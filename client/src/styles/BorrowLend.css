@@ -1,0 +1,106 @@
+.messenger{
+    background-color: white;
+    margin-left: 280px;
+    padding: 5px;
+    margin-right: 120px;
+    border-radius: 5%;
+}
+
+.You{
+    display: inline-block;
+    background-color: #841821;
+    color: #f5e8e0;
+    margin-left: 60%;
+    padding: 0.5em;
+    border-radius: 4%;
+}
+
+.Borrower{
+    display: inline-block;
+    background-color: #f5e8e0;
+    color:#841821;
+    margin-right: 60%;
+    padding: 0.5em;
+    border-radius: 4%;
+}
+
+.Lender{
+    display: inline-block;
+    background-color: #f5e8e0;
+    color:#841821;
+    margin-right: 60%;
+    padding: 0.5em;
+    border-radius: 4%;
+}
+
+#borrowMessenger{
+    
+    margin-left: 160px;
+    justify-content: center;
+    width: 40%;
+    border-radius: 5px;
+    border-style: none; 
+    
+}
+
+#borrowRequester{
+    
+    margin-left: 160px;
+    justify-content: center;
+    width: 40%;
+    border-radius: 4%;
+    border-style: none; 
+    
+}
+
+.messageField{
+    display:flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    
+}
+
+#dueDate{
+    margin-left: 160px;
+    width: auto;
+    height: 30px;
+}
+
+.dueDateField{
+    display: flex;
+    justify-content: center;
+}
+
+.nothing{
+    padding-left:10%;
+
+    padding-right:10%;
+}
+
+.returnButtons{
+    display: flex;
+    justify-content: center;
+    margin-left: 160px;
+}
+
+.dueDate{
+    text-decoration: underline;
+    display: flex;
+    justify-content: center;
+    margin-left: 160px;
+}
+
+.borrowActions{
+    display: flex;
+    justify-content: center;
+    margin-left: 160px;
+}
+
+.borrowRequestLabel{
+    background-color: #841821;
+    color: #f5e8e0;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-radius: 4%;
+    font-weight: bold;
+}
