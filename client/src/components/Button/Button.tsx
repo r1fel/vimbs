@@ -8,8 +8,9 @@ interface ButtonProps {
   success?: boolean;
   warning?: boolean;
   fail?: boolean;
-  ghost?: boolean;
   rounded?: boolean;
+  ghost?: boolean;
+  large?: boolean;
   className?: string;
 }
 
@@ -20,23 +21,25 @@ function Button({
   success,
   warning,
   fail,
-  ghost,
   rounded,
+  ghost,
+  large,
   ...rest
 }: ButtonProps) {
   const classes = classNames(rest.className, 'btn', {
-    'btn-primary': primary,
-    'btn-second': secondary,
-    'btn-success': success,
-    'btn-warning': warning,
-    'btn-fail': fail,
-    'btn-rounded': rounded,
-    'btn-ghost': ghost,
-    'text-blue-500': primary && ghost,
-    'text-cyan-500': secondary && ghost,
-    'text-green-500': success && ghost,
-    'text-yellow-500': warning && ghost,
-    'text-red-500': fail && ghost,
+    'btn--primary': primary,
+    'btn--second': secondary,
+    'btn--success': success,
+    'btn--warning': warning,
+    'btn--fail': fail,
+    'btn--rounded': rounded,
+    'btn--ghost': ghost,
+    'btn--large': large,
+    'text--blue-500': primary && ghost,
+    'text--cyan-500': secondary && ghost,
+    'text--green-500': success && ghost,
+    'text--yellow-500': warning && ghost,
+    'text--red-500': fail && ghost,
   });
 
   //className makes sure the classes are correctly written. rest.className is important to make sure, that this object doesn't overwrite the custom classNames, passed in by props. Like this they get added to the object before being overwritten.

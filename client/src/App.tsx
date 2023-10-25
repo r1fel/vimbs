@@ -1,4 +1,6 @@
 import './App.css';
+import {useContext, useState} from 'react';
+import UserContext from './context/UserContext';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import HomePage from './pages/HomePage/HomePage';
 import OnboardingPage from './pages/OnboardingPage/OnboardingPage';

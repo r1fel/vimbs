@@ -1,4 +1,4 @@
-function SettingsPage(): JSX.Element {
+function SettingsPage() {
   return <div>Settings Page</div>;
 }
 
