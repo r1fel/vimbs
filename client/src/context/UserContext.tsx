@@ -1,8 +1,8 @@
-import {createContext, useState} from 'react';
+import {ReactNode, createContext, useState} from 'react';
 
-const UserContext = createContext(null);
+const UserContext = createContext({});
 
-function Provider({children}) {
+function Provider({children}: {children: ReactNode}) {
   //Handle login and password validation
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 

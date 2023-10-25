@@ -1,27 +1,24 @@
 import {useState, useContext} from 'react';
-import UserContext from '../../context/user';
-import NavigationContext from '../../context/navigation';
+import UserContext from '../context/UserContext';
+import {handleLogin} from '../services/AuthServices';
 
 function LoginForm() {
-  const {handleLogin} = useContext(UserContext);
-  const {navigate} = useContext(NavigationContext);
-
-  //Handle the data from the login form
-
+  const {isLoggedIn, setIsLoggedIn} = useContext(UserContext);
   const [formData, setFormData] = useState({username: '', password: ''});
 
-  const handleChange = (event) => {
-    const changedField = event.target.name;
-    const newValue = event.target.value;
+  const handleChange = (e) => {
+    const changedField = e.target.name;
+    const newValue = e.target.value;
+    console.log('the login form value is: ', newValue);
     setFormData((currData) => {
       currData[changedField] = newValue;
       return {...currData};
     });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    handleLogin(formData.username, formData.password);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleLogin(formData.username, formData.password);
     setFormData({username: '', password: ''});
   };
 
