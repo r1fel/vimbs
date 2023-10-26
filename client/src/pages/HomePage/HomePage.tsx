@@ -1,14 +1,13 @@
+import {useEffect} from 'react';
+// import log from '../../util/Logger';
 import Button from '../../components/Button/Button';
 import LoginForm from '../../components/LoginForm';
-import {checkAuthStatus} from '../../services/AuthServices';
 import './HomePage.scss';
+import NoAuthRedirect from '../../components/NoAuthRedirect';
 
 function HomePage(): JSX.Element {
-  const authStatus = checkAuthStatus();
-
-  if (authStatus === false) {
-    return null;
-  }
+  //! I want to use "useEffect", but it gives error, why?
+  // NoAuthRedirect();
 
   return (
     <div>

@@ -1,10 +1,15 @@
 import axios from 'axios';
+import log from '../util/log';
 
 //TODO FR: How does auth process work?
 export const checkAuthStatus = async () => {
-  const authStatusResponse = axios.get(
+  const authStatusResponse = await axios.get(
     `${import.meta.env.VITE_SERVER_URL}/auth`,
   );
+  const authStatusData = authStatusResponse.data;
+  log(' - Current auth status is:', authStatusData);
+
+  return authStatusData;
 };
 
 export const handleLogin = async (username: string, password: string) => {

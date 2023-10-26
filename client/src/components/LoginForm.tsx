@@ -1,15 +1,18 @@
-import {useState, useContext} from 'react';
-import UserContext from '../context/UserContext';
+import {useState} from 'react';
+// import UserContext from '../context/UserContext';
 import {handleLogin} from '../services/AuthServices';
 
 function LoginForm() {
-  const {isLoggedIn, setIsLoggedIn} = useContext(UserContext);
+  // const {isLoggedIn, setIsLoggedIn} = useContext(UserContext);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({username: '', password: ''});
+
+  const togglePasswordVisibility = setShowPassword(!showPassword);
 
   const handleChange = (e) => {
     const changedField = e.target.name;
     const newValue = e.target.value;
-    console.log('the login form value is: ', newValue);
+    console.log('the login form value is: ', formData);
     setFormData((currData) => {
       currData[changedField] = newValue;
       return {...currData};
@@ -19,10 +22,9 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await handleLogin(formData.username, formData.password);
+
     setFormData({username: '', password: ''});
   };
-
-  //Login form
 
   return (
     <div>
