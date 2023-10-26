@@ -18,6 +18,7 @@ export const handleLogin = async (username: string, password: string) => {
     {username, password},
     {withCredentials: true},
   );
+  log('login successful! ', loginResponse);
   return loginResponse;
 };
 
