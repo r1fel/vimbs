@@ -1,5 +1,6 @@
 import axios from 'axios';
-import log from '../util/log';
+import {logger} from '../util/logger';
+import getTime from '../util/getTime';
 
 //TODO FR: How does auth process work?
 export const checkAuthStatus = async () => {
@@ -7,7 +8,7 @@ export const checkAuthStatus = async () => {
     `${import.meta.env.VITE_SERVER_URL}/auth`,
   );
   const authStatusData = authStatusResponse.data;
-  log(' - Current auth status is:', authStatusData);
+  logger.log('Current auth status is: ');
 
   return authStatusData;
 };
@@ -18,7 +19,7 @@ export const handleLogin = async (username: string, password: string) => {
     {username, password},
     {withCredentials: true},
   );
-  log('login successful! ', loginResponse);
+  logger.log(getTime(), ' login successful! ', loginResponse);
   return loginResponse;
 };
 

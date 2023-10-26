@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 // import UserContext from '../context/UserContext';
 import {handleLogin} from '../services/AuthServices';
-import log from '../util/log';
+import {logger} from '../util/logger';
 
 function LoginForm() {
   // const {isLoggedIn, setIsLoggedIn} = useContext(UserContext);
@@ -16,7 +16,7 @@ function LoginForm() {
   const handleChange = (e) => {
     const changedField = e.target.name;
     const newValue = e.target.value;
-    log('the login form value is: ', formData);
+    logger.log('the login form value is: ', formData);
     setFormData((currData) => {
       currData[changedField] = newValue;
       return {...currData};
