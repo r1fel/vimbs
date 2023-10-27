@@ -1,43 +1,44 @@
 import {logger} from '../../util/logger';
 import RenderCounter from '../../util/renderCounter';
 import {useState, useEffect} from 'react';
-import Card from '../Card/ItemCard';
+import ItemCard from '../ItemCard/ItemCard';
 import './ItemList.scss';
 import {fetchItems} from '../../services/ItemServices';
+import catchAsync from '../../util/catchAsync';
 
-function ItemList(url: string) {
+function ItemList({url}: {url: string}) {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    logger.log('useEffect started');
+    const fetchData = catchAsync(async () => {
       const fetchedItems = await fetchItems(url);
       setItems(fetchedItems.data);
-    };
+      logger.log('The currently fetched items are: ', fetchedItems.data);
+    });
     fetchData();
   }, [url]);
 
-  logger.log('The currently fetched items are: ', items);
   RenderCounter('ItemList');
 
-  // const renderCards = () => {
-  //   if (!items) return <p>loading Itemcards</p>;
-
-  //   return items.map((item, index) => (
-  //     <Card
-  //       itemName={itemName}
-  //       itemDescription={itemDescription}
-  //       itemImages={itemImages}
-  //     ></Card>
-  //   ));
-  // };
-
-  // if (!items || items.length === 0) {
-  //   return <div>No items available.</div>;
-  // }
+  const renderCards = () => {
+    if (items.length > 0) {
+      return items.map((item) => (
+        <ItemCard
+          key={`item-card-${item._id}`}
+          itemName={item.title}
+          itemDescription={item.blurb}
+          itemImages={item.image}
+        ></ItemCard>
+      ));
+    } else {
+      return <p>loading Itemcards</p>;
+    }
+  };
 
   return (
     <div className="section__item-cards">
-      <div className="item-cards--rendered">{}</div>
+      <div className="item-cards--rendered">{renderCards()}</div>
     </div>
   );
 }

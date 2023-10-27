@@ -17,7 +17,7 @@ function HomePage(): JSX.Element {
       Home Page
       <LoginForm />
       <ItemList url={'books/'} />
-      {/* <Button>This is a button</Button> */}
+      <Button>This is a button</Button>
     </div>
   );
 }
