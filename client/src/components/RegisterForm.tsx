@@ -1,23 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {useState, useContext} from 'react';
 import UserContext from '../context/UserContext';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
-import {handleLogin} from '../services/AuthServices';
+import {handleRegister} from '../services/AuthServices';
 import {logger} from '../util/logger';
 
-function LoginForm() {
-  // const {isLoggedIn, setIsLoggedIn} = useContext(UserContext);
-
-  interface LoginFormData {
-    username: string;
-    password: string;
-  }
-
-  const [formData, setFormData] = useState<LoginFormData>({
+function RegisterForm() {
+  const [formData, setFormData] = useState({
     username: '',
+    email: '',
     password: '',
   });
-  const {setUserData}: any = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => {
@@ -27,31 +19,23 @@ function LoginForm() {
   const handleChange = (e: any) => {
     const changedField = e.target.name;
     const newValue = e.target.value;
-    logger.log('the login form value is: ', formData);
+    logger.log(newValue);
     setFormData((currData) => {
       currData[changedField] = newValue;
       return {...currData};
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
-    try {
-      const userDataResponse = await handleLogin(
-        formData.username,
-        formData.password,
-      );
-      logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
-      setUserData(userDataResponse.data);
-      setFormData({username: '', password: ''});
-    } catch (error) {
-      logger.error('login handleSubmit failed!', error);
-    }
+    handleRegister(formData.username, formData.email, formData.password);
   };
+
+  //Register form
 
   return (
     <div>
-      <h2>Login</h2>
+      <h3>Register Form</h3>
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="username">Username </label>
@@ -63,6 +47,18 @@ function LoginForm() {
             onChange={handleChange}
             name="username"
             id="username"
+          />
+        </div>
+        <div>
+          <label htmlFor="email">E-mail </label>
+          <input
+            type="text"
+            placeholder="E-mail"
+            className="input"
+            value={formData.email}
+            onChange={handleChange}
+            name="email"
+            id="email"
           />
         </div>
         <div>
@@ -82,12 +78,13 @@ function LoginForm() {
             <IoEyeOffOutline onClick={toggleShowPassword} />
           )}
         </div>
+
         <button onClick={handleSubmit} className="button">
-          Login
+          Register
         </button>
       </form>
     </div>
   );
 }
 
-export default LoginForm;
+export default RegisterForm;

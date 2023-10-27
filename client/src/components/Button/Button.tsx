@@ -12,6 +12,10 @@ interface ButtonProps {
   ghost?: boolean;
   large?: boolean;
   className?: string;
+  onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  onHover?: () => void;
 }
 
 function Button({
