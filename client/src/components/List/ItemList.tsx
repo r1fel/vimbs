@@ -1,10 +1,10 @@
+import {useState, useEffect} from 'react';
+import {fetchItems} from '../../services/ItemServices';
 import {logger} from '../../util/logger';
 import RenderCounter from '../../util/renderCounter';
-import {useState, useEffect} from 'react';
-import ItemCard from '../ItemCard/ItemCard';
-import './ItemList.scss';
-import {fetchItems} from '../../services/ItemServices';
 import catchAsync from '../../util/catchAsync';
+import './ItemList.scss';
+import ItemCard from '../ItemCard/ItemCard';
 
 function ItemList({url}: {url: string}) {
   const [items, setItems] = useState([]);

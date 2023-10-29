@@ -1,0 +1,33 @@
+@import '../../styles/variables.scss';
+
+.item-card {
+  display: grid;
+  background-color: steelblue;
+  border-radius: 1rem;
+
+  // grid row, with grid-auto-rows in parent define the subgrid
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  gap: 1rem;
+
+  &__name {
+    font: $text-h2;
+    margin: 0;
+  }
+
+  &__descr {
+    font: $text-normal;
+  }
+
+  &__img {
+    object-fit: cover;
+    border-radius: 1rem 1rem 0 0;
+    width: 100%;
+    height: 120px;
+    // border-radius: 12px;
+  }
+
+  :not(img) {
+    padding: 0 0.5rem;
+  }
+}

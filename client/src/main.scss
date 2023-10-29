@@ -1,1 +1,6 @@
+@import './styles/variables.scss';
 
+body {
+  background-color: $col-grey-100;
+  font-family: $fam-text;
+}
