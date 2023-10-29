@@ -28,13 +28,6 @@
     height: 152px;
     // border-radius: 12px;
   }
-  &__link {
-    display: grid;
-    grid-template-rows: subgrid;
-    grid-row: span 3;
-    text-decoration: none;
-    color: inherit;
-  }
 
   :not(img) {
     padding: 0 0.5rem;
