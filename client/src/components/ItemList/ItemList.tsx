@@ -6,9 +6,18 @@ import catchAsync from '../../util/catchAsync';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
 
-function ItemList({url}: {url: string}) {
-  const [items, setItems] = useState([]);
+//! change type of image to string array later
+interface Item {
+  _id: string;
+  title: string;
+  blurb: string;
+  image: string;
+}
 
+function ItemList({url}: {url: string}) {
+  const [items, setItems] = useState<Item[]>([]);
+
+  //fetching the items with the specific endoint URL
   useEffect(() => {
     logger.log('useEffect started');
     const fetchData = catchAsync(async () => {
@@ -26,6 +35,7 @@ function ItemList({url}: {url: string}) {
       return items.map((item) => (
         <ItemCard
           key={`item-card-${item._id}`}
+          itemId={item._id}
           itemName={item.title}
           itemDescription={item.blurb}
           itemImages={item.image}
