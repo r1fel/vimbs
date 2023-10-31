@@ -1,9 +1,11 @@
 import {useParams} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 import NoAuthRedirect from '../../components/NoAuthRedirect';
 import ItemDetails from '../../components/ItemDetails/ItemDetails';
 import Button from '../../components/Button/Button';
 import Chat from '../../components/Chat/Chat';
+import {initializeRequest} from '../../services/ItemServices';
 
 function DetailsPage(): JSX.Element {
   // NoAuthRedirect();
@@ -14,7 +16,9 @@ function DetailsPage(): JSX.Element {
     <div>
       <ItemDetails id={id} />
       <Chat />
-      <Button>Reqest Item</Button>
+      <Link to={`items/${id}/interact`}>
+        <Button>Reqest Item</Button>
+      </Link>
     </div>
   );
 }

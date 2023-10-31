@@ -1,6 +1,6 @@
-import {useEffect} from 'react';
-import {fetchItems} from '../../services/ItemServices';
-import RenderCounter from '../../util/renderCounter';
+// import {useEffect} from 'react';
+// import {fetchItems} from '../../services/ItemServices';
+import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
 import Button from '../../components/Button/Button';
 import ItemList from '../../components/ItemList/ItemList';

@@ -1,10 +1,11 @@
 import {useState, useEffect} from 'react';
 import {fetchItems} from '../../services/ItemServices';
 import {logger} from '../../util/logger';
-import RenderCounter from '../../util/renderCounter';
-import catchAsync from '../../util/catchAsync';
+import RenderCounter from '../../util/RenderCounter';
+// import catchAsync from '../../util/catchAsync';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
+import catchAsync from '../../util/catchAsync';
 
 //! change type of image to string array later
 interface Item {
@@ -12,12 +13,14 @@ interface Item {
   title: string;
   blurb: string;
   image: string;
+  available: boolean;
 }
 
 function ItemList({url}: {url: string}) {
   const [items, setItems] = useState<Item[]>([]);
 
   // fetchItems(url);
+
   //fetching the items with the specific endoint URL
   useEffect(() => {
     logger.log('useEffect started');
@@ -40,6 +43,7 @@ function ItemList({url}: {url: string}) {
           itemName={item.title}
           itemDescription={item.blurb}
           itemImages={item.image}
+          itemAvailable={item.available}
         ></ItemCard>
       ));
     } else {

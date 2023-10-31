@@ -5,6 +5,6 @@
   grid-auto-flow: dense;
   gap: 0.8rem;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  grid-auto-rows: 150px auto auto;
+  grid-auto-rows: 150px auto auto auto;
   container-type: inline-size;
 }
