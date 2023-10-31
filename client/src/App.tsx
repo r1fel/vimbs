@@ -6,6 +6,7 @@ import AuthPage from './pages/AuthPage/AuthPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import DetailsPage from './pages/DetailsPage/DetailsPage';
+import ItemList from './components/ItemList/ItemList';
 
 function App() {
   return (
@@ -16,6 +17,11 @@ function App() {
           <Route
             path="/items/:id"
             element={<DetailsPage />}
+            errorElement={<ErrorPage />}
+          />
+          <Route
+            path="/items"
+            element={<ItemList url="books/" />}
             errorElement={<ErrorPage />}
           />
           <Route

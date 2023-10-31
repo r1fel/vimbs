@@ -17,6 +17,7 @@ interface Item {
 function ItemList({url}: {url: string}) {
   const [items, setItems] = useState<Item[]>([]);
 
+  // fetchItems(url);
   //fetching the items with the specific endoint URL
   useEffect(() => {
     logger.log('useEffect started');
