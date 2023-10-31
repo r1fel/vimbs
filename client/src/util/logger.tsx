@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import getTime from './getTime';
 const LOG_LEVEL = import.meta.env.VITE_LOG_LEVEL;
 
 /** Signature of a logging function */
