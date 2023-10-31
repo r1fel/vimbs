@@ -8,7 +8,7 @@
   border-radius: 1rem;
 
   // grid row, with grid-auto-rows in parent define the subgrid
-  grid-row: span 3;
+  grid-row: span 4;
   grid-template-rows: subgrid;
   gap: 0.5rem;
 
@@ -31,9 +31,21 @@
   &__link {
     display: grid;
     grid-template-rows: subgrid;
-    grid-row: span 3;
+    grid-row: span 4;
     text-decoration: none;
     color: inherit;
+  }
+
+  &__status {
+    & * {
+      margin: 0;
+    }
+    &--available {
+      color: green;
+    }
+    &--not-available {
+      color: red;
+    }
   }
 
   :not(img) {
