@@ -5,6 +5,7 @@ import OnboardingPage from './pages/OnboardingPage/OnboardingPage';
 import AuthPage from './pages/AuthPage/AuthPage';
 import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
+import DetailsPage from './pages/DetailsPage/DetailsPage';
 
 function App() {
   return (
@@ -12,6 +13,11 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<HomePage />} errorElement={<ErrorPage />} />
+          <Route
+            path="/items/:id"
+            element={<DetailsPage />}
+            errorElement={<ErrorPage />}
+          />
           <Route
             path="/auth"
             element={<AuthPage />}
