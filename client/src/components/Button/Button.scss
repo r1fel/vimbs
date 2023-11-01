@@ -1,0 +1,17 @@
+@import '../../styles/colors.scss';
+
+.btn {
+  padding: 0.2rem 0.5rem;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: $col-prim-500;
+}
+
+.btn--large {
+  padding: 0.5rem 1rem;
+}
+
+.btn--primary {
+  color: col-prim-500;
+}

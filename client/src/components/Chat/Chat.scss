@@ -1,0 +1,16 @@
+@import '../../styles/variables.scss';
+
+.chat {
+  &__msg-log {
+    max-height: 70%;
+  }
+  &__input {
+    border: 1px solid $col-prim-500;
+    padding: 0.5rem;
+    border-radius: 0.8rem;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
