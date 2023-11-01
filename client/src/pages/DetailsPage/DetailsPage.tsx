@@ -16,7 +16,7 @@ function DetailsPage(): JSX.Element {
     <div>
       <ItemDetails id={id} />
       <Chat />
-      <Link to={`items/${id}/interact`}>
+      <Link to={`items/${id}/request`}>
         <Button>Reqest Item</Button>
       </Link>
     </div>

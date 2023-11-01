@@ -20,10 +20,11 @@ function App() {
             errorElement={<ErrorPage />}
           />
           <Route
-            path="/items"
+            path="/items/:id/request"
             element={<ItemList url="books/" />}
             errorElement={<ErrorPage />}
           />
+
           <Route
             path="/auth"
             element={<AuthPage />}
