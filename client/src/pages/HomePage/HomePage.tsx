@@ -7,7 +7,7 @@ import NoAuthRedirect from '../../components/NoAuthRedirect';
 
 function HomePage(): JSX.Element {
   //! I want to use "useEffect", but it gives error, why?
-  NoAuthRedirect();
+  // NoAuthRedirect();
 
   RenderCounter('HomePage');
   return (
