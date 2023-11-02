@@ -1,5 +1,3 @@
-// import {useEffect} from 'react';
-// import {fetchItems} from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
 import Button from '../../components/Button/Button';
@@ -9,7 +7,7 @@ import NoAuthRedirect from '../../components/NoAuthRedirect';
 
 function HomePage(): JSX.Element {
   //! I want to use "useEffect", but it gives error, why?
-  // NoAuthRedirect();
+  NoAuthRedirect();
 
   RenderCounter('HomePage');
   return (
