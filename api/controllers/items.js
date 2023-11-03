@@ -1,4 +1,5 @@
 const Item = require('../models/item');
+const {processItemForClient} = require('../middleware');
 
 //TODO ER FR : revise search logic
 //TODO ER: use response more concious
@@ -10,7 +11,10 @@ module.exports.index = async (req, res) => {
     .populate('owner')
     .populate('interactions')
     .sort({name: 1});
-  const response = items.map(
+  const response = [];
+  processItemForClient(items, currentUser, response);
+  // console.log(response);
+  const response1 = items.map(
     ({_id, picture, name, description, owner, interactions, available}) => ({
       _id,
       picture: picture ? picture : null,

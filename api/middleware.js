@@ -56,7 +56,7 @@ module.exports.isNotOwner = async (req, res, next) => {
     // req.flash('error', 'You do not have permission to do that!');
     // return res.redirect(`/books/${id}`)
     return res.send(
-      'This is your book! You cant do borrowing requests for it!',
+      'This is your book! You cant do borrowing requests for it!'
     );
   }
   // console.log('isNotOwner just ran');
@@ -118,16 +118,55 @@ module.exports.bookHasOngoingBorrowingrequest = async (req, res, next) => {
     const indexLastBorrowingrequest = book.borrowingrequests.length - 1;
     if (
       ['backHome', 'declined'].includes(
-        book.borrowingrequests[indexLastBorrowingrequest].bookLocation,
+        book.borrowingrequests[indexLastBorrowingrequest].bookLocation
       )
     ) {
       return next();
     } else {
       // req.flash('error', 'your borrowingrequest failed, because the book is currently not at the lender.');
       return res.send(
-        'your borrowingrequest failed, because the book is currently not at the lender.',
+        'your borrowingrequest failed, because the book is currently not at the lender.'
       );
     }
   }
   return next();
+};
+
+// function to process an array of items for the client
+module.exports.processItemForClient = async (items, currentUser, response) => {
+  for (const item of items) {
+    const sendItem = {
+      _id: item._id,
+      name: item.name,
+      available: item.available,
+    };
+    if (item.picture) sendItem.picture = item.picture;
+    if (item.description) sendItem.description = item.description;
+    // TODO ER: revisit dueDate once "available" can be set to false
+    if (item.availabe === false)
+      sendItem.dueDate =
+        item.interactions[item.interactions.length - 1].dueDate;
+    if (item.owner.equals(currentUser)) {
+      sendItem.owner = true;
+      sendItem.interactions = item.interactions;
+    } else {
+      sendItem.owner = false;
+      sendItem.commonCommunity = {
+        _id: '6544bbe8dk864e46068d74bb',
+        picture:
+          'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
+        name: 'our common community',
+      };
+    }
+    // TODO ER: revisit and uncomment once interactions are in place
+    // if (
+    //   item.interactions !== [] &&
+    //   item.interactions[item.interactions.length - 1].interestedParty ===
+    //     currentUser
+    // ) {
+    //   sendItem.interactions = item.interactions[item.interactions.length - 1];
+    //   sendItem.ownerData = {_id: item.owner._id, firstName: item.owner.firstName};
+    // }
+    response.push(sendItem);
+  }
 };
