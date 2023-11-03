@@ -30,9 +30,10 @@ const borrowingrequestRoutes = require('./routes/borrowingrequestRoutes');
 
 // setup of the MongoDbAtlas
 //TODO ER change to VIMBS DB
-const dbURL = process.env.DB_URL;
+const dbURL = `${process.env.DB_URL}vimbs-dev`;
+// const dbURL = `${process.env.DB_URL}FriendsShelves`;
 //mongodb://127.0.0.1:27017/friends-shelves
-mongoose.connect(`${dbURL}FriendsShelves`);
+mongoose.connect(dbURL);
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
