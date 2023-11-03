@@ -27,13 +27,13 @@ function ItemCard({
         <img className="item-card__img" src={itemImages}></img>
         <h1 className="item-card__name">{shortName}</h1>
         <p className="item-card__descr">{shortDescription}</p>
-        <p className="item-card__status">
+        <div className="item-card__status">
           {itemAvailable ? (
             <p className="item-card__status--available">available</p>
           ) : (
             <p className="item-card__status--not-available">not available</p>
           )}
-        </p>
+        </div>
       </div>
     </Link>
   );

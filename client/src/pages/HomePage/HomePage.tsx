@@ -1,5 +1,3 @@
-// import {useEffect} from 'react';
-// import {fetchItems} from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
 import Button from '../../components/Button/Button';
@@ -16,7 +14,7 @@ function HomePage(): JSX.Element {
     <div>
       Home Page
       <LoginForm />
-      <ItemList url={'books/'} />
+      <ItemList url={'item/'} />
       <Button>This is a button</Button>
     </div>
   );

@@ -7,13 +7,23 @@ import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import DetailsPage from './pages/DetailsPage/DetailsPage';
 import ItemList from './components/ItemList/ItemList';
+import AuthCheck from './components/AuthCheck/AuthCheck';
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<HomePage />} errorElement={<ErrorPage />} />
+          <Route
+            path="/"
+            element={
+              // <AuthCheck>
+              <HomePage />
+              // </AuthCheck>
+            }
+            errorElement={<ErrorPage />}
+          />
+
           <Route
             path="/items/:id"
             element={<DetailsPage />}
