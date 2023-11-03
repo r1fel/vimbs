@@ -46,5 +46,5 @@ module.exports.logout = (req, res, next) => {
     // res.redirect('/');
   });
   res.send('successfully logged out on the BE!');
-  console.log('bye!');
+  // console.log('bye!');
 };

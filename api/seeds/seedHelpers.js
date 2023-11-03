@@ -1,55 +1,33 @@
+module.exports.name = [
+  'Schaufel',
+  'Stuhl',
+  'Lampe',
+  'Fahrrad',
+  'Tasse',
+  'Pflanze',
+  'Pferd',
+  'Tisch',
+  'Rucksack',
+  'Schirm',
+  'Tischtennis',
+  'Volleyball',
+  'Federball',
+  'Hammer',
+  'Schraubenzieher',
+  'Schraubzwinge',
+];
 
-module.exports.firstName = [
-    'Forest',
-    'Peter',
-    'Paul',
-    'Anna',
-    'Markus',
-    'Jack',
-    'Sarah',
-    'Jhon',
-]
+module.exports.picture = [
+  'https://tse2.mm.bing.net/th?id=OIP.KsB6kOzKJMXWjjU5Y0XATwHaHL&pid=Api',
+  'https://tse4.mm.bing.net/th?id=OIP.ZHDqYPQRKrob4g-Efci9rwHaIM&pid=Api',
+  'https://tse1.mm.bing.net/th?id=OIP.60Xz3zmGK7F3SPkaxeQ7CQHaHa&pid=Api',
+  'https://tse4.mm.bing.net/th?id=OIP.83Vx9mxgehav1g38GSP77AHaJd&pid=Api',
+  'https://tse4.mm.bing.net/th?id=OIP.iX5a5eOcY1CyQ88Gp7mZSgHaHa&pid=Api',
+];
 
-module.exports.lastName = [
-    'Miller',
-    'Lang',
-    'Smidt',
-    'Brown',
-    'Davis',
-    'Wilson',
-    'Jackson',
-    'Parker',
-]
-
-module.exports.titleStart = [
-    'Hand of',
-    'Primed for',
-    'King of',
-    'Devils',
-    'Clue of the',
-    'Sign of the',
-    'Years of',
-    'The Kingdom of',
-]
-
-
-
-module.exports.titleEnd = [
-    'Andromeda',
-    'Sin',
-    'Canyon',
-    'Pond',
-    'Aces',
-    'Heir',
-    'Ghost Town',
-    'Absent Staircase',
-    'Invisible Violin',
-    'Goodbyes',
-]
 // our 3 users are bob, bibi and bodo. all three have the username of their name and a password equal to their name
-module.exports.bookOwners = [
-    '64f09610fcc82a3f318948fc',
-    '64f0969dfcc82a3f3189491a',
-    '64f096b7fcc82a3f31894921',
-]
-
+module.exports.itemOwners = [
+  '6544bbe8df354e46068d74bb',
+  '6544bd1bdf354e46068d74bf',
+  '6544bd2fdf354e46068d74c3',
+];
