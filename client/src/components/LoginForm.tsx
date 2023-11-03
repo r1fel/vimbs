@@ -4,15 +4,14 @@ import UserContext from '../context/UserContext';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleLogin} from '../services/AuthServices';
 import {logger} from '../util/logger';
+import {useNavigate} from 'react-router-dom';
+
+interface LoginFormData {
+  username: string;
+  password: string;
+}
 
 function LoginForm() {
-  // const {isLoggedIn, setIsLoggedIn} = useContext(UserContext);
-
-  interface LoginFormData {
-    username: string;
-    password: string;
-  }
-
   const [formData, setFormData] = useState<LoginFormData>({
     username: '',
     password: '',
@@ -20,6 +19,7 @@ function LoginForm() {
   const {setUserData, setIsLoggedIn}: any = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -45,9 +45,10 @@ function LoginForm() {
       logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
 
       if (userDataResponse && userDataResponse.data) {
-        setUserData(userDataResponse.data);
-        setIsLoggedIn(true);
-        setFormData({username: '', password: ''});
+        await setUserData(userDataResponse.data);
+        await setIsLoggedIn(true);
+        await setFormData({username: '', password: ''});
+        navigate('/');
       } else {
         logger.error('Login failed.');
       }

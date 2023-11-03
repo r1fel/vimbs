@@ -19,18 +19,25 @@ interface Item {
 
 function ItemList({url}: {url: string}) {
   const [items, setItems] = useState<Item[]>([]);
-  const {userData, isLoggedIn}: any = useContext(UserContext);
+  const {userData, isLoggedIn} = useContext(UserContext);
 
   //fetching the items with the specific endpoint URL
   useEffect(() => {
-    logger.log('useEffect started');
-    if (userData && userData.length > 0 && isLoggedIn) {
+    logger.log(
+      'useEffect started with userData:',
+      userData,
+      'and isLoggedIn:',
+      isLoggedIn,
+    );
+    if (userData && isLoggedIn) {
       const fetchData = catchAsync(async () => {
         const fetchedItems = await fetchItems(url);
         setItems(fetchedItems.data);
         logger.log('The currently fetched items are: ', fetchedItems.data);
       });
       fetchData();
+    } else {
+      logger.error('not fetching items');
     }
   }, [url, userData, isLoggedIn]);
 
