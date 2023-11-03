@@ -25,6 +25,7 @@ const cors = require('cors');
 //Routes
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
+const itemRoutes = require('./routes/itemRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const borrowingrequestRoutes = require('./routes/borrowingrequestRoutes');
 
@@ -91,6 +92,7 @@ app.use((req, res, next) => {
 // Route necessities in routers folder
 app.use('/', userRoutes);
 app.use('/books', bookRoutes);
+app.use('/item', itemRoutes);
 app.use('/books/:id/reviews', reviewRoutes);
 app.use('/books/:id/borrowingrequest', borrowingrequestRoutes);
 
@@ -101,7 +103,7 @@ app.all('*', (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const { statusCode = 500 } = err;
+  const {statusCode = 500} = err;
   if (!err.message) err.message = 'Oh No, Something went wrong!';
   // res.status(statusCode).render('error', { err });
   console.log('some down the list error');
