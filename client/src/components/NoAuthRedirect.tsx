@@ -19,8 +19,8 @@ function NoAuthRedirect() {
       navigate('/auth');
     }
   };
-  checkCurrentAuthStatus();
-  return null;
+
+  return checkCurrentAuthStatus();
 }
 
 export default NoAuthRedirect;

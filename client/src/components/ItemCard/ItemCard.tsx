@@ -18,7 +18,6 @@ function ItemCard({
   itemImages,
   itemAvailable,
 }: ItemCardProps) {
-  logger.log(itemName);
   const shortName = shortenText(15, itemName);
   const shortDescription = shortenText(70, itemDescription);
 
