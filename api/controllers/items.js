@@ -10,13 +10,12 @@ module.exports.index = async (req, res) => {
     .populate('owner')
     .populate('interactions')
     .sort({name: 1});
-  console.log(items[0]);
   const response = items.map(
     ({_id, picture, name, description, owner, interactions, available}) => ({
       _id,
-      picture: picture ? picture : 'no picture available',
+      picture: picture ? picture : null,
       name,
-      description: description ? description : 'no description available',
+      description: description ? description : null,
       available,
       dueDate: '',
       // ['closed', 'declined'].includes(
