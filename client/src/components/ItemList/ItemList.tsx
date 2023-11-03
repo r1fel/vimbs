@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useContext} from 'react';
 import {fetchItems} from '../../services/ItemServices';
 import {logger} from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
@@ -6,6 +6,7 @@ import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
 import catchAsync from '../../util/catchAsync';
+import UserContext from '../../context/UserContext';
 
 //! change type of image to string array later
 interface Item {
@@ -18,19 +19,20 @@ interface Item {
 
 function ItemList({url}: {url: string}) {
   const [items, setItems] = useState<Item[]>([]);
+  const {userData, isLoggedIn}: any = useContext(UserContext);
 
-  // fetchItems(url);
-
-  //fetching the items with the specific endoint URL
+  //fetching the items with the specific endpoint URL
   useEffect(() => {
     logger.log('useEffect started');
-    const fetchData = catchAsync(async () => {
-      const fetchedItems = await fetchItems(url);
-      setItems(fetchedItems.data);
-      logger.log('The currently fetched items are: ', fetchedItems.data);
-    });
-    fetchData();
-  }, [url]);
+    if (userData && userData.length > 0 && isLoggedIn) {
+      const fetchData = catchAsync(async () => {
+        const fetchedItems = await fetchItems(url);
+        setItems(fetchedItems.data);
+        logger.log('The currently fetched items are: ', fetchedItems.data);
+      });
+      fetchData();
+    }
+  }, [url, userData, isLoggedIn]);
 
   RenderCounter('ItemList');
 

@@ -17,7 +17,7 @@ function LoginForm() {
     username: '',
     password: '',
   });
-  const {setUserData}: any = useContext(UserContext);
+  const {setUserData, setIsLoggedIn}: any = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleShowPassword = () => {
@@ -37,13 +37,20 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // handle login in AuthServices
       const userDataResponse = await handleLogin(
         formData.username,
         formData.password,
       );
       logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
-      setUserData(userDataResponse.data);
-      setFormData({username: '', password: ''});
+
+      if (userDataResponse && userDataResponse.data) {
+        setUserData(userDataResponse.data);
+        setIsLoggedIn(true);
+        setFormData({username: '', password: ''});
+      } else {
+        logger.error('Login failed.');
+      }
     } catch (error) {
       logger.error('login handleSubmit failed!', error);
     }
