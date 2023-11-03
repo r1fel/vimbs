@@ -14,7 +14,7 @@ router.route('/login').post(
     failureFlash: true,
     // failureRedirect: '/login'
   }),
-  catchAsync(users.login),
+  catchAsync(users.login)
 );
 
 // client checks if user has ongoing session
