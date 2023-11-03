@@ -14,7 +14,7 @@ function HomePage(): JSX.Element {
     <div>
       Home Page
       <LoginForm />
-      <ItemList url={'/'} />
+      <ItemList url={'item/'} />
       <Button>This is a button</Button>
     </div>
   );

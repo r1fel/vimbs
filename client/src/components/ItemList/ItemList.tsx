@@ -11,9 +11,9 @@ import UserContext from '../../context/UserContext';
 //! change type of image to string array later
 interface Item {
   _id: string;
-  title: string;
-  blurb: string;
-  image: string;
+  name: string;
+  description: string;
+  picture: string;
   available: boolean;
 }
 
@@ -49,9 +49,9 @@ function ItemList({url}: {url: string}) {
         <ItemCard
           key={`item-card-${item._id}`}
           itemId={item._id}
-          itemName={item.title}
-          itemDescription={item.blurb}
-          itemImages={item.image}
+          itemName={item.name}
+          itemDescription={item.description}
+          itemImages={item.picture}
           itemAvailable={item.available}
         ></ItemCard>
       ));
