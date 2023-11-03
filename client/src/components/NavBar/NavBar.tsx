@@ -1,27 +1,35 @@
+import {Link} from 'react-router-dom';
+import './NavBar.scss';
+import {RiFeedbackLine} from 'react-icons/ri';
 import {
   IoStorefront,
   IoPersonCircleOutline,
   IoSearch,
   IoAddCircleOutline,
 } from 'react-icons/io5';
-import {Link} from 'react-router-dom';
 
 function NavBar() {
   return (
     <div className="navbar">
-      <Link to="/">
+      <Link className="navbar__link" to="/">
         <IoStorefront />
       </Link>
 
-      <Link to="/settings">
-        <IoAddCircleOutline />
-      </Link>
+      <div className="navbar__links">
+        <Link className="navbar__link" to="/settings">
+          <IoAddCircleOutline />
+        </Link>
 
-      <IoSearch />
+        <IoSearch className="navbar__link" />
 
-      <Link to="/settings">
-        <IoPersonCircleOutline />
-      </Link>
+        <Link className="navbar__link" to="/settings">
+          <IoPersonCircleOutline />
+        </Link>
+
+        <Link className="navbar__link" to="/settings">
+          <RiFeedbackLine />
+        </Link>
+      </div>
     </div>
   );
 }

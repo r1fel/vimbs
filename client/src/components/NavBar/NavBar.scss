@@ -1,0 +1,31 @@
+@import '../../styles/variables.scss';
+
+.navbar {
+  padding: 0.7rem;
+  display: flex;
+  justify-content: space-between;
+  background-color: $col-prim2-100;
+
+  &__links {
+    display: flex;
+  }
+
+  &__link {
+    font-size: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: $col-prim2-800;
+    cursor: pointer;
+    transition: 0.15s;
+
+    &:not(:first-child) {
+      margin-left: 1rem;
+    }
+
+    &:hover {
+      color: $col-prim2-400;
+    }
+  }
+}
