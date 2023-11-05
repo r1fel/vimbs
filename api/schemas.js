@@ -10,6 +10,14 @@ module.exports.bookSchema = Joi.object({
   }).required(),
 });
 
+module.exports.itemSchema = Joi.object({
+  item: Joi.object({
+    picture: Joi.string(),
+    name: Joi.string().required(),
+    description: Joi.string(),
+  }).required(),
+});
+
 module.exports.reviewSchema = Joi.object({
   review: Joi.object({
     rating: Joi.number().required().min(1).max(5),

@@ -1,5 +1,10 @@
 const ExpressError = require('./utils/ExpressError');
-const {bookSchema, reviewSchema, borrowingrequestSchema} = require('./schemas');
+const {
+  bookSchema,
+  reviewSchema,
+  borrowingrequestSchema,
+  itemSchema,
+} = require('./schemas');
 const Book = require('./models/book');
 const Review = require('./models/review');
 const Borrowingrequest = require('./models/borrowingrequest');
@@ -28,6 +33,16 @@ module.exports.storeReturnTo = (req, res, next) => {
 // validate the incoming data for book creation or updating with the book Joi Schema
 module.exports.validateBook = (req, res, next) => {
   const {error} = bookSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(',');
+    res.send(msg);
+    // throw new ExpressError(msg, 400)
+  }
+  next();
+};
+
+module.exports.validateItem = (req, res, next) => {
+  const {error} = itemSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(',');
     res.send(msg);
