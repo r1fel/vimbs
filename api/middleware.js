@@ -154,6 +154,13 @@ module.exports.processItemForClient = async (items, currentUser, response) => {
       _id: item._id,
       name: item.name,
       available: item.available,
+      picture: null,
+      description: null,
+      dueDate: null,
+      owner: false,
+      interactions: null,
+      commonCommunity: null,
+      ownerData: null,
     };
     if (item.picture) sendItem.picture = item.picture;
     if (item.description) sendItem.description = item.description;
@@ -165,7 +172,6 @@ module.exports.processItemForClient = async (items, currentUser, response) => {
       sendItem.owner = true;
       sendItem.interactions = item.interactions;
     } else {
-      sendItem.owner = false;
       sendItem.commonCommunity = {
         _id: '6544bbe8dk864e46068d74bb',
         picture:
