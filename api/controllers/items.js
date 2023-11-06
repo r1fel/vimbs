@@ -29,7 +29,7 @@ module.exports.myInventory = async (req, res) => {
   res.send(response);
 };
 
-// react version of: post request handeling for a new book
+// create new item
 module.exports.createItem = async (req, res) => {
   const currentUser = '6544bbe8df354e46068d74bb';
   // const currentUser = req.user._id;
@@ -42,17 +42,35 @@ module.exports.createItem = async (req, res) => {
   res.send(response);
 };
 
-// Esther to Alex: Also toggle on isLogged in in the routes, once you start using this at the FE
+// get item by itemId
 module.exports.showItem = async (req, res) => {
   const currentUser = '6544bbe8df354e46068d74bb';
   // const currentUser = req.user._id;
-  const item = await Item.findById(req.params.id)
+  const item = await Item.findById(req.params.itemId)
     .populate('owner')
     .populate('interactions');
   //TODO ER: !response as middleware -global
   if (!item)
     // req.flash('error', 'Cannot find that book!');
-    return res.send('book not found');
+    return res.send('item not found');
+  const response = [];
+  processItemForClient([item], currentUser, response);
+
+  return res.send(response);
+};
+
+// edit item by itemId
+module.exports.updateItem = async (req, res) => {
+  const currentUser = '6544bbe8df354e46068d74bb';
+  // const currentUser = req.user._id;
+  await Item.findByIdAndUpdate(req.params.itemId, {...req.body.item});
+  const item = await Item.findById(req.params.itemId)
+    .populate('owner')
+    .populate('interactions');
+  //TODO ER: !response as middleware -global
+  if (!item)
+    // req.flash('error', 'Cannot find that book!');
+    return res.send('item not found');
   const response = [];
   processItemForClient([item], currentUser, response);
 

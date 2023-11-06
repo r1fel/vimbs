@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
 const items = require('../controllers/items');
-const {isLoggedIn, validateItem} = require('../middleware');
+const {isLoggedIn, validateItem, isOwner} = require('../middleware');
 
 router
   .route('/')
@@ -28,16 +28,18 @@ router.get(
   catchAsync(items.myInventory)
 );
 
-router.route('/:id').get(
-  // isLoggedIn,
-  catchAsync(items.showItem)
-);
-// .put(
-//   isLoggedIn,
-//   catchAsync(isOwner),
-//   validateBook,
-//   catchAsync(books.updateBook),
-// )
-// .delete(isLoggedIn, catchAsync(isOwner), catchAsync(books.deleteBook));
+router
+  .route('/:itemId')
+  .get(
+    // isLoggedIn,
+    catchAsync(items.showItem)
+  )
+  .put(
+    //   isLoggedIn,
+    //  catchAsync(isOwner),
+    validateItem,
+    catchAsync(items.updateItem)
+  );
+// .delete(isLoggedIn, catchAsync(isOwner), catchAsync(items.deleteItem));
 
 module.exports = router;
