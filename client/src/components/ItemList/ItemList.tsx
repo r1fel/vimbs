@@ -2,7 +2,6 @@ import {useState, useEffect, useContext} from 'react';
 import {fetchItems} from '../../services/ItemServices';
 import {logger} from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
-// import catchAsync from '../../util/catchAsync';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
 import catchAsync from '../../util/catchAsync';
