@@ -25,7 +25,7 @@ function App() {
           />
 
           <Route
-            path="/items/:id"
+            path="/item/:id"
             element={<DetailsPage />}
             errorElement={<ErrorPage />}
           />

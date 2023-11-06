@@ -22,7 +22,7 @@ function ItemCard({
   const shortDescription = shortenText(70, itemDescription);
 
   return (
-    <Link className="item-card__link" to={`items/${itemId}`}>
+    <Link className="item-card__link" to={`item/${itemId}`}>
       <div className="item-card">
         <img className="item-card__img" src={itemImages}></img>
         <h1 className="item-card__name">{shortName}</h1>
