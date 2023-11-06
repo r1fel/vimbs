@@ -20,6 +20,13 @@ router
     catchAsync(items.createItem)
   );
 
+router.route('/search').get(
+  // validation middleware:
+  // isLoggedIn,
+  // request handler:
+  catchAsync(items.itemSearch)
+);
+
 router.get(
   '/mine',
   // validation middleware:
@@ -31,13 +38,17 @@ router.get(
 router
   .route('/:itemId')
   .get(
+    // validation middleware:
     // isLoggedIn,
+    // request handler:
     catchAsync(items.showItem)
   )
   .put(
-    //   isLoggedIn,
+    // validation middleware:
+    // isLoggedIn,
     //  catchAsync(isOwner),
     validateItem,
+    // request handler:
     catchAsync(items.updateItem)
   );
 // .delete(isLoggedIn, catchAsync(isOwner), catchAsync(items.deleteItem));

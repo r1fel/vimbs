@@ -76,3 +76,17 @@ module.exports.updateItem = async (req, res) => {
 
   return res.send(response);
 };
+
+// search items by search term, fetch from DB that don't belog to user and process for client
+module.exports.itemSearch = async (req, res) => {
+  const currentUser = '6544bbe8df354e46068d74bb';
+  // const currentUser = req.user._id;
+  const items = await Item.find({name: req.query.q})
+    .populate('owner')
+    .populate('interactions')
+    // sorts own items to beginning or array
+    .sort({owner: 1, name: 1});
+  const response = [];
+  processItemForClient(items, currentUser, response);
+  res.send(response);
+};
