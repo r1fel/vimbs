@@ -23,7 +23,6 @@ module.exports.myInventory = async (req, res) => {
   const items = await Item.find({owner: currentUser})
     .populate('interactions')
     .sort({title: 1});
-  console.log(items[0]);
   const response = [];
   processItemForClient(items, currentUser, response);
   res.send(response);
