@@ -14,7 +14,7 @@ export const fetchItems = catchAsync(async (url: string) => {
 //search items
 export const searchItems = catchAsync(async (searchTerm: string) => {
   const response = await axios.get(
-    `${import.meta.env.VITE_SERVER_URL}/suggestions?term=${searchTerm}`,
+    `${import.meta.env.VITE_SERVER_URL}/search/?q=${searchTerm}`,
   );
   logger.log('searching items worked:', response);
   return response;
