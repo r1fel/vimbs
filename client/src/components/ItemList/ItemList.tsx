@@ -6,6 +6,13 @@ import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
 import catchAsync from '../../util/catchAsync';
 import UserContext from '../../context/UserContext';
+import {useQuery, useMutation} from '@tanstack/react-query';
+
+// export const fetchItems2 = useQuery({
+//   queryKey:['fetchItems'],
+//   queryFn:  axios.get(`${import.meta.env.VITE_SERVER_URL}${url}`, {
+//     withCredentials: true,
+//   });
 
 //! change type of image to string array later
 interface Item {
