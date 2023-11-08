@@ -20,6 +20,33 @@ export const searchItems = catchAsync(async (searchTerm: string) => {
   return response;
 });
 
+// create new item
+export interface CreateItemData {
+  name: string;
+  description: string;
+  picture: string;
+}
+
+export const createItem = catchAsync(async (name, description, picture) => {
+  logger.log('creating item initialized');
+  const input = {
+    item: {
+      name,
+      description,
+      picture,
+    },
+  };
+  const response = await axios.post(
+    `${import.meta.env.VITE_SERVER_URL}/item`,
+    input,
+    {
+      withCredentials: true,
+    },
+  );
+  logger.log('response is:', response);
+  return response;
+});
+
 //initalize new borrowing request
 export const initializeRequest = catchAsync(
   async (itemId, message, status, dueDate) => {

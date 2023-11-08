@@ -16,7 +16,7 @@ function NavBar() {
       </Link>
 
       <div className="navbar__links">
-        <Link className="navbar__link" to="/settings">
+        <Link className="navbar__link" to="/item/new">
           <IoAddCircleOutline />
         </Link>
 

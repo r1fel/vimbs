@@ -1,14 +1,29 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {createItem} from '../../services/ItemServices';
+import catchAsync from '../../util/catchAsync';
+import {logger} from '../../util/logger';
+import './ItemCreateForm.scss';
+
+interface ItemCreateFormData {
+  name: string;
+  description: string;
+  picture: string;
+}
 
 function ItemCreateForm() {
   //Handle book submit form changes and submit
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ItemCreateFormData>({
     name: '',
     description: '',
     picture: '',
   });
 
-  const handleChange = (event) => {
+  logger.log(formData);
+
+  const navigate = useNavigate();
+
+  const handleChange = (event: any) => {
     const changedField = event.target.name;
     const newValue = event.target.value;
     setFormData((currData) => {
@@ -17,64 +32,60 @@ function ItemCreateForm() {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = catchAsync(async (event: any) => {
     event.preventDefault();
-    onSubmit(formData.name, formData.picture, formData.description);
-  };
+    logger.log('try create item with:', formData);
+    const item = await createItem(
+      formData.name,
+      formData.description,
+      formData.picture,
+    );
+    logger.log('created item is:', item);
+
+    // navigate(`/item/${item._id}`);
+  });
 
   //Book creation form
   return (
     <div>
       <h2>Create Item</h2>
       <form onSubmit={handleSubmit}>
-        <p>
+        <div>
           <label>Title </label>
           <input
             type="text"
-            placeholder="title"
-            className="input"
-            value={formData.title}
+            placeholder="name"
+            className="create-item-input__name"
+            value={formData.name}
             onChange={handleChange}
-            name="title"
-            id="title"
+            name="name"
+            id="name"
           />
-        </p>
-        <p>
-          <label>Author </label>
+        </div>
+        <div>
+          <label>description</label>
           <input
             type="text"
-            placeholder="author"
-            className="input"
-            value={formData.author}
+            placeholder="description"
+            className="create-item-input__description"
+            value={formData.description}
             onChange={handleChange}
-            name="author"
-            id="author"
+            name="description"
+            id="description"
           />
-        </p>
-        <p>
-          <label>ISBN </label>
+        </div>
+        <div>
+          <label>picture</label>
           <input
             type="text"
-            placeholder="ISBN"
-            className="input"
-            value={formData.isbn}
+            placeholder="image URL"
+            className="create-item-input__picture"
+            value={formData.picture}
             onChange={handleChange}
-            name="isbn"
-            id="isbn"
+            name="picture"
+            id="picture"
           />
-        </p>
-        <p>
-          <label>Blurb </label>
-          <input
-            type="text"
-            placeholder="blurb"
-            className="input"
-            value={formData.blurb}
-            onChange={handleChange}
-            name="blurb"
-            id="blurb"
-          />
-        </p>
+        </div>
         <button onClick={handleSubmit} className="button">
           Create!
         </button>

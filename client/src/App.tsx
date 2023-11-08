@@ -8,6 +8,7 @@ import ErrorPage from './pages/ErrorPage/ErrorPage';
 import DetailsPage from './pages/DetailsPage/DetailsPage';
 import ItemList from './components/ItemList/ItemList';
 import AuthCheck from './components/AuthCheck/AuthCheck';
+import CreateItemPage from './pages/CreateItemPage/CreateItemPage';
 
 function App() {
   return (
@@ -30,8 +31,13 @@ function App() {
             errorElement={<ErrorPage />}
           />
           <Route
-            path="/items/:id/request"
+            path="/item/:id/request"
             element={<ItemList url="books/" />}
+            errorElement={<ErrorPage />}
+          />
+          <Route
+            path="/item/new"
+            element={<CreateItemPage />}
             errorElement={<ErrorPage />}
           />
 

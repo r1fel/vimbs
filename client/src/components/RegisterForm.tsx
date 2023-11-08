@@ -6,9 +6,15 @@ import {logger} from '../util/logger';
 import RegisterPwdValidator from './RegisterPwdValidator';
 import {useNavigate} from 'react-router-dom';
 
+interface RegisterFormData {
+  username: string;
+  email: string;
+  password: string;
+}
+
 function RegisterForm() {
   const {setUserData, setIsLoggedIn}: any = useContext(UserContext);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     username: '',
     email: '',
     password: '',
