@@ -1,4 +1,4 @@
-import {useState, useRef} from 'react';
+import {useState} from 'react';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
 import Button from '../../components/Button/Button';
@@ -11,21 +11,17 @@ import SearchBar from '../../components/SearchBar/SearchBar';
 function HomePage(): JSX.Element {
   // NoAuthRedirect();
 
-  const searchTerm = useRef('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   RenderCounter('HomePage');
   return (
     <div>
       <NavBar />
-      <SearchBar searchTerm={searchTerm} />
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       Home Page
       <LoginForm />
       <ItemList
-        url={
-          searchTerm.current === ''
-            ? 'item/'
-            : `/item/search?q="${searchTerm.current}"`
-        }
+        url={searchTerm === '' ? 'item/' : `/item/search?q="${searchTerm}"`}
       />
       <Button>This is a button</Button>
     </div>

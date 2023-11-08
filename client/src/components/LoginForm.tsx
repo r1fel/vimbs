@@ -5,6 +5,7 @@ import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleLogin} from '../services/AuthServices';
 import {logger} from '../util/logger';
 import {useNavigate} from 'react-router-dom';
+import Button from './Button/Button';
 
 interface LoginFormData {
   username: string;
@@ -57,6 +58,26 @@ function LoginForm() {
     }
   };
 
+  const handleSubmitBob = async (e) => {
+    e.preventDefault();
+    try {
+      // handle login in AuthServices
+      const userDataResponse = await handleLogin('bob', 'bob');
+      logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
+
+      if (userDataResponse && userDataResponse.data) {
+        await setUserData(userDataResponse.data);
+        await setIsLoggedIn(true);
+        await setFormData({username: '', password: ''});
+        navigate('/');
+      } else {
+        logger.error('Login failed.');
+      }
+    } catch (error) {
+      logger.error('login handleSubmit failed!', error);
+    }
+  };
+
   return (
     <div>
       <h2>Login</h2>
@@ -93,6 +114,7 @@ function LoginForm() {
         <button onClick={handleSubmit} className="button">
           Login
         </button>
+        <Button onClick={handleSubmitBob}>Login with Bob</Button>
       </form>
     </div>
   );
