@@ -1,7 +1,7 @@
 import mongoose, {Schema, Document} from 'mongoose';
 // import ItemInteraction from './itemInteraction';
 
-interface IItem extends Document {
+export interface IItem extends Document {
   creationDate: Date;
   picture: string | undefined;
   name: string;
@@ -37,6 +37,4 @@ const ItemSchema: Schema = new Schema({
   available: {type: Boolean, default: true},
 });
 
-const Item = mongoose.model<IItem>('Item', ItemSchema);
-
-export default Item;
+export const Item = mongoose.model<IItem>('Item', ItemSchema);

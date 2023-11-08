@@ -3,6 +3,7 @@ import express, {Application, Request, Response, NextFunction} from 'express';
 import mongoose from 'mongoose';
 // generic error handling function
 //TODO ER: implement
+import ExpressError from './utils/ExpressError';
 // const ExpressError = require('./utils/ExpressError');
 // TODO FR: needed for client
 // import methodOverride from 'method-override';
@@ -101,18 +102,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // routes
 app.use('/item', itemRoutes);
 
-// TODO ER: error handeling - revisit when client is setup to deal with some error messages
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-  // next(new ExpressError('Page Not Found', 404))
-  console.log('some down the list error');
-  next();
+  next(new ExpressError('Page Not Found', 404));
 });
 
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // const {statusCode = 500} = err;
+app.use((err: any, req: Request, res: Response) => {
+  const {statusCode = 500} = err;
   if (!err.message) err.message = 'Oh No, Something went wrong!';
-  // res.status(statusCode).render('error', { err });
-  console.log('some down the list error');
+  res.status(statusCode).send(err);
 });
 
 // general configurations

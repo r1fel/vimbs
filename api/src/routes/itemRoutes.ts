@@ -1,6 +1,11 @@
-import express from 'express';
-import {defaultRoute} from './defaultRoutes';
+import {Router} from 'express';
+// import Item from '../models/item';
+import {index, itemSearch, showItem} from '../controllers/itemControllers';
 
-export const itemRoutes = express.Router();
+export const itemRoutes = Router();
 
-itemRoutes.use(defaultRoute);
+itemRoutes.route('/').get(index);
+
+itemRoutes.route('/search').get(itemSearch);
+
+itemRoutes.route('/:itemId').get(showItem);
