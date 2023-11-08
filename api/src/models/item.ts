@@ -1,15 +1,6 @@
-import mongoose, {Schema, Document} from 'mongoose';
-// import ItemInteraction from './itemInteraction';
-
-export interface IItem extends Document {
-  creationDate: Date;
-  picture: string | undefined;
-  name: string;
-  description: string | undefined;
-  owner: mongoose.Types.ObjectId;
-  interactions: mongoose.Types.ObjectId[];
-  available: boolean;
-}
+import mongoose, {Schema} from 'mongoose';
+import {ItemInDB} from '../typeDefinitions';
+// import {ItemInteraction} from './itemInteraction';
 
 const ItemSchema: Schema = new Schema({
   creationDate: {
@@ -28,13 +19,13 @@ const ItemSchema: Schema = new Schema({
     ref: 'User',
     required: true,
   },
-  // interactions: [
-  //   {
-  //     type: Schema.Types.ObjectId,
-  //     ref: "ItemInteraction",
-  //   },
-  // ],
+  interactions: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'ItemInteraction',
+    },
+  ],
   available: {type: Boolean, default: true},
 });
 
-export const Item = mongoose.model<IItem>('Item', ItemSchema);
+export const Item = mongoose.model<ItemInDB>('Item', ItemSchema);

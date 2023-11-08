@@ -1,9 +1,9 @@
 import {
+  ItemInDB,
   DBItems,
   ResponseItemForClient,
   ObjectId,
-} from '../controllers/itemControllers';
-import {IItem} from '../models/item';
+} from '../typeDefinitions';
 
 // function to process an array of items for the client
 export const processItemForClient = async (
@@ -11,7 +11,7 @@ export const processItemForClient = async (
   currentUser: ObjectId,
   response: Array<ResponseItemForClient>
 ) => {
-  let itemArray: Array<IItem> = [];
+  let itemArray: Array<ItemInDB> = [];
   if (Array.isArray(items)) {
     itemArray = items;
   } else {
