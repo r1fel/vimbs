@@ -22,7 +22,16 @@ export const searchItems = catchAsync(async (searchTerm: string) => {
 
 // create item
 export const createItem = catchAsync(
-  async (name: string, description: string, picture: string) => {
+  async ({
+    name,
+    description,
+    picture,
+  }: {
+    name: string;
+    description: string;
+    picture: string;
+  }) => {
+    logger.log('service receives:', name, description, picture);
     const input = {
       item: {
         name,

@@ -21,7 +21,7 @@ function ItemList({url}: {url: string}) {
   const isUserLoggedInAndDataExists = isLoggedIn && userData.length > 0;
 
   const itemsQuery = useQuery({
-    queryKey: ['fetchItems'],
+    queryKey: ['item'],
     queryFn: () => fetchItems(url),
     enabled: isUserLoggedInAndDataExists,
   });
