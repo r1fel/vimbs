@@ -1,5 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import {useMutation} from '@tanstack/react-query';
 import {createItem} from '../../services/ItemServices';
 import catchAsync from '../../util/catchAsync';
 import {logger} from '../../util/logger';
@@ -19,9 +20,15 @@ function ItemCreateForm() {
     picture: '',
   });
 
-  logger.log(formData);
-
   const navigate = useNavigate();
+
+  //use createItem as mutation function
+  const createItemMutation = useMutation({
+    mutationFn: createItem,
+    onSuccess: (item) => {
+      navigate(`/item/${item.data[0]._id}`);
+    },
+  });
 
   const handleChange = (event: any) => {
     const changedField = event.target.name;
@@ -32,17 +39,16 @@ function ItemCreateForm() {
     });
   };
 
-  const handleSubmit = catchAsync(async (event: any) => {
+  // call the mutation
+  const handleSubmit = (event: any) => {
     event.preventDefault();
-    const item = await createItem(
-      formData.name,
-      formData.description,
-      formData.picture,
-    );
-    logger.log('created item is:', item);
-    logger.log('navigate to:', item.data[0]._id);
-    navigate(`/item/${item.data[0]._id}`);
-  });
+    createItemMutation.mutate(formData);
+
+    if (createItemMutation.status === 'error') {
+      logger.error('Error loading items:', createItemMutation.error);
+      return;
+    }
+  };
 
   //Book creation form
   return (
