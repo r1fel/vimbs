@@ -2,7 +2,10 @@ import {Router} from 'express';
 // import Item from '../models/item';
 import {index, itemSearch, showItem} from '../controllers/itemControllers';
 import catchAsync from '../utils/catchAsync';
-import {createItemInteraction} from '../controllers/itemInteractionControllers';
+import {
+  createItemInteraction,
+  deleteAllItemInteractions,
+} from '../controllers/itemInteractionControllers';
 
 export const itemRoutes = Router();
 
@@ -14,4 +17,5 @@ itemRoutes.route('/:itemId').get(catchAsync(showItem));
 
 itemRoutes
   .route('/:itemId/itemInteraction')
-  .post(catchAsync(createItemInteraction));
+  .post(catchAsync(createItemInteraction))
+  .delete(catchAsync(deleteAllItemInteractions));

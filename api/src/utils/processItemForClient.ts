@@ -1,61 +1,72 @@
 import {
-  ItemInDB,
-  DBItems,
+  PopulatedItemsFromDB,
   ResponseItemForClient,
-  ObjectId,
+  ItemInteractionInDB,
+  ItemInDBPopulated,
 } from '../typeDefinitions';
+import mongoose from 'mongoose';
 
 // function to process an array of items for the client
 export const processItemForClient = async (
-  items: DBItems,
-  currentUser: ObjectId,
+  items: PopulatedItemsFromDB,
+  currentUser: mongoose.Types.ObjectId,
   response: Array<ResponseItemForClient>
 ) => {
-  let itemArray: Array<ItemInDB> = [];
+  if (items === null) return (response = []);
+
+  let itemArray: Array<ItemInDBPopulated> = [];
   if (Array.isArray(items)) {
     itemArray = items;
   } else {
     itemArray = [items];
   }
+
   for (const item of itemArray) {
+    if (item.owner === null || item.interactions === null) continue;
+
+    const ownerBool: boolean = item.owner._id.equals(currentUser)
+      ? true
+      : false;
+
     const sendItem: ResponseItemForClient = {
       _id: item._id,
       name: item.name,
       available: item.available,
-      picture: null,
-      description: null,
+      picture: !item.picture ? null : item.picture,
+      description: !item.description ? null : item.description,
       dueDate: null,
-      owner: false,
-      interactions: null,
-      commonCommunity: null,
+      owner: ownerBool,
+      interactions: ownerBool ? item.interactions : null,
+      commonCommunity: ownerBool
+        ? null
+        : {
+            _id: new mongoose.Types.ObjectId('6544be0f04b3ecd121538985'),
+            picture:
+              'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
+            name: 'our common community',
+          },
       ownerData: null,
     };
-    if (item.picture) sendItem.picture = item.picture;
-    if (item.description) sendItem.description = item.description;
-    // TODO ER: revisit dueDate once "available" can be set to false
-    if (item.available === false) sendItem.dueDate = new Date();
-    // item.interactions[item.interactions.length - 1].dueDate
-    //should use .equals
-    if (item.owner == currentUser) {
-      sendItem.owner = true;
-      // sendItem.interactions = item.interactions;
-    } else {
-      sendItem.commonCommunity = {
-        _id: '6544bbe8dk864e46068d74bb',
-        picture:
-          'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
-        name: 'our common community',
-      };
+
+    if (item.interactions.length !== 0) {
+      const lastInteraction: mongoose.Types.ObjectId | ItemInteractionInDB =
+        item.interactions[item.interactions.length - 1];
+      if (lastInteraction instanceof mongoose.Types.ObjectId) {
+        response.push(sendItem);
+        continue;
+      }
+
+      if (sendItem.available === false)
+        sendItem.dueDate = lastInteraction.dueDate;
+
+      if (lastInteraction.interestedParty.equals(currentUser)) {
+        sendItem.interactions = [lastInteraction];
+        lastInteraction.revealOwnerIdentity === true
+          ? {_id: item.owner._id, firstName: 'Hans'}
+          : null;
+      }
     }
-    // TODO ER: revisit and uncomment once interactions are in place
-    // if (
-    //   item.interactions !== [] &&
-    //   item.interactions[item.interactions.length - 1].interestedParty ===
-    //     currentUser
-    // ) {
-    //   sendItem.interactions = item.interactions[item.interactions.length - 1];
-    //   sendItem.ownerData = {_id: item.owner._id, firstName: item.owner.firstName};
-    // }
     response.push(sendItem);
   }
+  return response;
 };

@@ -93,7 +93,7 @@
     // "noImplicitThis": true,                           /* Enable error reporting when 'this' is given the type 'any'. */
     // "useUnknownInCatchVariables": true,               /* Default catch clause variables as 'unknown' instead of 'any'. */
     // "alwaysStrict": true,                             /* Ensure 'use strict' is always emitted. */
-    "noUnusedLocals": true /* Enable error reporting when local variables aren't read. */,
+    // "noUnusedLocals": true /* Enable error reporting when local variables aren't read. ER20231109 Hatte ich an und geht mir auf den Sack, weil ich ständig wenn ich was auskommentiere die imports ändern muss */,
     // "noUnusedParameters": true /* Raise an error when a function parameter isn't read. ER20231107: if turnerd on, it throws error with unused req in route handling functions */,
     // "exactOptionalPropertyTypes": true,               /* Interpret optional property types as written, rather than adding 'undefined'. */
     "noImplicitReturns": true /* Enable error reporting for codepaths that do not explicitly return in a function. */,
