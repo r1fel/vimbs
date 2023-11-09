@@ -34,15 +34,14 @@ function ItemCreateForm() {
 
   const handleSubmit = catchAsync(async (event: any) => {
     event.preventDefault();
-    logger.log('try create item with:', formData);
     const item = await createItem(
       formData.name,
       formData.description,
       formData.picture,
     );
     logger.log('created item is:', item);
-
-    // navigate(`/item/${item._id}`);
+    logger.log('navigate to:', item.data[0]._id);
+    navigate(`/item/${item.data[0]._id}`);
   });
 
   //Book creation form

@@ -39,10 +39,12 @@ function Provider({children}) {
           blurb,
         },
       };
+      console.log('input: ', input);
       // with credentials = cookie info for backend to access req.user
       const response = await axios.post('http://localhost:8080/books', input, {
         withCredentials: true,
       });
+      console.log('response: ', response);
       handleFetchBooks('mine');
     } catch (e) {
       console.log(e);

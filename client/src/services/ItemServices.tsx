@@ -14,38 +14,37 @@ export const fetchItems = catchAsync(async (url: string) => {
 //search items
 export const searchItems = catchAsync(async (searchTerm: string) => {
   const response = await axios.get(
-    `${import.meta.env.VITE_SERVER_URL}/search/?q=${searchTerm}`,
+    `${import.meta.env.VITE_SERVER_URL}search/?q=${searchTerm}`,
   );
   logger.log('searching items worked:', response);
   return response;
 });
 
-// create new item
-export interface CreateItemData {
-  name: string;
-  description: string;
-  picture: string;
-}
+// create item
+export const createItem = catchAsync(
+  async (name: string, description: string, picture: string) => {
+    const input = {
+      item: {
+        name,
+        description,
+        picture,
+      },
+    };
 
-export const createItem = catchAsync(async (name, description, picture) => {
-  logger.log('creating item initialized');
-  const input = {
-    item: {
-      name,
-      description,
-      picture,
-    },
-  };
-  const response = await axios.post(
-    `${import.meta.env.VITE_SERVER_URL}/item`,
-    input,
-    {
-      withCredentials: true,
-    },
-  );
-  logger.log('response is:', response);
-  return response;
-});
+    const response = await axios.post(
+      `${import.meta.env.VITE_SERVER_URL}item/`,
+      input,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    logger.log('creating item worked:', response);
+    return response;
+  },
+);
 
 //initalize new borrowing request
 export const initializeRequest = catchAsync(
