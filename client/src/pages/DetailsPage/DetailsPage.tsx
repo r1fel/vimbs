@@ -1,6 +1,5 @@
 import {useParams} from 'react-router-dom';
 import {Link} from 'react-router-dom';
-
 import NoAuthRedirect from '../../components/NoAuthRedirect';
 import ItemDetails from '../../components/ItemDetails/ItemDetails';
 import Button from '../../components/Button/Button';
