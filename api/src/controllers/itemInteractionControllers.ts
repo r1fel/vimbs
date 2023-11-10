@@ -21,13 +21,11 @@ export const createItemInteraction = async (
   const status: InteractionStatuses = req.body.itemInteraction.status;
   if (status !== 'opened')
     return next(
-      new ExpressError('you cant create an interactionwith this request', 500)
+      new ExpressError('you cant create an interaction with this request', 500)
     );
-
   const item: PopulatedItemsFromDB = await Item.findById(req.params.itemId)
     .populate<{owner: UserInDB}>('owner')
     .populate<{interactions: ItemInteractionInDB[]}>('interactions');
-  // const item: ItemInDB | null = await Item.findById(req.params.itemId);
   if (item === null)
     return next(new ExpressError('this item doesnt exist', 500));
 
@@ -35,6 +33,7 @@ export const createItemInteraction = async (
     '6544bbe8df354e46068d74bb'
   );
   // const currentUser = req.user._id;
+
   // if (item.owner.equals(currentUser))
   //   return next(
   //     new ExpressError(

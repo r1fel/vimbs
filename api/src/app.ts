@@ -24,6 +24,7 @@ import cors from 'cors';
 // import reviewRoutes from './routes/reviewRoutes';
 // import borrowingrequestRoutes from './routes/borrowingrequestRoutes';
 import {itemRoutes} from './routes/itemRoutes';
+import {itemInteractionRoutes} from './routes/itemInteractionRoutes';
 
 // Importing models
 import User from './models/user';
@@ -101,6 +102,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // routes
 app.use('/item', itemRoutes);
+app.use('/item/:itemId/itemInteraction', itemInteractionRoutes);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(new ExpressError('Page Not Found', 404));

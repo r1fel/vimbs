@@ -1,21 +1,54 @@
 import {Router} from 'express';
-// import Item from '../models/item';
-import {index, itemSearch, showItem} from '../controllers/itemControllers';
-import catchAsync from '../utils/catchAsync';
 import {
-  createItemInteraction,
-  deleteAllItemInteractions,
-} from '../controllers/itemInteractionControllers';
+  index,
+  createItem,
+  itemSearch,
+  showItem,
+  updateItem,
+  myInventory,
+} from '../controllers/itemControllers';
+import catchAsync from '../utils/catchAsync';
 
 export const itemRoutes = Router();
 
-itemRoutes.route('/').get(catchAsync(index));
+itemRoutes
+  .route('/')
+  .get(
+    // isLoggedIn,
+    //
+    catchAsync(index)
+  )
+  .post(
+    // isLoggedIn,
+    // validateItem,
+    //
+    catchAsync(createItem)
+  );
 
-itemRoutes.route('/search').get(catchAsync(itemSearch));
+itemRoutes.route('/search').get(
+  // isLoggedIn,
+  //
+  catchAsync(itemSearch)
+);
 
-itemRoutes.route('/:itemId').get(catchAsync(showItem));
+itemRoutes.route('/mine').get(
+  // isLoggedIn,
+  //
+  catchAsync(myInventory)
+);
 
 itemRoutes
-  .route('/:itemId/itemInteraction')
-  .post(catchAsync(createItemInteraction))
-  .delete(catchAsync(deleteAllItemInteractions));
+  .route('/:itemId')
+  .get(
+    // isLoggedIn,
+    //
+    catchAsync(showItem)
+  )
+  .put(
+    // isLoggedIn,
+    //  catchAsync(isOwner),
+    // validateItem,
+    //
+    catchAsync(updateItem)
+  );
+// .delete(isLoggedIn, catchAsync(isOwner), catchAsync(items.deleteItem));
