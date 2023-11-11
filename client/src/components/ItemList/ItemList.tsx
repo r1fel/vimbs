@@ -20,6 +20,8 @@ function ItemList({url}: {url: string}) {
   const {userData, isLoggedIn} = useContext(UserContext);
   const isUserLoggedInAndDataExists = isLoggedIn && userData.length > 0;
 
+  RenderCounter('ItemList');
+
   const itemsQuery = useQuery({
     queryKey: ['item'],
     queryFn: () => fetchItems(url),
@@ -28,7 +30,7 @@ function ItemList({url}: {url: string}) {
 
   if (itemsQuery.status === 'pending') {
     logger.log(
-      'useUery started with userData:',
+      'useQuery started with userData:',
       userData,
       'and isLoggedIn:',
       isLoggedIn,

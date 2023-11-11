@@ -12,18 +12,27 @@ function HomePage(): JSX.Element {
   // NoAuthRedirect();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchExecuted, setIsSearchExecuted] = useState(false);
 
   RenderCounter('HomePage');
   return (
     <div>
       <NavBar />
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <SearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        isSearchExecuted={isSearchExecuted}
+        setIsSearchExecuted={setIsSearchExecuted}
+      />
       Home Page
       <LoginForm />
       <ItemList
-        url={searchTerm === '' ? 'item/' : `/item/search?q="${searchTerm}"`}
+        url={
+          searchTerm != '' && isSearchExecuted
+            ? `/item/search?q="${searchTerm}"`
+            : 'item/'
+        }
       />
-      <Button>This is a button</Button>
     </div>
   );
 }
