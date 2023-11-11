@@ -1,5 +1,4 @@
-import {useState, useContext} from 'react';
-import {fetchItems} from '../../services/ItemServices';
+import {useState, useContext, useEffect} from 'react';
 import {logger} from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
@@ -16,7 +15,7 @@ interface Item {
   available: boolean;
 }
 
-function ItemList({url}: {url: string}) {
+function ItemList({url, fetchFunction, trigger}: {url: string}) {
   const {userData, isLoggedIn} = useContext(UserContext);
   const isUserLoggedInAndDataExists = isLoggedIn && userData.length > 0;
 
@@ -24,9 +23,34 @@ function ItemList({url}: {url: string}) {
 
   const itemsQuery = useQuery({
     queryKey: ['item'],
-    queryFn: () => fetchItems(url),
+    queryFn: () => fetchFunction(url),
     enabled: isUserLoggedInAndDataExists,
   });
+
+  logger.log(
+    'ItemList rendered with:',
+    'fetchfunction : ',
+    fetchFunction,
+    'URL:',
+    url,
+  );
+
+  useEffect(() => {
+    const refetch = async () => {
+      if (isUserLoggedInAndDataExists) {
+        await itemsQuery.refetch();
+        logger.log('refetch in items list:', itemsQuery);
+      } else {
+        logger.log(
+          'refetch didnt work! trigger:',
+          trigger,
+          'isUserLoggedInAndDataExists:',
+          isUserLoggedInAndDataExists,
+        );
+      }
+    };
+    refetch();
+  }, [trigger, isUserLoggedInAndDataExists]);
 
   if (itemsQuery.status === 'pending') {
     logger.log(
