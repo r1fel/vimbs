@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {useMutation} from '@tanstack/react-query';
+import {QueryClient, useMutation, useQueryClient} from '@tanstack/react-query';
 import {createItem} from '../../services/ItemServices';
 import catchAsync from '../../util/catchAsync';
 import {logger} from '../../util/logger';
@@ -21,12 +21,15 @@ function ItemCreateForm() {
   });
 
   const navigate = useNavigate();
-
+  //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
+  const queryClient = useQueryClient();
   //use createItem as mutation function
   const createItemMutation = useMutation({
     mutationFn: createItem,
-    onSuccess: (item) => {
-      navigate(`/item/${item.data[0]._id}`);
+    onSuccess: (itemData) => {
+      queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
+      queryClient.invalidateQueries(['item'], {exact: true});
+      navigate(`/item/${itemData.data[0]._id}`);
     },
   });
 
@@ -39,16 +42,20 @@ function ItemCreateForm() {
     });
   };
 
-  // call the mutation
+  // call the mutation (takes objects only)
   const handleSubmit = (event: any) => {
     event.preventDefault();
     createItemMutation.mutate(formData);
-
-    if (createItemMutation.status === 'error') {
-      logger.error('Error loading items:', createItemMutation.error);
-      return;
-    }
+    logger.log('data of create item mutation: ', createItemMutation);
   };
+
+  if (createItemMutation.status === 'error') {
+    logger.error('Error loading items:', createItemMutation.error);
+    return <p>an error occured: {JSON.stringify(createItemMutation.error)}</p>;
+  }
+  if (createItemMutation.status === 'pending') {
+    return <p>New Item Loading</p>;
+  }
 
   //Book creation form
   return (
