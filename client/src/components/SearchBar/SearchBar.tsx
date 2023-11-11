@@ -6,6 +6,8 @@ import {searchItems} from '../../services/ItemServices';
 import catchAsync from '../../util/catchAsync';
 import Button from '../Button/Button';
 import {logger} from '../../util/logger';
+import {useAtom} from 'jotai';
+import {searchTermAtom, isSearchExecutedAtom} from '../../context/itemAtoms';
 
 function debounce(func, wait) {
   let timeout;
@@ -16,10 +18,17 @@ function debounce(func, wait) {
   };
 }
 
-function SearchBar({searchTerm, setSearchTerm}) {
+function SearchBar({
+  pageSearchTerm,
+  setPageSearchTerm,
+  isSearchExecuted,
+  setIsSearchExecuted,
+  setFetchMode,
+}) {
+  const [searchTerm, setSearchTerm] = useState('');
   const [activeIndex, setActiveIndex] = useState(-1);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
-  const [placeholder, setPlaceholer] = useState('Was suchst du?');
+  const [placeholder, setPlaceholder] = useState('Was suchst du?');
   const navigate = useNavigate();
 
   const searchQuery = useQuery({
@@ -33,11 +42,6 @@ function SearchBar({searchTerm, setSearchTerm}) {
     searchQuery.refetch();
   }, [searchTerm]);
 
-  useEffect(() => {
-    // Trigger a refetch when searchTerm changes
-    logger.log('search suggestions are:', searchSuggestions);
-  }, [searchSuggestions]);
-
   if (searchQuery.status === 'success') {
     logger.log(
       'searchQuery results are:',
@@ -45,31 +49,7 @@ function SearchBar({searchTerm, setSearchTerm}) {
       'search term was:',
       searchTerm,
     );
-    // const items = searchQuery.data.data.map((item) => ({
-    //   key: `search-result-${item._id}`,
-    //   name: item.name,
-    //   id: item._id,
-    // }));
-    // setSearchSuggestions(searchQuery.data.data);
   }
-
-  // const handleSearchTermChange = catchAsync(async (searchTerm: string) => {
-  //   const suggestedItems = await searchItems(searchTerm);
-  //   const items = suggestedItems.data.map((item) => ({
-  //     key: `search-result-${item._id}`,
-  //     name: item.name,
-  //     id: item._id,
-  //   }));
-  //   await setSearchSuggestions(items);
-  //   console.log('search suggestions are:', searchSuggestions);
-  // });
-
-  // useEffect(() => {
-  //   const debouncedSearch = debounce(handleSearchTermChange, 300);
-  //   if (searchTerm) {
-  //     debouncedSearch(searchTerm);
-  //   }
-  // }, [searchTerm]);
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -90,12 +70,18 @@ function SearchBar({searchTerm, setSearchTerm}) {
     } else if (e.key === 'ArrowUp') {
       setActiveIndex((prev) => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter' && activeIndex >= 0) {
-      handleSuggestionClick(searchSuggestions[activeIndex]);
+      handleSuggestionClick(searchQuery.data.data[activeIndex]);
     }
   };
-  const handleSearchClick = () => {
+  const handleSearchClick = async () => {
     if (searchTerm) {
-      //! set the itemList to the search reuslts
+      await setFetchMode('searchItems');
+      await setPageSearchTerm(searchTerm);
+      await setIsSearchExecuted(!isSearchExecuted);
+      logger.log('pageSearchTerm is', pageSearchTerm);
+
+      await setPlaceholder('Was suchst du?');
+      // await setSearchTerm('');
     } else {
       setPlaceholder('Please enter something to search for...');
     }

@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {fetchItems, searchItems} from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
 import Button from '../../components/Button/Button';
@@ -7,29 +8,41 @@ import LoginForm from '../../components/LoginForm';
 import NoAuthRedirect from '../../components/NoAuthRedirect';
 import NavBar from '../../components/NavBar/NavBar';
 import SearchBar from '../../components/SearchBar/SearchBar';
+import {logger} from '../../util/logger';
 
 function HomePage(): JSX.Element {
   // NoAuthRedirect();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [pageSearchTerm, setPageSearchTerm] = useState('');
   const [isSearchExecuted, setIsSearchExecuted] = useState(false);
+  const [fetchMode, setFetchMode] = useState('fetchItems');
 
   RenderCounter('HomePage');
+  logger.log(
+    'pageSearchTerm is:',
+    pageSearchTerm,
+    'isSearchExecuted',
+    isSearchExecuted,
+  );
   return (
     <div>
       <NavBar />
       <SearchBar
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        pageSearchTerm={pageSearchTerm}
+        setPageSearchTerm={setPageSearchTerm}
         isSearchExecuted={isSearchExecuted}
         setIsSearchExecuted={setIsSearchExecuted}
+        setFetchMode={setFetchMode}
       />
       Home Page
       <LoginForm />
       <ItemList
+        trigger={isSearchExecuted}
+        setTrigger={setIsSearchExecuted}
+        fetchFunction={fetchMode === 'searchItems' ? searchItems : fetchItems}
         url={
-          searchTerm != '' && isSearchExecuted
-            ? `/item/search?q="${searchTerm}"`
+          pageSearchTerm.length > 0 && fetchMode === 'searchItems'
+            ? `${pageSearchTerm}`
             : 'item/'
         }
       />
