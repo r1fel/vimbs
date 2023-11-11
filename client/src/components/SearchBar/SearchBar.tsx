@@ -1,8 +1,11 @@
 import {useState, useEffect} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
+import {useQuery} from '@tanstack/react-query';
 import './SearchBar.scss';
 import {searchItems} from '../../services/ItemServices';
 import catchAsync from '../../util/catchAsync';
+import Button from '../Button/Button';
+import {logger} from '../../util/logger';
 
 function debounce(func, wait) {
   let timeout;
@@ -17,24 +20,56 @@ function SearchBar({searchTerm, setSearchTerm}) {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [placeholder, setPlaceholer] = useState('Was suchst du?');
+  const navigate = useNavigate();
 
-  const handleSearchTermChange = catchAsync(async (searchTerm: string) => {
-    const suggestedItems = await searchItems(searchTerm);
-    const items = suggestedItems.data.map((item) => ({
-      key: `search-result-${item._id}`,
-      name: item.name,
-      id: item._id,
-    }));
-    await setSearchSuggestions(items);
-    console.log('search suggestions are:', searchSuggestions);
+  const searchQuery = useQuery({
+    queryKey: ['item', 'search'],
+    queryFn: () => searchItems(searchTerm),
+    enabled: !!searchTerm,
   });
 
   useEffect(() => {
-    const debouncedSearch = debounce(handleSearchTermChange, 300);
-    if (searchTerm) {
-      debouncedSearch(searchTerm);
-    }
+    // Trigger a refetch when searchTerm changes
+    searchQuery.refetch();
   }, [searchTerm]);
+
+  useEffect(() => {
+    // Trigger a refetch when searchTerm changes
+    logger.log('search suggestions are:', searchSuggestions);
+  }, [searchSuggestions]);
+
+  if (searchQuery.status === 'success') {
+    logger.log(
+      'searchQuery results are:',
+      searchQuery,
+      'search term was:',
+      searchTerm,
+    );
+    // const items = searchQuery.data.data.map((item) => ({
+    //   key: `search-result-${item._id}`,
+    //   name: item.name,
+    //   id: item._id,
+    // }));
+    // setSearchSuggestions(searchQuery.data.data);
+  }
+
+  // const handleSearchTermChange = catchAsync(async (searchTerm: string) => {
+  //   const suggestedItems = await searchItems(searchTerm);
+  //   const items = suggestedItems.data.map((item) => ({
+  //     key: `search-result-${item._id}`,
+  //     name: item.name,
+  //     id: item._id,
+  //   }));
+  //   await setSearchSuggestions(items);
+  //   console.log('search suggestions are:', searchSuggestions);
+  // });
+
+  // useEffect(() => {
+  //   const debouncedSearch = debounce(handleSearchTermChange, 300);
+  //   if (searchTerm) {
+  //     debouncedSearch(searchTerm);
+  //   }
+  // }, [searchTerm]);
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -42,7 +77,8 @@ function SearchBar({searchTerm, setSearchTerm}) {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setSearchTerm(suggestion.name);
+    logger.log('suggestion:', suggestion);
+    navigate(`item/${suggestion._id}`);
   };
 
   const handleKeyDown = (e) => {
@@ -59,6 +95,7 @@ function SearchBar({searchTerm, setSearchTerm}) {
   };
   const handleSearchClick = () => {
     if (searchTerm) {
+      //! set the itemList to the search reuslts
     } else {
       setPlaceholder('Please enter something to search for...');
     }
@@ -75,7 +112,6 @@ function SearchBar({searchTerm, setSearchTerm}) {
     e.preventDefault();
     //make request to backend
   };
-
   return (
     <form onSubmit={handleSubmit}>
       <input
@@ -88,25 +124,29 @@ function SearchBar({searchTerm, setSearchTerm}) {
           handleEnterPress(e);
         }}
       />
-      {searchSuggestions.length > 0 && searchTerm && (
-        <ul className="search-bar-suggestion-list">
-          {searchSuggestions.map((suggestion, index) => (
-            <Link
-              to={`/rest/${suggestion._id}`}
-              key={`${suggestion._id}-search-suggestion`}
-            >
-              <li
-                onClick={() => handleSuggestionClick(suggestion)}
-                className={`suggestion-item ${
-                  index === activeIndex ? 'background-grey' : ''
-                }`}
+      <Button onClick={handleSearchClick}>Search!</Button>
+      {searchQuery.status === 'success' &&
+        searchQuery.data.data.length > 0 &&
+        searchTerm && (
+          <ul className="search-bar-suggestion-list">
+            {searchQuery.data.data.map((suggestion, index) => (
+              <Link
+                id={suggestion._id}
+                to={`/item/${suggestion._id}`}
+                key={`${suggestion._id}-search-suggestion`}
               >
-                <span className="font-semibold">{suggestion.name}</span>
-              </li>
-            </Link>
-          ))}
-        </ul>
-      )}
+                <li
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className={`suggestion-item ${
+                    index === activeIndex ? 'background-grey' : ''
+                  }`}
+                >
+                  <span className="font-semibold">{suggestion.name}</span>
+                </li>
+              </Link>
+            ))}
+          </ul>
+        )}
     </form>
   );
 }
