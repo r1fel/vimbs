@@ -7,8 +7,9 @@ import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import DetailsPage from './pages/DetailsPage/DetailsPage';
 import ItemList from './components/ItemList/ItemList';
-import AuthCheck from './components/AuthCheck/AuthCheck';
+import AuthCheck from './features/authentication/components/AuthCheck';
 import CreateItemPage from './pages/CreateItemPage/CreateItemPage';
+import NotificationsPage from './pages/NotificationsPage/NotificationsPage';
 
 function App() {
   return (
@@ -20,6 +21,16 @@ function App() {
             element={
               // <AuthCheck>
               <HomePage />
+              // </AuthCheck>
+            }
+            errorElement={<ErrorPage />}
+          />
+
+          <Route
+            path="/user/notifications"
+            element={
+              // <AuthCheck>
+              <NotificationsPage />
               // </AuthCheck>
             }
             errorElement={<ErrorPage />}

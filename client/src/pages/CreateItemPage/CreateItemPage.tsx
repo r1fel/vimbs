@@ -1,4 +1,4 @@
-import NoAuthRedirect from '../../components/NoAuthRedirect';
+import NoAuthRedirect from '../../features/authentication/components/NoAuthRedirect';
 import ItemCreateForm from '../../components/ItemCreateForm/ItemCreateForm';
 
 function CreateItemPage(): JSX.Element {

@@ -6,6 +6,7 @@ import {
   IoPersonCircleOutline,
   IoSearch,
   IoAddCircleOutline,
+  IoNotificationsOutline,
 } from 'react-icons/io5';
 
 function NavBar() {
@@ -16,18 +17,22 @@ function NavBar() {
       </Link>
 
       <div className="navbar__links">
+        <IoSearch className="navbar__link" />
+
         <Link className="navbar__link" to="/item/new">
           <IoAddCircleOutline />
         </Link>
 
-        <IoSearch className="navbar__link" />
-
         <Link className="navbar__link" to="/settings">
-          <IoPersonCircleOutline />
+          <RiFeedbackLine />
+        </Link>
+
+        <Link className="navbar__link" to="/user/notifications">
+          <IoNotificationsOutline />
         </Link>
 
         <Link className="navbar__link" to="/settings">
-          <RiFeedbackLine />
+          <IoPersonCircleOutline />
         </Link>
       </div>
     </div>

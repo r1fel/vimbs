@@ -1,8 +1,8 @@
 import {useState, useContext, useEffect} from 'react';
-import UserContext from '../context/UserContext';
+import UserContext from '../../../context/UserContext';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleRegister} from '../services/AuthServices';
-import {logger} from '../util/logger';
+import {logger} from '../../../util/logger';
 import RegisterPwdValidator from './RegisterPwdValidator';
 import {useNavigate} from 'react-router-dom';
 

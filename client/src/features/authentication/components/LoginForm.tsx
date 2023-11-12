@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {useState, useContext} from 'react';
-import UserContext from '../context/UserContext';
+import UserContext from '../../../context/UserContext';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleLogin} from '../services/AuthServices';
-import {logger} from '../util/logger';
+import {logger} from '../../../util/logger';
 import {useNavigate} from 'react-router-dom';
-import Button from './Button/Button';
+import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
   username: string;
