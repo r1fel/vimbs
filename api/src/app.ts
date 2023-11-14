@@ -18,10 +18,6 @@ import {Strategy as LocalStrategy} from 'passport-local';
 import cors from 'cors';
 
 // Importing routes
-// import bookRoutes from './routes/bookRoutes';
-// import itemRoutes from './routes/itemRoutes';
-// import reviewRoutes from './routes/reviewRoutes';
-// import borrowingrequestRoutes from './routes/borrowingrequestRoutes';
 import itemRoutes from './routes/itemRoutes';
 import itemInteractionRoutes from './routes/itemInteractionRoutes';
 import userRoutes from './routes/userRoutes';
@@ -51,7 +47,7 @@ const app: Application = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: `${process.env.CLIENT_URL}`,
     credentials: true,
   })
 );
@@ -60,7 +56,7 @@ app.use(
 
 // TODO ER: revisit for making session work
 const sessionConfig = {
-  secret: 'thisshouldbeabettersecret!', // Secret for session
+  secret: `${process.env.SESSION_SECRET}`,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -93,17 +89,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Route necessities in routers folder
-// app.use('/books', bookRoutes);
-// app.use('/item', itemRoutes);
-// app.use('/books/:id/reviews', reviewRoutes);
-// app.use('/books/:id/borrowingrequest', borrowingrequestRoutes);
-
 // routes
 app.use('/', userRoutes);
 app.use('/item', itemRoutes);
 app.use('/item/:itemId/itemInteraction', itemInteractionRoutes);
 
+// Error Handeling
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
   next(new ExpressError('Page Not Found', 404));
 });
@@ -115,6 +106,6 @@ app.use((err: any, req: Request, res: Response) => {
 });
 
 // general configurations
-app.listen(8080, () => {
-  console.log('Serving on port 8080');
+app.listen(process.env.PORT, () => {
+  console.log(`Serving on port ${process.env.PORT}`);
 });

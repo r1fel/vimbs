@@ -1,3 +1,5 @@
+// Item Model for working with MongoDB
+
 import mongoose, {Schema} from 'mongoose';
 import {ItemInDB} from '../typeDefinitions';
 // import {ItemInteraction} from './itemInteraction';

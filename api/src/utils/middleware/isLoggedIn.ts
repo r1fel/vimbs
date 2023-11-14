@@ -1,3 +1,4 @@
+// Middleware to check wether the user sending the request is logged in
 import {Request, Response, NextFunction} from 'express';
 
 const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {

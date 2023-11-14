@@ -1,6 +1,13 @@
+// routes with base /item
+
 import {Router} from 'express';
-import catchAsync from '../utils/catchAsync';
-import isLoggedIn from '../utils/isLoggedIn';
+
+// middleware
+import isLoggedIn from '../utils/middleware/isLoggedIn';
+import validateItem from '../utils/middleware/validateItem';
+import isOwner from '../utils/middleware/isOwner';
+
+// controllers
 import {
   index,
   createItem,
@@ -18,25 +25,25 @@ itemRoutes
   .get(
     isLoggedIn,
     //
-    catchAsync(index)
+    index
   )
   .post(
     isLoggedIn,
-    // validateItem,
+    validateItem,
     //
-    catchAsync(createItem)
+    createItem
   );
 
 itemRoutes.route('/search').get(
   isLoggedIn,
   //
-  catchAsync(itemSearch)
+  itemSearch
 );
 
 itemRoutes.route('/mine').get(
   isLoggedIn,
   //
-  catchAsync(myInventory)
+  myInventory
 );
 
 itemRoutes
@@ -44,13 +51,13 @@ itemRoutes
   .get(
     isLoggedIn,
     //
-    catchAsync(showItem)
+    showItem
   )
   .put(
     isLoggedIn,
-    //  catchAsync(isOwner),
-    // validateItem,
+    isOwner,
+    validateItem,
     //
-    catchAsync(updateItem)
+    updateItem
   );
-// .delete(isLoggedIn, catchAsync(isOwner), catchAsync(items.deleteItem));
+// .delete(isLoggedIn, isOwner, items.deleteItem);

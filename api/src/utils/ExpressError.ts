@@ -1,3 +1,4 @@
+// generic error handling function
 class ExpressError extends Error {
   statusCode: number;
 

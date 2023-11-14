@@ -1,7 +1,8 @@
 // routes with base /item/:itemId/itemInteraction
 
 import {Router} from 'express';
-import catchAsync from '../utils/catchAsync';
+
+// controllers
 import {
   createItemInteraction,
   deleteAllItemInteractions,
@@ -9,10 +10,9 @@ import {
 
 const itemInteractionRoutes = Router({mergeParams: true});
 // "merge params" is need to pass the req.params from the app.use to the following routes
-
 export default itemInteractionRoutes;
 
 itemInteractionRoutes
   .route('/')
-  .post(catchAsync(createItemInteraction))
-  .delete(catchAsync(deleteAllItemInteractions));
+  .post(createItemInteraction)
+  .delete(deleteAllItemInteractions);

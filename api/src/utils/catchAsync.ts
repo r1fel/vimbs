@@ -1,3 +1,4 @@
+// wrap async functions with this generic function instead of using try catch
 import {Request, Response, NextFunction} from 'express';
 
 const catchAsync = (

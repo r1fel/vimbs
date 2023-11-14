@@ -1,3 +1,5 @@
+// Function that takes the items from the DB and processes them to be sent to the client
+
 import {
   PopulatedItemsFromDB,
   ResponseItemForClient,
@@ -7,7 +9,7 @@ import {
 import mongoose from 'mongoose';
 
 // function to process an array of items for the client
-export const processItemForClient = async (
+const processItemForClient = async (
   items: PopulatedItemsFromDB,
   currentUser: mongoose.Types.ObjectId,
   response: Array<ResponseItemForClient>
@@ -70,3 +72,5 @@ export const processItemForClient = async (
   }
   return response;
 };
+
+export default processItemForClient;

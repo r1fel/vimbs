@@ -1,7 +1,14 @@
+// routes with base /
+
 import {Router} from 'express';
 import passport from 'passport';
-import catchAsync from '../utils/catchAsync';
-import isLoggedIn from '../utils/isLoggedIn';
+
+// middleware
+import isLoggedIn from '../utils/middleware/isLoggedIn';
+import validateUserRegister from '../utils/middleware/validateUserRegister';
+import validateUserLogin from '../utils/middleware/validateUserLogin';
+
+// controllers
 import {
   register,
   login,
@@ -11,45 +18,46 @@ import {
 } from '../controllers/userControllers';
 
 const userRoutes = Router();
-
 export default userRoutes;
 
 userRoutes.route('/register').post(
-  // validateUser
+  validateUserRegister,
   //
-  catchAsync(register),
+  register,
   passport.authenticate('local', {
     //TODO FR: use failureFlash with tostify?
     failureMessage: true,
     // failureRedirect: 'http://localhost:5173/login',
   }),
-  catchAsync(login)
+  login
 );
 
 userRoutes.route('/login').post(
+  validateUserLogin,
   // storeReturnTo,
+  //
   passport.authenticate('local', {
     //TODO FR: use failureFlash with tostify?
     failureMessage: true,
     // failureRedirect: 'http://localhost:5173/login',
   }),
-  catchAsync(login)
+  login
 );
 
 userRoutes.route('/changePassword').post(
   isLoggedIn,
   //
-  catchAsync(changePassword)
+  changePassword
 );
 
 userRoutes.route('/auth').get(
   isLoggedIn,
   //
-  catchAsync(sendIsAuthenticated)
+  sendIsAuthenticated
 );
 
 userRoutes.route('/logout').get(
   isLoggedIn,
   //
-  catchAsync(logout)
+  logout
 );
