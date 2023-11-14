@@ -1,7 +1,17 @@
 import mongoose, {Document} from 'mongoose';
 
+// Extension of Express.User, so that req.user._id can be used
+declare global {
+  namespace Express {
+    interface User {
+      _id: mongoose.Types.ObjectId;
+    }
+  }
+}
+
 // DB related Types
 export interface UserInDB extends Document {
+  _id: mongoose.Types.ObjectId;
   email: string;
   username: string;
 }

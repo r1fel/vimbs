@@ -1,4 +1,6 @@
 import {Router} from 'express';
+import catchAsync from '../utils/catchAsync';
+import isLoggedIn from '../utils/isLoggedIn';
 import {
   index,
   createItem,
@@ -7,32 +9,32 @@ import {
   updateItem,
   myInventory,
 } from '../controllers/itemControllers';
-import catchAsync from '../utils/catchAsync';
 
-export const itemRoutes = Router();
+const itemRoutes = Router();
+export default itemRoutes;
 
 itemRoutes
   .route('/')
   .get(
-    // isLoggedIn,
+    isLoggedIn,
     //
     catchAsync(index)
   )
   .post(
-    // isLoggedIn,
+    isLoggedIn,
     // validateItem,
     //
     catchAsync(createItem)
   );
 
 itemRoutes.route('/search').get(
-  // isLoggedIn,
+  isLoggedIn,
   //
   catchAsync(itemSearch)
 );
 
 itemRoutes.route('/mine').get(
-  // isLoggedIn,
+  isLoggedIn,
   //
   catchAsync(myInventory)
 );
@@ -40,12 +42,12 @@ itemRoutes.route('/mine').get(
 itemRoutes
   .route('/:itemId')
   .get(
-    // isLoggedIn,
+    isLoggedIn,
     //
     catchAsync(showItem)
   )
   .put(
-    // isLoggedIn,
+    isLoggedIn,
     //  catchAsync(isOwner),
     // validateItem,
     //

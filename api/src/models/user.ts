@@ -12,6 +12,7 @@ const UserSchema: Schema = new Schema({
 
 UserSchema.plugin(passportLocalMongoose);
 
-const User = mongoose.model<UserInDB>('User', UserSchema);
+const User = mongoose.model('User', UserSchema);
+// const User = mongoose.model<UserInDB>('User', UserSchema);
 
 export default User;

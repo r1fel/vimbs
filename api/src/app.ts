@@ -18,13 +18,13 @@ import {Strategy as LocalStrategy} from 'passport-local';
 import cors from 'cors';
 
 // Importing routes
-// import userRoutes from './routes/userRoutes';
 // import bookRoutes from './routes/bookRoutes';
 // import itemRoutes from './routes/itemRoutes';
 // import reviewRoutes from './routes/reviewRoutes';
 // import borrowingrequestRoutes from './routes/borrowingrequestRoutes';
-import {itemRoutes} from './routes/itemRoutes';
-import {itemInteractionRoutes} from './routes/itemInteractionRoutes';
+import itemRoutes from './routes/itemRoutes';
+import itemInteractionRoutes from './routes/itemInteractionRoutes';
+import userRoutes from './routes/userRoutes';
 
 // Importing models
 import User from './models/user';
@@ -81,8 +81,8 @@ app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
 // TODO ER: login fixen!!!
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   //req.user used in controllers to get user info from request
@@ -94,13 +94,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Route necessities in routers folder
-// app.use('/', userRoutes);
 // app.use('/books', bookRoutes);
 // app.use('/item', itemRoutes);
 // app.use('/books/:id/reviews', reviewRoutes);
 // app.use('/books/:id/borrowingrequest', borrowingrequestRoutes);
 
 // routes
+app.use('/', userRoutes);
 app.use('/item', itemRoutes);
 app.use('/item/:itemId/itemInteraction', itemInteractionRoutes);
 

@@ -17,10 +17,8 @@ export const index = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-    '6544bbe8df354e46068d74bb'
-  );
-  // const currentUser = req.user._id;
+  if (req.user === undefined) return new ExpressError('user is undefined', 500);
+  const currentUser = req.user._id;
   const items: PopulatedItemsFromDB = await Item.find({
     owner: {$ne: currentUser},
   })
@@ -36,10 +34,8 @@ export const index = async (
 
 // create new item
 export const createItem = async (req: Request, res: Response) => {
-  const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-    '6544bbe8df354e46068d74bb'
-  );
-  // const currentUser = req.user._id;
+  if (req.user === undefined) return new ExpressError('user is undefined', 500);
+  const currentUser = req.user._id;
   const item: ItemInDB = new Item(req.body.item);
   item.owner = currentUser;
   await item.save();
@@ -54,16 +50,8 @@ export const showItem = async (
   res: Response,
   next: NextFunction
 ) => {
-  // const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-  //   '6544bbe8df354e46068d74bb'
-  // ); //bob
-  // const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-  //   '6544bd1bdf354e46068d74bf'
-  // ); //owner bibi
-  const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-    '6544bd2fdf354e46068d74c3'
-  ); //bodo
-  // const currentUser = req.user._id;
+  if (req.user === undefined) return new ExpressError('user is undefined', 500);
+  const currentUser = req.user._id;
   const item: PopulatedItemsFromDB = await Item.findById(req.params.itemId)
     .populate<{owner: UserInDB}>('owner')
     .populate<{interactions: ItemInteractionInDB[]}>('interactions');
@@ -80,10 +68,8 @@ export const updateItem = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-    '6544bbe8df354e46068d74bb'
-  );
-  // const currentUser = req.user._id;
+  if (req.user === undefined) return new ExpressError('user is undefined', 500);
+  const currentUser = req.user._id;
   const item: PopulatedItemsFromDB | null = await Item.findOneAndUpdate(
     {_id: req.params.itemId},
     {...req.body.item},
@@ -104,10 +90,8 @@ export const myInventory = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-    '6544bbe8df354e46068d74bb'
-  );
-  // const currentUser = req.user._id;
+  if (req.user === undefined) return new ExpressError('user is undefined', 500);
+  const currentUser = req.user._id;
   const items: PopulatedItemsFromDB = await Item.find({owner: currentUser})
     .populate<{interactions: ItemInteractionInDB[]}>('interactions')
     .sort({title: 1});
@@ -125,10 +109,8 @@ export const itemSearch = async (
   res: Response,
   next: NextFunction
 ) => {
-  const currentUser: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-    '6544bbe8df354e46068d74bb'
-  );
-  // const currentUser = req.user._id;
+  if (req.user === undefined) return new ExpressError('user is undefined', 500);
+  const currentUser = req.user._id;
   const items: PopulatedItemsFromDB = await Item.find({name: req.query.q})
     .populate<{owner: UserInDB}>('owner')
     .populate<{interactions: ItemInteractionInDB[]}>('interactions')

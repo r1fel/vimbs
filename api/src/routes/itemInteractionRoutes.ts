@@ -7,8 +7,10 @@ import {
   deleteAllItemInteractions,
 } from '../controllers/itemInteractionControllers';
 
-export const itemInteractionRoutes = Router({mergeParams: true});
+const itemInteractionRoutes = Router({mergeParams: true});
 // "merge params" is need to pass the req.params from the app.use to the following routes
+
+export default itemInteractionRoutes;
 
 itemInteractionRoutes
   .route('/')
