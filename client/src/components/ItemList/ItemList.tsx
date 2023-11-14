@@ -1,10 +1,11 @@
-import {useState, useContext, useEffect} from 'react';
+import {useState, useEffect} from 'react';
+import {useQuery} from '@tanstack/react-query';
+import {useAtom} from 'jotai';
 import {logger} from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
-import UserContext from '../../context/UserContext';
-import {useQuery} from '@tanstack/react-query';
+import {userDataAtom, isLoggedInAtom} from '../../context/userAtoms';
 
 //! change type of image to string array later
 interface Item {
@@ -16,7 +17,8 @@ interface Item {
 }
 
 function ItemList({url, fetchFunction, trigger}: {url: string}) {
-  const {userData, isLoggedIn} = useContext(UserContext);
+  const [userData] = useAtom(userDataAtom);
+  const [isLoggedIn] = useAtom(isLoggedInAtom);
   const isUserLoggedInAndDataExists = isLoggedIn && userData.length > 0;
 
   RenderCounter('ItemList');
