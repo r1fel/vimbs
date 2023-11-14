@@ -10,6 +10,7 @@ import ItemList from './components/ItemList/ItemList';
 import AuthCheck from './features/authentication/components/AuthCheck';
 import CreateItemPage from './pages/CreateItemPage/CreateItemPage';
 import NotificationsPage from './pages/NotificationsPage/NotificationsPage';
+import MyItemsPage from './pages/MyItemsPage/MyItemsPAge';
 
 function App() {
   return (
@@ -55,6 +56,11 @@ function App() {
           <Route
             path="/auth"
             element={<AuthPage />}
+            errorElement={<ErrorPage />}
+          />
+          <Route
+            path="/user/myitems"
+            element={<MyItemsPage />}
             errorElement={<ErrorPage />}
           />
           <Route path="/onboarding" element={<OnboardingPage />} />
