@@ -1,6 +1,7 @@
 @import '../../styles/variables.scss';
 
 .item-card {
+  position: relative;
   display: grid;
   background-color: $col-bright;
   outline: 2px solid transparent;
@@ -34,6 +35,16 @@
     grid-row: span 4;
     text-decoration: none;
     color: inherit;
+  }
+  &__edit {
+    font-size: 2rem;
+    position: absolute;
+    right: 3rem;
+  }
+  &__delete {
+    font-size: 2rem;
+    position: absolute;
+    right: 0.5rem;
   }
 
   &__status {

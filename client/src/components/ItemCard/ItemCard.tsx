@@ -1,7 +1,8 @@
+import {Link} from 'react-router-dom';
 import {logger} from '../../util/logger';
 import shortenText from '../../util/shortenText';
 import './ItemCard.scss';
-import {Link} from 'react-router-dom';
+import {IoCreateOutline, IoTrashOutline} from 'react-icons/io5';
 
 interface ItemCardProps {
   itemId: string;
@@ -9,6 +10,7 @@ interface ItemCardProps {
   itemDescription: string;
   itemImages: string;
   itemAvailable: boolean;
+  itemOwner: boolean;
 }
 
 function ItemCard({
@@ -17,13 +19,16 @@ function ItemCard({
   itemDescription,
   itemImages,
   itemAvailable,
+  itemOwner,
 }: ItemCardProps) {
   const shortName = shortenText(15, itemName);
   const shortDescription = shortenText(70, itemDescription);
 
   return (
-    <Link className="item-card__link" to={`item/${itemId}`}>
+    <Link className="item-card__link" to={`/item/${itemId}`}>
       <div className="item-card">
+        {itemOwner && <IoCreateOutline className="item-card__edit" />}
+        {itemOwner && <IoTrashOutline className="item-card__delete" />}
         <img className="item-card__img" src={itemImages}></img>
         <h1 className="item-card__name">{shortName}</h1>
         <p className="item-card__descr">{shortDescription}</p>
