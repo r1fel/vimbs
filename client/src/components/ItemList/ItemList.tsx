@@ -14,6 +14,7 @@ interface Item {
   description: string;
   picture: string;
   available: boolean;
+  owner: boolean;
 }
 
 function ItemList({url, fetchFunction, trigger}: {url: string}) {
@@ -86,6 +87,7 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
             itemDescription={item.description}
             itemImages={item.picture}
             itemAvailable={item.available}
+            itemOwner={item.owner}
           ></ItemCard>
         ));
       } else {
