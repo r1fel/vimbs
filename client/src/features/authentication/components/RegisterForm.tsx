@@ -1,10 +1,11 @@
-import {useState, useContext, useEffect} from 'react';
-import UserContext from '../../../context/UserContext';
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useAtom} from 'jotai';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleRegister} from '../services/AuthServices';
 import {logger} from '../../../util/logger';
 import RegisterPwdValidator from './RegisterPwdValidator';
-import {useNavigate} from 'react-router-dom';
+import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
 
 interface RegisterFormData {
   username: string;
@@ -13,7 +14,8 @@ interface RegisterFormData {
 }
 
 function RegisterForm() {
-  const {setUserData, setIsLoggedIn}: any = useContext(UserContext);
+  const [userData, setUserData] = useAtom(userDataAtom);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [formData, setFormData] = useState<RegisterFormData>({
     username: '',
     email: '',

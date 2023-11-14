@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useState, useContext} from 'react';
-import UserContext from '../../../context/UserContext';
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useAtom} from 'jotai';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleLogin} from '../services/AuthServices';
 import {logger} from '../../../util/logger';
-import {useNavigate} from 'react-router-dom';
+import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
 import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
@@ -17,7 +18,8 @@ function LoginForm() {
     username: '',
     password: '',
   });
-  const {setUserData, setIsLoggedIn}: any = useContext(UserContext);
+  const [userData, setUserData] = useAtom(userDataAtom);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
@@ -43,7 +45,10 @@ function LoginForm() {
         formData.username,
         formData.password,
       );
-      logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
+      logger.log(
+        'the userDataResponse in handleSubmit is:',
+        userDataResponse.data,
+      );
 
       if (userDataResponse && userDataResponse.data) {
         await setUserData(userDataResponse.data);
