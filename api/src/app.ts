@@ -15,6 +15,7 @@ import session from 'express-session';
 //TODO ER: google Login
 import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 import cors from 'cors';
 
 // Importing routes
@@ -47,7 +48,9 @@ const app: Application = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: `${process.env.CLIENT_URL}`,
+    // origin: `${process.env.CLIENT_URL}`,
+    // ! testing google Oauth
+    origin: 'http://localhost:3000',
     credentials: true,
   })
 );
@@ -57,7 +60,8 @@ app.use(
 // TODO ER: revisit for making session work
 const sessionConfig = {
   secret: `${process.env.SESSION_SECRET}`,
-  resave: false,
+  // ! ER: Google prototype has resave: true
+  resave: true,
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
@@ -80,6 +84,40 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: `${process.env.GOOGLE_CLIENT_ID}`,
+      clientSecret: `${process.env.GOOGLE_CLIENT_SECRET}`,
+      callbackURL: '/auth/google/callback',
+    },
+    function (accessToken: any, refreshToken: any, profile: any, cb: any) {
+      // console.log(profile);
+      User.findOne({googleId: profile.id})
+        .exec()
+        .then((doc) => {
+          if (!doc) {
+            // console.log('hit !doc');
+            const newUser = new User({
+              googleId: profile.id,
+              username: profile.name.givenName,
+              // email: 'some-mail@gmail.com',
+            });
+            // console.log(newUser);
+            return newUser.save();
+          }
+          return doc;
+        })
+        .then((result) => {
+          cb(null, result);
+        })
+        .catch((err) => {
+          cb(err, null);
+        });
+    }
+  )
+);
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   //req.user used in controllers to get user info from request
   res!.locals!.currentUser = req.user;
@@ -93,6 +131,47 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use('/', userRoutes);
 app.use('/item', itemRoutes);
 app.use('/item/:itemId/itemInteraction', itemInteractionRoutes);
+
+app.get(
+  '/auth/google',
+  // function (req, res, next) {
+  //   console.log('hit auth/google');
+  //   // next();
+  // },
+  passport.authenticate('google', {scope: ['profile']})
+);
+
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: 'http://localhost:3000/login',
+  }),
+  function (req, res) {
+    // successful authentication, redirect home
+    // res.send('you made it');
+    console.log('successful auth redirect home');
+    res.redirect('http://localhost:3000');
+  }
+);
+
+app.get('/getuser', (req, res) => {
+  // console.log('hit getuser');
+  if (req.user) {
+    res.send(req.user);
+  }
+});
+
+app.get('/auth/logout', (req, res, next) => {
+  // console.log('hit logout');
+  if (req.user) {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+    });
+    res.send('done');
+  }
+});
 
 // Error Handeling
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

@@ -7,8 +7,12 @@ import {UserInDB} from '../typeDefinitions';
 const UserSchema: Schema = new Schema({
   email: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+  },
+  googleId: {
+    required: false,
+    type: String,
   },
 });
 

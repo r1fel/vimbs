@@ -14,6 +14,7 @@ export interface UserInDB extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
   username: string;
+  googleId?: string;
 }
 
 export interface ItemInDB extends Document {

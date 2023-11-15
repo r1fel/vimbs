@@ -11,8 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@joi/date": "^2.1.0",
-    "@types/mongodb": "^4.0.7",
     "body-parser": "^1.20.2",
     "connect-flash": "^0.1.1",
     "cors": "^2.8.5",
@@ -27,6 +25,7 @@
     "mongodb": "^6.0.0",
     "mongoose": "^7.4.3",
     "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^8.0.0",
     "ts-node": "^10.9.1",
@@ -41,6 +40,9 @@
     "@types/passport-local": "^1.0.38",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
+    "@joi/date": "^2.1.0",
+    "@types/mongodb": "^4.0.7",
+    "@types/passport-google-oauth20": "^2.0.14",
     "tslint": "^6.1.3"
   }
 }
