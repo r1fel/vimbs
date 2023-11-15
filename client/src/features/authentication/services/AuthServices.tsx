@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {logger} from '../util/logger';
-import catchAsync from '../util/catchAsync';
+import {logger} from '../../../util/logger';
+import catchAsync from '../../../util/catchAsync';
 
 //TODO FR: How does auth process work?
 export const checkAuthStatus = catchAsync(async () => {

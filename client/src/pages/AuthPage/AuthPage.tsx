@@ -1,6 +1,6 @@
 import {useState} from 'react';
-import LoginForm from '../../components/LoginForm';
-import RegisterForm from '../../components/RegisterForm';
+import LoginForm from '../../features/authentication/components/LoginForm';
+import RegisterForm from '../../features/authentication/components/RegisterForm';
 import Button from '../../components/Button/Button';
 
 function AuthPage(): JSX.Element {

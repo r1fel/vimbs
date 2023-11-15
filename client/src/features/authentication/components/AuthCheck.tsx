@@ -1,8 +1,8 @@
-import {checkAuthStatus} from '../../services/AuthServices';
+import {checkAuthStatus} from '../services/AuthServices';
 import {useEffect, useState} from 'react';
 import {redirect, useNavigate} from 'react-router-dom';
-import catchAsync from '../../util/catchAsync';
-import {logger} from '../../util/logger';
+import catchAsync from '../../../util/catchAsync';
+import {logger} from '../../../util/logger';
 
 function AuthCheck({children}: {children: any}) {
   const navigate = useNavigate();

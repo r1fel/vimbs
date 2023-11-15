@@ -2,23 +2,63 @@ import axios from 'axios';
 import catchAsync from '../util/catchAsync';
 import {logger} from '../util/logger';
 
-//!change URL from books to items
 // fetch items - use "/mine" in the url to get my items
 export const fetchItems = catchAsync(async (url: string) => {
-  const fetchedItems = await axios.get(
-    `${import.meta.env.VITE_SERVER_URL}${url}`,
-    {withCredentials: true},
-  );
-
-  logger.log(
-    'The whole URL for fetching the items is:',
-    `${import.meta.env.VITE_SERVER_URL}${url}`,
-  );
-
-  logger.log('fetching items worked:', fetchedItems);
-  return fetchedItems;
+  const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}${url}`, {
+    withCredentials: true,
+  });
+  logger.log('fetching items worked:', response);
+  return response;
 });
 
+//search items
+export const searchItems = catchAsync(async (searchTerm: string) => {
+  const response = await axios.get(
+    `${import.meta.env.VITE_SERVER_URL}item/search?q=${searchTerm}`,
+    {
+      withCredentials: true,
+    },
+  );
+  logger.log('searching items worked:', response);
+  return response;
+});
+
+// create item
+export const createItem = catchAsync(
+  async ({
+    name,
+    description,
+    picture,
+  }: {
+    name: string;
+    description: string;
+    picture: string;
+  }) => {
+    logger.log('service receives:', name, description, picture);
+    const input = {
+      item: {
+        name,
+        description,
+        picture,
+      },
+    };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_SERVER_URL}item/`,
+      input,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    logger.log('creating item worked:', response);
+    return response;
+  },
+);
+
+//initalize new borrowing request
 export const initializeRequest = catchAsync(
   async (itemId, message, status, dueDate) => {
     const input = {

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useState, useContext} from 'react';
-import UserContext from '../context/UserContext';
+import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useAtom} from 'jotai';
 import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
 import {handleLogin} from '../services/AuthServices';
-import {logger} from '../util/logger';
-import {useNavigate} from 'react-router-dom';
+import {logger} from '../../../util/logger';
+import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
+import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
   username: string;
@@ -16,7 +18,8 @@ function LoginForm() {
     username: '',
     password: '',
   });
-  const {setUserData, setIsLoggedIn}: any = useContext(UserContext);
+  const [userData, setUserData] = useAtom(userDataAtom);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
@@ -42,6 +45,29 @@ function LoginForm() {
         formData.username,
         formData.password,
       );
+      logger.log(
+        'the userDataResponse in handleSubmit is:',
+        userDataResponse.data,
+      );
+
+      if (userDataResponse && userDataResponse.data) {
+        await setUserData(userDataResponse.data);
+        await setIsLoggedIn(true);
+        await setFormData({username: '', password: ''});
+        navigate('/');
+      } else {
+        logger.error('Login failed.');
+      }
+    } catch (error) {
+      logger.error('login handleSubmit failed!', error);
+    }
+  };
+
+  const handleSubmitBob = async (e) => {
+    e.preventDefault();
+    try {
+      // handle login in AuthServices
+      const userDataResponse = await handleLogin('bob', 'bob');
       logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
 
       if (userDataResponse && userDataResponse.data) {
@@ -93,6 +119,7 @@ function LoginForm() {
         <button onClick={handleSubmit} className="button">
           Login
         </button>
+        <Button onClick={handleSubmitBob}>Login with Bob</Button>
       </form>
     </div>
   );

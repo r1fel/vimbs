@@ -1,0 +1,9 @@
+$img-size: 10rem;
+
+.user-settings {
+  &__img {
+    heigth: $img-size;
+    width: $img-size;
+    border-radius: $img-size / 2;
+  }
+}

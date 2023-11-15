@@ -7,7 +7,10 @@ import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import DetailsPage from './pages/DetailsPage/DetailsPage';
 import ItemList from './components/ItemList/ItemList';
-import AuthCheck from './components/AuthCheck/AuthCheck';
+import AuthCheck from './features/authentication/components/AuthCheck';
+import CreateItemPage from './pages/CreateItemPage/CreateItemPage';
+import NotificationsPage from './pages/NotificationsPage/NotificationsPage';
+import MyItemsPage from './pages/MyItemsPage/MyItemsPAge';
 
 function App() {
   return (
@@ -25,19 +28,39 @@ function App() {
           />
 
           <Route
-            path="/items/:id"
+            path="/user/notifications"
+            element={
+              // <AuthCheck>
+              <NotificationsPage />
+              // </AuthCheck>
+            }
+            errorElement={<ErrorPage />}
+          />
+
+          <Route
+            path="/item/:id"
             element={<DetailsPage />}
             errorElement={<ErrorPage />}
           />
           <Route
-            path="/items/:id/request"
+            path="/item/:id/request"
             element={<ItemList url="books/" />}
+            errorElement={<ErrorPage />}
+          />
+          <Route
+            path="/item/new"
+            element={<CreateItemPage />}
             errorElement={<ErrorPage />}
           />
 
           <Route
             path="/auth"
             element={<AuthPage />}
+            errorElement={<ErrorPage />}
+          />
+          <Route
+            path="/user/myitems"
+            element={<MyItemsPage />}
             errorElement={<ErrorPage />}
           />
           <Route path="/onboarding" element={<OnboardingPage />} />
