@@ -8,7 +8,7 @@ export default function Homepage() {
   return (
     <div>
       {userObject ? (
-        <h1>Welcome back {userObject.username}</h1>
+        <h1>Welcome back {userObject.firstName}</h1>
       ) : (
         <h1>Welcome To MY Website</h1>
       )}

@@ -7,16 +7,41 @@ import {UserInDB} from '../typeDefinitions';
 const UserSchema: Schema = new Schema({
   email: {
     type: String,
-    required: false,
-    unique: true,
+    required: function (this: UserInDB): boolean {
+      // The email is required if googleId is not provided or googleId is an empty string
+      return !(this.googleId && this.googleId.trim() !== '');
+    },
+    unique: function (this: UserInDB): boolean {
+      // The email is required if googleId is not provided or googleId is an empty string
+      return !(this.googleId && this.googleId.trim() !== '');
+    },
   },
   googleId: {
+    required: false,
+    type: String,
+    unique: true,
+  },
+  profilePicture: {
+    required: false,
+    type: String,
+  },
+  creationDate: {
+    type: Date,
+    default: Date.now,
+  },
+  firstName: {
+    required: false,
+    type: String,
+  },
+  lastName: {
     required: false,
     type: String,
   },
 });
 
-UserSchema.plugin(passportLocalMongoose);
+UserSchema.plugin(passportLocalMongoose, {
+  usernameField: 'email',
+});
 
 const User = mongoose.model('User', UserSchema);
 // const User = mongoose.model<UserInDB>('User', UserSchema);

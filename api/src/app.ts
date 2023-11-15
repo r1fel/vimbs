@@ -26,6 +26,9 @@ import userRoutes from './routes/userRoutes';
 // Importing models
 import User from './models/user';
 
+// types
+import {GoogleEmailObject, UserInDB} from './typeDefinitions';
+
 // setup .env
 if (process.env.NODE_ENV !== 'production') {
   // Load environment variables from .env file if not in production
@@ -78,11 +81,28 @@ app.use(session(sessionConfig));
 // Authentication
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: 'email', // Use the email field instead of username
+    },
+    User.authenticate()
+  )
+);
 
 // TODO ER: login fixen!!!
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function (user, done) {
+  done(null, user._id);
+});
+passport.deserializeUser(function (_id: mongoose.Types.ObjectId, done) {
+  User.findById(_id)
+    .then((user: UserInDB | null) => {
+      done(null, user);
+    })
+    .catch((err: Error) => {
+      done(err, null);
+    });
+});
 
 passport.use(
   new GoogleStrategy(
@@ -92,7 +112,24 @@ passport.use(
       callbackURL: '/auth/google/callback',
     },
     function (accessToken: any, refreshToken: any, profile: any, cb: any) {
-      // console.log(profile);
+      // get users email from profile.emails
+      // array from api
+      const emails: GoogleEmailObject[] = profile.emails;
+      // function to select either the first verified email from the array or if all emails are not verified, the last entry of the array
+      function getGoogleEmail(emails: GoogleEmailObject[]): string | undefined {
+        const verifiedEmail = emails.find((email) => email.verified);
+
+        if (verifiedEmail) {
+          return verifiedEmail.value;
+        } else if (emails.length > 0) {
+          return emails[emails.length - 1].value;
+        }
+        // emails array was empty
+        return undefined;
+      }
+
+      const googleEmail = getGoogleEmail(emails);
+
       User.findOne({googleId: profile.id})
         .exec()
         .then((doc) => {
@@ -100,8 +137,10 @@ passport.use(
             // console.log('hit !doc');
             const newUser = new User({
               googleId: profile.id,
-              username: profile.name.givenName,
-              // email: 'some-mail@gmail.com',
+              firstName: profile.name.givenName,
+              lastName: profile.name.familyName,
+              email: googleEmail === undefined ? '' : googleEmail,
+              profilePicture: profile.photos[profile.photos.length - 1].value,
             });
             // console.log(newUser);
             return newUser.save();
@@ -138,19 +177,21 @@ app.get(
   //   console.log('hit auth/google');
   //   // next();
   // },
-  passport.authenticate('google', {scope: ['profile']})
+  passport.authenticate('google', {
+    scope: ['email', 'profile'],
+  })
 );
 
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', {
     failureRedirect: 'http://localhost:3000/login',
+    // failureRedirect: `${process.env.CLIENT_URL}/auth`,
   }),
   function (req, res) {
     // successful authentication, redirect home
-    // res.send('you made it');
-    console.log('successful auth redirect home');
     res.redirect('http://localhost:3000');
+    // res.redirect(${process.env.CLIENT_URL});
   }
 );
 

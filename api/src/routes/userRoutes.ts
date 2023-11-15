@@ -5,8 +5,7 @@ import passport from 'passport';
 
 // middleware
 import isLoggedIn from '../utils/middleware/isLoggedIn';
-import validateUserRegister from '../utils/middleware/validateUserRegister';
-import validateUserLogin from '../utils/middleware/validateUserLogin';
+import validateUser from '../utils/middleware/validateUser';
 
 // controllers
 import {
@@ -21,7 +20,7 @@ const userRoutes = Router();
 export default userRoutes;
 
 userRoutes.route('/register').post(
-  validateUserRegister,
+  validateUser,
   //
   register,
   passport.authenticate('local', {
@@ -33,7 +32,7 @@ userRoutes.route('/register').post(
 );
 
 userRoutes.route('/login').post(
-  validateUserLogin,
+  validateUser,
   // storeReturnTo,
   //
   passport.authenticate('local', {

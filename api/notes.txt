@@ -1,14 +1,9 @@
-setup of TypeScript:
-followed: 
-for node/express: https://dev.to/sulistef/how-to-set-up-a-nodejs-backend-using-expressjs-and-typescript-1655
-for routing: https://dev.to/sulistef/how-to-set-up-routing-in-an-expressjs-project-using-typescript-51ib
-for nodemon: https://dev.to/chroline/configuring-nodemon-with-typescript-21lp + first comment for script to run server
-removed: 
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "tsc",
-    "prestart": "npm run build",
-    "start": "node .",
-from scripts cause of nodemon
+To Do:
+
+get google Login to work with client
+use one logout route
+
+user settings: set profilePic, firstName and LastName
 
 
 

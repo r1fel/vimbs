@@ -12,8 +12,8 @@ import User from '../models/user';
 // register new user
 export const register = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const {email, username, password} = req.body;
-    const user = new User({email, username});
+    const {email, password} = req.body;
+    const user = new User({email});
     await User.register(user, password);
     return next();
   }
@@ -21,8 +21,8 @@ export const register = catchAsync(
 
 // login existing user
 export const login = catchAsync(async (req: Request, res: Response) => {
-  const {username} = req.body;
-  const user = await User.find({username: username});
+  const {email} = req.body;
+  const user = await User.findOne({email: email});
   res.send(user);
 });
 
