@@ -15,6 +15,9 @@ export const fetchItems = catchAsync(async (url: string) => {
 export const searchItems = catchAsync(async (searchTerm: string) => {
   const response = await axios.get(
     `${import.meta.env.VITE_SERVER_URL}item/search?q=${searchTerm}`,
+    {
+      withCredentials: true,
+    },
   );
   logger.log('searching items worked:', response);
   return response;
