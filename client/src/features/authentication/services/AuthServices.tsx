@@ -24,6 +24,10 @@ export const handleLogin = catchAsync(
   },
 );
 
+export const handleGoogleLogin = () => {
+  window.open(`${import.meta.env.VITE_SERVER_URL}auth/google`, '_self');
+};
+
 export const handleRegister = catchAsync(
   async (username: string, email: string, password: string) => {
     const registerResponse = await axios.post(

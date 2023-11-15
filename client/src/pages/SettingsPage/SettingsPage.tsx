@@ -5,7 +5,7 @@ import NavBar from '../../components/NavBar/NavBar';
 import Button from '../../components/Button/Button';
 
 function SettingsPage(): JSX.Element {
-  NoAuthRedirect();
+  // NoAuthRedirect();
 
   return (
     <div>
