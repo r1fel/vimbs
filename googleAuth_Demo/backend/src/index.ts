@@ -5,7 +5,7 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import User from './User';
-import { IMongoDBUser } from './types';
+import {IMongoDBUser} from './types';
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const LocalStrategy = require('passport-local').Strategy;
 
@@ -30,14 +30,19 @@ db.once('open', () => {
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 
 app.use(
   session({
     secret: 'secretcode',
     resave: true,
     saveUninitialized: true,
-  })
+  }),
 );
 
 app.use(passport.initialize());
@@ -71,7 +76,7 @@ passport.use(
       callbackURL: '/auth/google/callback',
     },
     function (accessToken: any, refreshToken: any, profile: any, cb: any) {
-      User.findOne({ googleId: profile.id })
+      User.findOne({googleId: profile.id})
         .exec()
         .then((doc) => {
           if (!doc) {
@@ -90,8 +95,8 @@ passport.use(
         .catch((err) => {
           cb(err, null);
         });
-    }
-  )
+    },
+  ),
 );
 
 // passport.use(new LocalStrategy(User.authenticate()));
@@ -102,7 +107,7 @@ passport.use(
       passReqToCallBack: true,
     },
     function (username: string, password: string, done: any) {
-      User.findOne({ username: username })
+      User.findOne({username: username})
         .exec()
         .then(async function (user: any) {
           if (user) {
@@ -128,14 +133,11 @@ passport.use(
         .catch((err) => {
           done(err, null);
         });
-    }
-  )
+    },
+  ),
 );
 
-app.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['profile'] })
-);
+app.get('/auth/google', passport.authenticate('google', {scope: ['profile']}));
 
 app.get(
   '/auth/google/callback',
@@ -146,7 +148,7 @@ app.get(
     // successful authentication, redirect home
     // res.send('you made it');
     res.redirect('http://localhost:3000');
-  }
+  },
 );
 
 app.post(
@@ -159,7 +161,7 @@ app.post(
     // successful authentication, redirect home
     console.log('made login');
     res.redirect('http://localhost:3000');
-  }
+  },
 );
 
 app.get('/', (req, res) => {

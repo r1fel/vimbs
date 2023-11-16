@@ -1,5 +1,5 @@
 // all required packages
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, {Application, Request, Response, NextFunction} from 'express';
 import mongoose from 'mongoose';
 // generic error handling function
 //TODO ER: implement
@@ -14,7 +14,7 @@ import session from 'express-session';
 //authentification package
 //TODO ER: google Login
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
+import {Strategy as LocalStrategy} from 'passport-local';
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 import cors from 'cors';
 
@@ -28,7 +28,7 @@ import userRoutes from './routes/userRoutes';
 import User from './models/user';
 
 // types
-import { GoogleEmailObject, UserInDB } from './typeDefinitions';
+import {GoogleEmailObject, UserInDB} from './typeDefinitions';
 
 // setup .env
 if (process.env.NODE_ENV !== 'production') {
@@ -52,11 +52,10 @@ const app: Application = express();
 app.use(express.json());
 app.use(
   cors({
-    // origin: `${process.env.CLIENT_URL}`,
     // ! testing google Oauth
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', `${process.env.CLIENT_URL}`],
     credentials: true,
-  })
+  }),
 );
 // TODO FR: necessary with client
 // app.use(methodOverride('_method'));
@@ -87,8 +86,8 @@ passport.use(
     {
       usernameField: 'email', // Use the email field instead of username
     },
-    User.authenticate()
-  )
+    User.authenticate(),
+  ),
 );
 
 // TODO ER: login fixen!!!
@@ -131,7 +130,7 @@ passport.use(
 
       const googleEmail = getGoogleEmail(emails);
 
-      User.findOne({ googleId: profile.id })
+      User.findOne({googleId: profile.id})
         .exec()
         .then((doc) => {
           if (!doc) {
@@ -154,8 +153,8 @@ passport.use(
         .catch((err) => {
           cb(err, null);
         });
-    }
-  )
+    },
+  ),
 );
 
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -181,7 +180,7 @@ app.get(
   // },
   passport.authenticate('google', {
     scope: ['email', 'profile'],
-  })
+  }),
 );
 
 app.get(
@@ -194,7 +193,7 @@ app.get(
     // successful authentication, redirect home
     res.redirect('http://localhost:3000');
     // res.redirect(${process.env.CLIENT_URL});
-  }
+  },
 );
 
 app.get('/getuser', (req, res) => {
@@ -222,7 +221,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((err: any, req: Request, res: Response) => {
-  const { statusCode = 500 } = err;
+  const {statusCode = 500} = err;
   if (!err.message) err.message = 'Oh No, Something went wrong!';
   res.status(statusCode).send(err);
 });
