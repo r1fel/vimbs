@@ -1,5 +1,5 @@
 // all required packages
-import express, {Application, Request, Response, NextFunction} from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 // generic error handling function
 //TODO ER: implement
@@ -14,20 +14,21 @@ import session from 'express-session';
 //authentification package
 //TODO ER: google Login
 import passport from 'passport';
-import {Strategy as LocalStrategy} from 'passport-local';
+import { Strategy as LocalStrategy } from 'passport-local';
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 import cors from 'cors';
 
 // Importing routes
 import itemRoutes from './routes/itemRoutes';
 import itemInteractionRoutes from './routes/itemInteractionRoutes';
+import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 
 // Importing models
 import User from './models/user';
 
 // types
-import {GoogleEmailObject, UserInDB} from './typeDefinitions';
+import { GoogleEmailObject, UserInDB } from './typeDefinitions';
 
 // setup .env
 if (process.env.NODE_ENV !== 'production') {
@@ -130,7 +131,7 @@ passport.use(
 
       const googleEmail = getGoogleEmail(emails);
 
-      User.findOne({googleId: profile.id})
+      User.findOne({ googleId: profile.id })
         .exec()
         .then((doc) => {
           if (!doc) {
@@ -167,7 +168,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // routes
-app.use('/', userRoutes);
+app.use('/auth', authRoutes);
+app.use('/user/:userId', userRoutes);
 app.use('/item', itemRoutes);
 app.use('/item/:itemId/itemInteraction', itemInteractionRoutes);
 
@@ -220,7 +222,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((err: any, req: Request, res: Response) => {
-  const {statusCode = 500} = err;
+  const { statusCode = 500 } = err;
   if (!err.message) err.message = 'Oh No, Something went wrong!';
   res.status(statusCode).send(err);
 });

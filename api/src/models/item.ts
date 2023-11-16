@@ -1,7 +1,7 @@
 // Item Model for working with MongoDB
 
-import mongoose, {Schema} from 'mongoose';
-import {ItemInDB} from '../typeDefinitions';
+import mongoose, { Schema } from 'mongoose';
+import { ItemInDB } from '../typeDefinitions';
 // import {ItemInteraction} from './itemInteraction';
 
 const ItemSchema: Schema = new Schema({
@@ -27,7 +27,9 @@ const ItemSchema: Schema = new Schema({
       ref: 'ItemInteraction',
     },
   ],
-  available: {type: Boolean, default: true},
+  available: { type: Boolean, default: true },
 });
 
-export const Item = mongoose.model<ItemInDB>('Item', ItemSchema);
+const Item = mongoose.model<ItemInDB>('Item', ItemSchema);
+
+export default Item;

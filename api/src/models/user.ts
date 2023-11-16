@@ -1,8 +1,9 @@
 // User Model for working with MongoDB
 
-import mongoose, {Schema} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import passportLocalMongoose from 'passport-local-mongoose';
-import {UserInDB} from '../typeDefinitions';
+import { UserInDB } from '../typeDefinitions';
+import { number } from 'joi';
 
 const UserSchema: Schema = new Schema({
   email: {
@@ -36,6 +37,19 @@ const UserSchema: Schema = new Schema({
   lastName: {
     required: false,
     type: String,
+  },
+  phone: {
+    countryCode: {
+      required: false,
+      type: String,
+      default: '+49',
+    },
+    number: Number,
+  },
+  adress: {
+    street: String,
+    plz: String,
+    city: String,
   },
 });
 

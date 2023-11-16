@@ -1,7 +1,7 @@
 // ItemInteraction Model for working with MongoDB
 
-import mongoose, {Schema} from 'mongoose';
-import {ItemInteractionInDB} from '../typeDefinitions';
+import mongoose, { Schema } from 'mongoose';
+import { ItemInteractionInDB } from '../typeDefinitions';
 
 const itemInteractionSchema: Schema = new Schema({
   creationDate: {
@@ -30,7 +30,7 @@ const itemInteractionSchema: Schema = new Schema({
         type: String,
         enum: ['opened', 'declined', 'accepted', 'closed'],
       },
-      changeInitiator: {type: String, enum: ['getter', 'giver']},
+      changeInitiator: { type: String, enum: ['getter', 'giver'] },
       entryTimestamp: Date,
     },
   ],
@@ -38,15 +38,15 @@ const itemInteractionSchema: Schema = new Schema({
   messagelog: [
     {
       messageText: String,
-      messageWriter: {type: String, enum: ['getter', 'giver']},
+      messageWriter: { type: String, enum: ['getter', 'giver'] },
       messageTimestamp: Date,
     },
   ],
 });
 
-export const ItemInteraction = mongoose.model<ItemInteractionInDB>(
+const ItemInteraction = mongoose.model<ItemInteractionInDB>(
   'ItemInteraction',
   itemInteractionSchema
 );
 
-// export default ItemInteraction;
+export default ItemInteraction;

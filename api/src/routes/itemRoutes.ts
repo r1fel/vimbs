@@ -1,6 +1,6 @@
 // routes with base /item
 
-import {Router} from 'express';
+import { Router } from 'express';
 
 // middleware
 import isLoggedIn from '../utils/middleware/isLoggedIn';
@@ -14,7 +14,6 @@ import {
   itemSearch,
   showItem,
   updateItem,
-  myInventory,
 } from '../controllers/itemControllers';
 
 const itemRoutes = Router();
@@ -38,12 +37,6 @@ itemRoutes.route('/search').get(
   isLoggedIn,
   //
   itemSearch
-);
-
-itemRoutes.route('/mine').get(
-  isLoggedIn,
-  //
-  myInventory
 );
 
 itemRoutes
