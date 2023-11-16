@@ -28,10 +28,10 @@ export const setUserData = catchAsync(
     if (user === null)
       return next(new ExpressError('this user doesnt exist', 500));
     const newUserData: ChangeSettingsRequest = req.body.newUserData;
-    user.firstName = newUserData.firstName;
-    user.lastName = newUserData.lastName;
-    user.phone = newUserData.phone;
-    user.address = newUserData.address;
+    if (newUserData.firstName) user.firstName = newUserData.firstName;
+    if (newUserData.lastName) user.lastName = newUserData.lastName;
+    if (newUserData.phone) user.phone = newUserData.phone;
+    if (newUserData.address) user.address = newUserData.address;
     user.save();
     res.send(user);
   }

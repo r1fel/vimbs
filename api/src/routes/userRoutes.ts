@@ -6,6 +6,7 @@ import { Router } from 'express';
 import isLoggedIn from '../utils/middleware/isLoggedIn';
 import isUser from '../utils/middleware/isUser';
 import validatePasswordChange from '../utils/middleware/validatePasswordChange';
+import validateUserData from '../utils/middleware/validateUserData';
 
 // controllers
 import {
@@ -21,6 +22,7 @@ export default userRoutes;
 userRoutes.route('/settings').put(
   isLoggedIn,
   isUser,
+  validateUserData,
   //
   setUserData
 );

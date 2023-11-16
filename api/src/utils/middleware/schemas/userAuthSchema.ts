@@ -2,9 +2,9 @@
 
 import Joi from 'joi';
 
-const userRegisterSchema = Joi.object({
+const userAuthSchema = Joi.object({
   email: Joi.string().required(),
   password: Joi.string().required(),
 });
 
-export default userRegisterSchema;
+export default userAuthSchema;
