@@ -1,9 +1,0 @@
-To Do:
-
-get google Login to work with client
-use one logout route
-
-user settings: set profilePic, firstName and LastName
-
-
-
