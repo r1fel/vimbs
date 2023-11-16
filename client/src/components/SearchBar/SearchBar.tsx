@@ -3,11 +3,8 @@ import {Link, useNavigate} from 'react-router-dom';
 import {useQuery} from '@tanstack/react-query';
 import './SearchBar.scss';
 import {searchItems} from '../../services/ItemServices';
-import catchAsync from '../../util/catchAsync';
 import Button from '../Button/Button';
 import {logger} from '../../util/logger';
-import {useAtom} from 'jotai';
-import {searchTermAtom, isSearchExecutedAtom} from '../../context/itemAtoms';
 
 function debounce(func, wait) {
   let timeout;
