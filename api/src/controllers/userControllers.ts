@@ -1,30 +1,30 @@
 // end of line functions when hitting user Routes
 
-import {Request, Response, NextFunction} from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 // utils
 import ExpressError from '../utils/ExpressError';
 import catchAsync from '../utils/catchAsync';
+import processItemForClient from '../utils/processItemForClient';
 
 // models
 import User from '../models/user';
+import Item from '../models/item';
 
-// register new user
-export const register = catchAsync(
+// Type-Definitions
+import {
+  PopulatedItemsFromDB,
+  ResponseItemForClient,
+  ItemInteractionInDB,
+} from '../typeDefinitions';
+
+// change/ add user settings
+export const settings = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const {email, username, password} = req.body;
-    const user = new User({email, username});
-    await User.register(user, password);
-    return next();
+    console.log(req.body);
+    res.send('hit user settings');
   }
 );
-
-// login existing user
-export const login = catchAsync(async (req: Request, res: Response) => {
-  const {username} = req.body;
-  const user = await User.find({username: username});
-  res.send(user);
-});
 
 // changePassword
 export const changePassword = catchAsync(
@@ -33,26 +33,28 @@ export const changePassword = catchAsync(
     const user = await User.findById(req.user._id);
     if (user === null)
       return next(new ExpressError('this user doesnt exist', 500));
-    const {oldPassword, newPassword} = req.body;
+    const { oldPassword, newPassword } = req.body;
     if (oldPassword === newPassword)
       return next(new ExpressError('pick new password', 400));
     await user.changePassword(oldPassword, newPassword);
     await user.save();
-    return res.status(200).send('successfully changed user data');
+    return res.status(200).send('successfully changed password');
   }
 );
 
-// simple auth for client route changes: isLoggedIn middleware ran previously
-export const sendIsAuthenticated = (req: Request, res: Response) => {
-  res.send(true);
-};
-
-// logout
-export const logout = (req: Request, res: Response, next: NextFunction) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-  });
-  res.send('successfully logged out!');
-};
+// fetch users inventory from DB and process for client
+export const myItems = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user === undefined)
+      return new ExpressError('user is undefined', 500);
+    const currentUser = req.user._id;
+    const items: PopulatedItemsFromDB = await Item.find({ owner: currentUser })
+      .populate<{ interactions: ItemInteractionInDB[] }>('interactions')
+      .sort({ title: 1 });
+    if (items === null)
+      return next(new ExpressError('this item doesnt exist', 500));
+    const response: Array<ResponseItemForClient> = [];
+    processItemForClient(items, currentUser, response);
+    return res.send(response);
+  }
+);

@@ -13,7 +13,11 @@ declare global {
 export interface UserInDB extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
-  username: string;
+  googleId?: string;
+  profilePicture?: string;
+  creationDate: Date;
+  firstName?: string;
+  lastName?: string;
 }
 
 export interface ItemInDB extends Document {
@@ -82,3 +86,9 @@ export interface ResponseItemForClient {
     firstName: string;
   } | null;
 }
+
+// e-mail input from google api
+export type GoogleEmailObject = {
+  value: string;
+  verified: boolean;
+};
