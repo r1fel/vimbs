@@ -5,18 +5,19 @@ import catchAsync from '../../../util/catchAsync';
 //TODO FR: How does auth process work?
 export const checkAuthStatus = catchAsync(async () => {
   const authStatusResponse = await axios.get(
-    `${import.meta.env.VITE_SERVER_URL}/auth`,
+    `${import.meta.env.VITE_SERVER_URL}auth`,
+    {withCredentials: true},
   );
   const authStatusData = authStatusResponse.data;
-  logger.log('Current auth status is: ');
+  logger.log('Current auth status is: ', authStatusData);
 
   return authStatusData;
 });
 
 export const handleLogin = catchAsync(
-  async (email: string, password: string) => {
+  async ({email, password}: {email: string; password: string}) => {
     const loginResponse = await axios.post(
-      `${import.meta.env.VITE_SERVER_URL}login`,
+      `${import.meta.env.VITE_SERVER_URL}auth/login`,
       {email, password},
       {withCredentials: true},
     );
@@ -31,7 +32,7 @@ export const handleGoogleLogin = () => {
 export const handleRegister = catchAsync(
   async (email: string, password: string) => {
     const registerResponse = await axios.post(
-      `${import.meta.env.VITE_SERVER_URL}register`,
+      `${import.meta.env.VITE_SERVER_URL}auth/register`,
       {email, password},
       {withCredentials: true},
     );
