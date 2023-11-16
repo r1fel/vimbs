@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {fetchItems, searchItems} from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
@@ -11,11 +11,11 @@ import SearchBar from '../../components/SearchBar/SearchBar';
 import {logger} from '../../util/logger';
 
 function HomePage(): JSX.Element {
-  // NoAuthRedirect();
-
   const [pageSearchTerm, setPageSearchTerm] = useState('');
   const [isSearchExecuted, setIsSearchExecuted] = useState(false);
   const [fetchMode, setFetchMode] = useState('fetchItems');
+
+  NoAuthRedirect();
 
   RenderCounter('HomePage');
   logger.log(
