@@ -20,7 +20,7 @@ interface Item {
 function ItemList({url, fetchFunction, trigger}: {url: string}) {
   const [userData] = useAtom(userDataAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
-  const isUserLoggedInAndDataExists = isLoggedIn && userData.length > 0;
+  const isUserLoggedInAndDataExists = isLoggedIn && !!userData;
 
   RenderCounter('ItemList');
 
@@ -36,6 +36,12 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
     fetchFunction,
     'URL:',
     url,
+    'isUserLoggedInAndDataExists:',
+    isUserLoggedInAndDataExists,
+    'isLoggedIn:',
+    isLoggedIn,
+    '!!userData:',
+    !!userData,
   );
 
   useEffect(() => {
@@ -70,7 +76,7 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
     return <p>{JSON.stringify(itemsQuery.error)}</p>;
   }
 
-  if (itemsQuery.status === 'success') {
+  if (itemsQuery.status === 'success' && isLoggedIn) {
     const items: Item[] = itemsQuery.data.data;
     // setItems(itemsQuery.data.data);
     logger.log('Items are:', itemsQuery.data.data);
