@@ -14,10 +14,10 @@ export const checkAuthStatus = catchAsync(async () => {
 });
 
 export const handleLogin = catchAsync(
-  async (username: string, password: string) => {
+  async (email: string, password: string) => {
     const loginResponse = await axios.post(
       `${import.meta.env.VITE_SERVER_URL}login`,
-      {username, password},
+      {email, password},
       {withCredentials: true},
     );
     return loginResponse;
@@ -29,10 +29,10 @@ export const handleGoogleLogin = () => {
 };
 
 export const handleRegister = catchAsync(
-  async (username: string, email: string, password: string) => {
+  async (email: string, password: string) => {
     const registerResponse = await axios.post(
       `${import.meta.env.VITE_SERVER_URL}register`,
-      {username, email, password},
+      {email, password},
       {withCredentials: true},
     );
     return registerResponse;

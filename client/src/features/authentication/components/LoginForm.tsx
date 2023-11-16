@@ -9,13 +9,13 @@ import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
 import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
-  username: string;
+  email: string;
   password: string;
 }
 
 function LoginForm() {
   const [formData, setFormData] = useState<LoginFormData>({
-    username: '',
+    email: '',
     password: '',
   });
   const [userData, setUserData] = useAtom(userDataAtom);
@@ -42,7 +42,7 @@ function LoginForm() {
     try {
       // handle login in AuthServices
       const userDataResponse = await handleLogin(
-        formData.username,
+        formData.email,
         formData.password,
       );
       logger.log(
@@ -53,7 +53,7 @@ function LoginForm() {
       if (userDataResponse && userDataResponse.data) {
         await setUserData(userDataResponse.data);
         await setIsLoggedIn(true);
-        await setFormData({username: '', password: ''});
+        await setFormData({email: '', password: ''});
         navigate('/');
       } else {
         logger.error('Login failed.');
@@ -67,13 +67,13 @@ function LoginForm() {
     e.preventDefault();
     try {
       // handle login in AuthServices
-      const userDataResponse = await handleLogin('bob', 'bob');
+      const userDataResponse = await handleLogin('bob@gmail.com', 'bob');
       logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
 
       if (userDataResponse && userDataResponse.data) {
         await setUserData(userDataResponse.data);
         await setIsLoggedIn(true);
-        await setFormData({username: '', password: ''});
+        await setFormData({email: '', password: ''});
         navigate('/');
       } else {
         logger.error('Login failed.');
