@@ -21,7 +21,7 @@ import {
 } from '../typeDefinitions';
 
 // change/ add user settings
-export const settings = catchAsync(
+export const setUserData = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) return new ExpressError('user is undefined', 500);
     const user: UserInDB | null = await User.findById(req.user._id);

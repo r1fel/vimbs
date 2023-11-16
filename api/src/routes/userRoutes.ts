@@ -9,7 +9,7 @@ import validatePasswordChange from '../utils/middleware/validatePasswordChange';
 
 // controllers
 import {
-  settings,
+  setUserData,
   changePassword,
   myItems,
 } from '../controllers/userControllers';
@@ -18,11 +18,11 @@ const userRoutes = Router({ mergeParams: true });
 // "merge params" is need to pass the req.params from the app.use to the following routes
 export default userRoutes;
 
-userRoutes.route('/settings').post(
+userRoutes.route('/settings').put(
   isLoggedIn,
   isUser,
   //
-  settings
+  setUserData
 );
 
 userRoutes.route('/changePassword').post(
