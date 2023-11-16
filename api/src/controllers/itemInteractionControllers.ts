@@ -1,6 +1,6 @@
 // end of line functions when hitting itemInteraction Routes
 
-import {Request, Response, NextFunction} from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 // utils
 import ExpressError from '../utils/ExpressError';
@@ -8,8 +8,8 @@ import catchAsync from '../utils/catchAsync';
 import processItemForClient from '../utils/processItemForClient';
 
 // models
-import {Item} from '../models/item';
-import {ItemInteraction} from '../models/itemInteraction';
+import Item from '../models/item';
+import ItemInteraction from '../models/itemInteraction';
 
 // Type-Definitions
 import {
@@ -32,8 +32,8 @@ export const createItemInteraction = catchAsync(
         )
       );
     const item: PopulatedItemsFromDB = await Item.findById(req.params.itemId)
-      .populate<{owner: UserInDB}>('owner')
-      .populate<{interactions: ItemInteractionInDB[]}>('interactions');
+      .populate<{ owner: UserInDB }>('owner')
+      .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
     if (item === null)
       return next(new ExpressError('this item doesnt exist', 500));
 
@@ -84,8 +84,8 @@ export const createItemInteraction = catchAsync(
 export const deleteAllItemInteractions = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const item: PopulatedItemsFromDB = await Item.findById(req.params.itemId)
-      .populate<{owner: UserInDB}>('owner')
-      .populate<{interactions: ItemInteractionInDB[]}>('interactions');
+      .populate<{ owner: UserInDB }>('owner')
+      .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
     if (item === null)
       return next(new ExpressError('this item doesnt exist', 500));
     if (item.interactions) {

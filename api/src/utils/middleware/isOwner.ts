@@ -1,10 +1,10 @@
 // Middleware that checks weather the the requesting user is the owner of the item
 
-import {Request, Response, NextFunction} from 'express';
-import {Item} from '../../models/item';
+import { Request, Response, NextFunction } from 'express';
+import Item from '../../models/item';
 import ExpressError from '../ExpressError';
 import catchAsync from '../catchAsync';
-import {ItemInDB} from '../../typeDefinitions';
+import { ItemInDB } from '../../typeDefinitions';
 
 const isOwner = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

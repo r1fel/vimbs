@@ -1,63 +1,41 @@
-// routes with base /
+// routes with base /user/:userId
 
-import {Router} from 'express';
-import passport from 'passport';
+import { Router } from 'express';
 
 // middleware
 import isLoggedIn from '../utils/middleware/isLoggedIn';
-import validateUserRegister from '../utils/middleware/validateUserRegister';
-import validateUserLogin from '../utils/middleware/validateUserLogin';
+import isUser from '../utils/middleware/isUser';
+import validatePasswordChange from '../utils/middleware/validatePasswordChange';
 
 // controllers
 import {
-  register,
-  login,
-  sendIsAuthenticated,
-  logout,
+  settings,
   changePassword,
+  myItems,
 } from '../controllers/userControllers';
 
-const userRoutes = Router();
+const userRoutes = Router({ mergeParams: true });
+// "merge params" is need to pass the req.params from the app.use to the following routes
 export default userRoutes;
 
-userRoutes.route('/register').post(
-  validateUserRegister,
+userRoutes.route('/settings').post(
+  isLoggedIn,
+  isUser,
   //
-  register,
-  passport.authenticate('local', {
-    //TODO FR: use failureFlash with tostify?
-    failureMessage: true,
-    // failureRedirect: 'http://localhost:5173/login',
-  }),
-  login
-);
-
-userRoutes.route('/login').post(
-  validateUserLogin,
-  // storeReturnTo,
-  //
-  passport.authenticate('local', {
-    //TODO FR: use failureFlash with tostify?
-    failureMessage: true,
-    // failureRedirect: 'http://localhost:5173/login',
-  }),
-  login
+  settings
 );
 
 userRoutes.route('/changePassword').post(
   isLoggedIn,
+  isUser,
+  validatePasswordChange,
   //
   changePassword
 );
 
-userRoutes.route('/auth').get(
+userRoutes.route('/inventory/myItems').get(
   isLoggedIn,
+  isUser,
   //
-  sendIsAuthenticated
-);
-
-userRoutes.route('/logout').get(
-  isLoggedIn,
-  //
-  logout
+  myItems
 );
