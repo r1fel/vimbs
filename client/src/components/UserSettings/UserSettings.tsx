@@ -7,11 +7,12 @@ import Button from '../Button/Button';
 
 function UserSettings() {
   const [userData, setUserData] = useAtom(userDataAtom);
+  logger.log('userdata:', userData);
 
-  const [updatedUserData, setUpdatedUserData] = useState({
-    username: userData[0].username,
-    email: userData[0].email,
-  });
+  // const [updatedUserData, setUpdatedUserData] = useState({
+  //   username: userData[0].username,
+  //   email: userData[0].email,
+  // });
 
   const [profileImgURL, setProfileImgUrl] = useState(
     `https://picsum.photos/seed/${userData.username}/200`,
