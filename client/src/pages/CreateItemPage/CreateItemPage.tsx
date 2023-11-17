@@ -3,7 +3,7 @@ import ItemCreateForm from '../../components/ItemCreateForm/ItemCreateForm';
 import NavBar from '../../components/NavBar/NavBar';
 
 function CreateItemPage(): JSX.Element {
-  // NoAuthRedirect();
+  NoAuthRedirect();
   return (
     <div>
       <NavBar />

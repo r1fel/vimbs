@@ -11,6 +11,14 @@ function NoAuthRedirect() {
   const [userData] = useAtom(userDataAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
 
+  // useEffect(() => {
+  //   const simpleAuthStatus = async () => {
+  //     const status = await checkAuthStatus();
+  //     logger.log('simpleAuth status is', status);
+  //   };
+  //   simpleAuthStatus();
+  // }, [userData, isLoggedIn]);
+
   const authQuery = useQuery({
     queryKey: ['auth'],
     queryFn: checkAuthStatus,
