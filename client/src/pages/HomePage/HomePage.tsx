@@ -1,7 +1,9 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
+import {useAtom} from 'jotai';
 import {fetchItems, searchItems} from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
+import {userDataAtom, isLoggedInAtom} from '../../context/userAtoms';
 import Button from '../../components/Button/Button';
 import ItemList from '../../components/ItemList/ItemList';
 import LoginForm from '../../features/authentication/components/LoginForm';
@@ -14,6 +16,8 @@ function HomePage(): JSX.Element {
   const [pageSearchTerm, setPageSearchTerm] = useState('');
   const [isSearchExecuted, setIsSearchExecuted] = useState(false);
   const [fetchMode, setFetchMode] = useState('fetchItems');
+  const [userData] = useAtom(userDataAtom);
+  const [isLoggedIn] = useAtom(isLoggedInAtom);
 
   NoAuthRedirect();
 
@@ -26,26 +30,32 @@ function HomePage(): JSX.Element {
   );
   return (
     <div>
-      <NavBar />
-      <SearchBar
-        pageSearchTerm={pageSearchTerm}
-        setPageSearchTerm={setPageSearchTerm}
-        isSearchExecuted={isSearchExecuted}
-        setIsSearchExecuted={setIsSearchExecuted}
-        setFetchMode={setFetchMode}
-      />
-      Home Page
-      <LoginForm />
-      <ItemList
-        trigger={isSearchExecuted}
-        setTrigger={setIsSearchExecuted}
-        fetchFunction={fetchMode === 'searchItems' ? searchItems : fetchItems}
-        url={
-          pageSearchTerm.length > 0 && fetchMode === 'searchItems'
-            ? `${pageSearchTerm}`
-            : 'item/'
-        }
-      />
+      {userData && isLoggedIn && (
+        <div>
+          <NavBar />
+          <SearchBar
+            pageSearchTerm={pageSearchTerm}
+            setPageSearchTerm={setPageSearchTerm}
+            isSearchExecuted={isSearchExecuted}
+            setIsSearchExecuted={setIsSearchExecuted}
+            setFetchMode={setFetchMode}
+          />
+          Home Page
+          <LoginForm />
+          <ItemList
+            trigger={isSearchExecuted}
+            setTrigger={setIsSearchExecuted}
+            fetchFunction={
+              fetchMode === 'searchItems' ? searchItems : fetchItems
+            }
+            url={
+              pageSearchTerm.length > 0 && fetchMode === 'searchItems'
+                ? `${pageSearchTerm}`
+                : 'item/'
+            }
+          />{' '}
+        </div>
+      )}
     </div>
   );
 }
