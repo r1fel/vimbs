@@ -30,19 +30,19 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
     enabled: isUserLoggedInAndDataExists,
   });
 
-  logger.log(
-    'ItemList rendered with:',
-    'fetchfunction : ',
-    fetchFunction,
-    'URL:',
-    url,
-    'isUserLoggedInAndDataExists:',
-    isUserLoggedInAndDataExists,
-    'isLoggedIn:',
-    isLoggedIn,
-    '!!userData:',
-    !!userData,
-  );
+  // logger.log(
+  //   'ItemList rendered with:',
+  //   'fetchfunction : ',
+  //   fetchFunction,
+  //   'URL:',
+  //   url,
+  //   'isUserLoggedInAndDataExists:',
+  //   isUserLoggedInAndDataExists,
+  //   'isLoggedIn:',
+  //   isLoggedIn,
+  //   '!!userData:',
+  //   userData,
+  // );
 
   useEffect(() => {
     const refetch = async () => {
@@ -62,12 +62,6 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
   }, [trigger, isUserLoggedInAndDataExists]);
 
   if (itemsQuery.status === 'pending') {
-    logger.log(
-      'useQuery started with userData:',
-      userData,
-      'and isLoggedIn:',
-      isLoggedIn,
-    );
     return <p>Items are loading</p>;
   }
 

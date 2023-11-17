@@ -39,14 +39,14 @@ function SearchBar({
     searchQuery.refetch();
   }, [searchTerm]);
 
-  if (searchQuery.status === 'success') {
-    logger.log(
-      'searchQuery results are:',
-      searchQuery,
-      'search term was:',
-      searchTerm,
-    );
-  }
+  // if (searchQuery.status === 'success') {
+  //   logger.log(
+  //     'searchQuery results are:',
+  //     searchQuery,
+  //     'search term was:',
+  //     searchTerm,
+  //   );
+  // }
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
