@@ -10,14 +10,7 @@ function NoAuthRedirect() {
   const navigate = useNavigate();
   const [userData] = useAtom(userDataAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
-
-  // useEffect(() => {
-  //   const simpleAuthStatus = async () => {
-  //     const status = await checkAuthStatus();
-  //     logger.log('simpleAuth status is', status);
-  //   };
-  //   simpleAuthStatus();
-  // }, [userData, isLoggedIn]);
+  const currentURL = window.location.pathname;
 
   const authQuery = useQuery({
     queryKey: ['auth'],
@@ -34,6 +27,8 @@ function NoAuthRedirect() {
           isLoggedIn,
           'userData:',
           userData,
+          'currentURL:',
+          currentURL,
         );
         if (
           authQuery.data &&
@@ -59,7 +54,7 @@ function NoAuthRedirect() {
     };
 
     handleAuthStatus();
-  }, [authQuery, isLoggedIn, userData]);
+  }, [authQuery, isLoggedIn, userData, currentURL]);
 }
 
 export default NoAuthRedirect;
