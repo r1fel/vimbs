@@ -1,10 +1,10 @@
-import {useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useQuery} from '@tanstack/react-query';
-import {useAtom} from 'jotai';
-import {checkAuthStatus} from '../services/AuthServices';
-import {logger} from '../../../util/logger';
-import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useAtom } from 'jotai';
+import { checkAuthStatus } from '../services/AuthServices';
+import { logger } from '../../../util/logger';
+import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
 
 function NoAuthRedirect() {
   const navigate = useNavigate();

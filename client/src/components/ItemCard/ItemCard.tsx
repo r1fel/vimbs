@@ -1,9 +1,9 @@
-import {useState} from 'react';
-import {Link} from 'react-router-dom';
-import {logger} from '../../util/logger';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { logger } from '../../util/logger';
 import shortenText from '../../util/shortenText';
 import './ItemCard.scss';
-import {IoCreateOutline, IoTrashOutline} from 'react-icons/io5';
+import { IoCreateOutline, IoTrashOutline } from 'react-icons/io5';
 
 interface ItemCardProps {
   itemId: string;

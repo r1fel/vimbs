@@ -1,6 +1,6 @@
 import './Modal.scss';
 
-function Modal({children}) {
+function Modal({ children }) {
   return <div>{children}</div>;
 }
 

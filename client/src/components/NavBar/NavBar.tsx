@@ -1,6 +1,6 @@
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './NavBar.scss';
-import {RiFeedbackLine} from 'react-icons/ri';
+import { RiFeedbackLine } from 'react-icons/ri';
 import LogoutButton from '../../features/authentication/components/LogoutButton';
 
 import {

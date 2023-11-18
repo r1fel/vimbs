@@ -1,11 +1,11 @@
-import {useState, useEffect} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {useAtom} from 'jotai';
-import {logger} from '../../util/logger';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useAtom } from 'jotai';
+import { logger } from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
-import {userDataAtom, isLoggedInAtom} from '../../context/userAtoms';
+import { userDataAtom, isLoggedInAtom } from '../../context/userAtoms';
 
 //! change type of image to string array later
 interface Item {
@@ -17,7 +17,7 @@ interface Item {
   owner: boolean;
 }
 
-function ItemList({url, fetchFunction, trigger}: {url: string}) {
+function ItemList({ url, fetchFunction, trigger }: { url: string }) {
   const [userData] = useAtom(userDataAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
   const isUserLoggedInAndDataExists = isLoggedIn && !!userData;

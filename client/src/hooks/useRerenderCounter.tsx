@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 
 // track and log the number of renders of a component
 function useRenderCounter(componentName) {

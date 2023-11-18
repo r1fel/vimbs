@@ -1,8 +1,8 @@
-import {useState} from 'react';
-import {useAtom} from 'jotai';
+import { useState } from 'react';
+import { useAtom } from 'jotai';
 import './UserSettings.scss';
-import {userDataAtom} from '../../context/userAtoms';
-import {logger} from '../../util/logger';
+import { userDataAtom } from '../../context/userAtoms';
+import { logger } from '../../util/logger';
 import Button from '../Button/Button';
 
 function UserSettings() {
@@ -26,7 +26,7 @@ function UserSettings() {
     logger.log(newValue);
     setUpdatedUserData((currData) => {
       currData[changedField] = newValue;
-      return {...currData};
+      return { ...currData };
     });
   };
 

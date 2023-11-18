@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {QueryClient, useMutation, useQueryClient} from '@tanstack/react-query';
-import {useAtom} from 'jotai';
-import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
-import {handleLogin} from '../services/AuthServices';
-import {logger} from '../../../util/logger';
-import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useAtom } from 'jotai';
+import { IoEyeOffOutline, IoEye } from 'react-icons/io5';
+import { handleLogin } from '../services/AuthServices';
+import { logger } from '../../../util/logger';
+import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
 import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
@@ -39,9 +43,9 @@ function LoginForm() {
       await setUserData(data.data);
       logger.log('loginQueryData is:', data.data);
       await setIsLoggedIn(true);
-      await setFormData({email: '', password: ''});
-      queryClient.invalidateQueries(['item'], {exact: true});
-      queryClient.invalidateQueries(['auth'], {exact: true});
+      await setFormData({ email: '', password: '' });
+      queryClient.invalidateQueries(['item'], { exact: true });
+      queryClient.invalidateQueries(['auth'], { exact: true });
       navigate('/');
     },
     onError: (error) => logger.log('Login Mutation Did not happen', error),
@@ -53,7 +57,7 @@ function LoginForm() {
     logger.log('the login form value is: ', formData);
     setFormData((currData) => {
       currData[changedField] = newValue;
-      return {...currData};
+      return { ...currData };
     });
   };
 
@@ -64,7 +68,7 @@ function LoginForm() {
 
   const handleSubmitBob = (e) => {
     e.preventDefault();
-    loginMutation.mutate({email: 'bob@gmail.com', password: 'bob'});
+    loginMutation.mutate({ email: 'bob@gmail.com', password: 'bob' });
   };
 
   return (

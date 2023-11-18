@@ -1,11 +1,11 @@
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useAtom} from 'jotai';
-import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
-import {handleRegister} from '../services/AuthServices';
-import {logger} from '../../../util/logger';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { IoEyeOffOutline, IoEye } from 'react-icons/io5';
+import { handleRegister } from '../services/AuthServices';
+import { logger } from '../../../util/logger';
 import RegisterPwdValidator from './RegisterPwdValidator';
-import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
+import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
 
 interface RegisterFormData {
   email: string;
@@ -46,7 +46,7 @@ function RegisterForm() {
     logger.log(newValue);
     setFormData((currData) => {
       currData[changedField] = newValue;
-      return {...currData};
+      return { ...currData };
     });
   };
 

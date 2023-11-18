@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
-import {useQuery} from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import './SearchBar.scss';
-import {searchItems} from '../../services/ItemServices';
+import { searchItems } from '../../services/ItemServices';
 import Button from '../Button/Button';
-import {logger} from '../../util/logger';
+import { logger } from '../../util/logger';
 
 function debounce(func, wait) {
   let timeout;

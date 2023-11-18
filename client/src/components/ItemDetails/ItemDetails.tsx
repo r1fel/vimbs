@@ -1,9 +1,9 @@
-import {fetchItems} from '../../services/ItemServices';
-import {useQuery} from '@tanstack/react-query';
-import {logger} from '../../util/logger';
+import { fetchItems } from '../../services/ItemServices';
+import { useQuery } from '@tanstack/react-query';
+import { logger } from '../../util/logger';
 import './ItemDetails.scss';
 
-function ItemDetails({id}: {id: string}) {
+function ItemDetails({ id }: { id: string }) {
   // const [item, setItem] = useState({});
 
   const itemQuery = useQuery({

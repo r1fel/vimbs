@@ -1,13 +1,17 @@
-import {useMutation, QueryClient, useQueryClient} from '@tanstack/react-query';
-import {useNavigate} from 'react-router-dom';
-import {useAtom} from 'jotai';
+import {
+  useMutation,
+  QueryClient,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useAtom } from 'jotai';
 import '../../../components/NavBar/NavBar.scss';
-import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
-import {handleLogout} from '../services/AuthServices';
-import {IoLogOutOutline} from 'react-icons/io5';
-import {logger} from '../../../util/logger';
+import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
+import { handleLogout } from '../services/AuthServices';
+import { IoLogOutOutline } from 'react-icons/io5';
+import { logger } from '../../../util/logger';
 
-function LogoutButton({className}) {
+function LogoutButton({ className }) {
   const [userData, setUserData] = useAtom(userDataAtom);
   const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
 
@@ -18,7 +22,7 @@ function LogoutButton({className}) {
     mutationFn: handleLogout,
     onSuccess: async () => {
       // queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
-      queryClient.invalidateQueries(['auth'], {exact: true});
+      queryClient.invalidateQueries(['auth'], { exact: true });
       await setUserData('');
       await setIsLoggedIn(false);
       logger.log('logout mutation successful');

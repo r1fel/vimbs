@@ -1,5 +1,5 @@
 import NoAuthRedirect from '../../features/authentication/components/NoAuthRedirect';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import UserSettings from '../../components/UserSettings/UserSettings';
 import NavBar from '../../components/NavBar/NavBar';
 import Button from '../../components/Button/Button';
