@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import userDataSchema from './schemas/userDataSchema';
 import ExpressError from '../ExpressError';
 
-const validateItem = (req: Request, res: Response, next: NextFunction) => {
+const validateUserData = (req: Request, res: Response, next: NextFunction) => {
   const { error } = userDataSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(',');
@@ -13,4 +13,4 @@ const validateItem = (req: Request, res: Response, next: NextFunction) => {
   return next();
 };
 
-export default validateItem;
+export default validateUserData;

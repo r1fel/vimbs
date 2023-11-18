@@ -103,13 +103,13 @@ export type GoogleEmailObject = {
 };
 
 export type ChangeSettingsRequest = {
-  firstName: string;
-  lastName: string;
-  phone: {
+  firstName?: string;
+  lastName?: string;
+  phone?: {
     countryCode: string;
     number: number;
   };
-  address: {
+  address?: {
     street: string;
     plz: string;
     city: string;
