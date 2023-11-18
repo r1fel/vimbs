@@ -16,13 +16,24 @@ import {
   PopulatedItemsFromDB,
   ResponseItemForClient,
   ItemInteractionInDB,
+  UserInDB,
+  ChangeSettingsRequest,
 } from '../typeDefinitions';
 
 // change/ add user settings
-export const settings = catchAsync(
+export const setUserData = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
-    res.send('hit user settings');
+    if (!req.user) return new ExpressError('user is undefined', 500);
+    const user: UserInDB | null = await User.findById(req.user._id);
+    if (user === null)
+      return next(new ExpressError('this user doesnt exist', 500));
+    const newUserData: ChangeSettingsRequest = req.body.newUserData;
+    if (newUserData.firstName) user.firstName = newUserData.firstName;
+    if (newUserData.lastName) user.lastName = newUserData.lastName;
+    if (newUserData.phone) user.phone = newUserData.phone;
+    if (newUserData.address) user.address = newUserData.address;
+    user.save();
+    res.send(user);
   }
 );
 

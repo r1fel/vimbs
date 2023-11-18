@@ -1,11 +1,11 @@
 // Request Validation Middleware: checks the sent user data from Login
 
-import {Request, Response, NextFunction} from 'express';
-import userSchema from './schemas/userSchema';
+import { Request, Response, NextFunction } from 'express';
+import userAuthSchema from './schemas/userAuthSchema';
 import ExpressError from '../ExpressError';
 
 const validateUserLogin = (req: Request, res: Response, next: NextFunction) => {
-  const {error} = userSchema.validate(req.body);
+  const { error } = userAuthSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(',');
     return next(new ExpressError(msg, 400));

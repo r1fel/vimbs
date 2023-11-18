@@ -1,4 +1,4 @@
-import mongoose, {Document} from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 // Extension of Express.User, so that req.user._id can be used
 declare global {
@@ -18,6 +18,15 @@ export interface UserInDB extends Document {
   creationDate: Date;
   firstName?: string;
   lastName?: string;
+  address?: {
+    street?: string;
+    plz?: string;
+    city?: string;
+  };
+  phone?: {
+    countryCode?: string;
+    number?: number;
+  };
 }
 
 export interface ItemInDB extends Document {
@@ -91,4 +100,18 @@ export interface ResponseItemForClient {
 export type GoogleEmailObject = {
   value: string;
   verified: boolean;
+};
+
+export type ChangeSettingsRequest = {
+  firstName?: string;
+  lastName?: string;
+  phone?: {
+    countryCode: string;
+    number: number;
+  };
+  address?: {
+    street: string;
+    plz: string;
+    city: string;
+  };
 };
