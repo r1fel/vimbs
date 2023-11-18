@@ -1,7 +1,7 @@
-import {useState, useEffect} from 'react';
-import {logger} from '../../../util/logger';
+import { useState, useEffect } from 'react';
+import { logger } from '../../../util/logger';
 
-const RegisterPwdValidator = ({inputPassword}: {inputPassword: string}) => {
+const RegisterPwdValidator = ({ inputPassword }: { inputPassword: string }) => {
   const [validations, setValidations] = useState({
     length: false,
     uppercase: false,

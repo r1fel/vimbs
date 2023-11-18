@@ -1,9 +1,13 @@
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {QueryClient, useMutation, useQueryClient} from '@tanstack/react-query';
-import {createItem} from '../../services/ItemServices';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { createItem } from '../../services/ItemServices';
 import catchAsync from '../../util/catchAsync';
-import {logger} from '../../util/logger';
+import { logger } from '../../util/logger';
 import './ItemCreateForm.scss';
 
 interface ItemCreateFormData {
@@ -28,7 +32,7 @@ function ItemCreateForm() {
     mutationFn: createItem,
     onSuccess: (itemData) => {
       queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
-      queryClient.invalidateQueries(['item'], {exact: true});
+      queryClient.invalidateQueries(['item'], { exact: true });
       navigate(`/item/${itemData.data[0]._id}`);
     },
   });
@@ -38,7 +42,7 @@ function ItemCreateForm() {
     const newValue = event.target.value;
     setFormData((currData) => {
       currData[changedField] = newValue;
-      return {...currData};
+      return { ...currData };
     });
   };
 

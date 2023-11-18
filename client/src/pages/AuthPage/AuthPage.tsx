@@ -1,8 +1,8 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import LoginForm from '../../features/authentication/components/LoginForm';
 import RegisterForm from '../../features/authentication/components/RegisterForm';
 import Button from '../../components/Button/Button';
-import {handleGoogleLogin} from '../../features/authentication/services/AuthServices';
+import { handleGoogleLogin } from '../../features/authentication/services/AuthServices';
 
 function AuthPage(): JSX.Element {
   const [loginOrRegister, setLoginOrRegister] = useState('login');

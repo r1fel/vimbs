@@ -21,7 +21,7 @@ export default authRoutes;
 authRoutes.route('/').get(
   isLoggedIn,
   //
-  sendIsAuthenticated
+  sendIsAuthenticated,
 );
 
 authRoutes.route('/register').post(
@@ -33,7 +33,7 @@ authRoutes.route('/register').post(
     failureMessage: true,
     // failureRedirect: 'http://localhost:5173/login',
   }),
-  login
+  login,
 );
 
 authRoutes.route('/login').post(
@@ -45,11 +45,11 @@ authRoutes.route('/login').post(
     failureMessage: true,
     // failureRedirect: 'http://localhost:5173/login',
   }),
-  login
+  login,
 );
 
-authRoutes.route('/logout').get(
+authRoutes.route('/logout').post(
   isLoggedIn,
   //
-  logout
+  logout,
 );

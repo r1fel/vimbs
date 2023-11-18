@@ -1,5 +1,5 @@
-import {useParams} from 'react-router-dom';
-import {Link} from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import NoAuthRedirect from '../../features/authentication/components/NoAuthRedirect';
 import ItemDetails from '../../components/ItemDetails/ItemDetails';
 import Button from '../../components/Button/Button';
@@ -9,7 +9,7 @@ import NavBar from '../../components/NavBar/NavBar';
 function DetailsPage(): JSX.Element {
   // NoAuthRedirect();
 
-  const {id} = useParams();
+  const { id } = useParams();
 
   return (
     <div>

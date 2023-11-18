@@ -1,17 +1,18 @@
-import {useState} from 'react';
-import {useAtom} from 'jotai';
+import { useState } from 'react';
+import { useAtom } from 'jotai';
 import './UserSettings.scss';
-import {userDataAtom} from '../../context/userAtoms';
-import {logger} from '../../util/logger';
+import { userDataAtom } from '../../context/userAtoms';
+import { logger } from '../../util/logger';
 import Button from '../Button/Button';
 
 function UserSettings() {
   const [userData, setUserData] = useAtom(userDataAtom);
+  logger.log('userdata:', userData);
 
-  const [updatedUserData, setUpdatedUserData] = useState({
-    username: userData[0].username,
-    email: userData[0].email,
-  });
+  // const [updatedUserData, setUpdatedUserData] = useState({
+  //   username: userData[0].username,
+  //   email: userData[0].email,
+  // });
 
   const [profileImgURL, setProfileImgUrl] = useState(
     `https://picsum.photos/seed/${userData.username}/200`,
@@ -25,7 +26,7 @@ function UserSettings() {
     logger.log(newValue);
     setUpdatedUserData((currData) => {
       currData[changedField] = newValue;
-      return {...currData};
+      return { ...currData };
     });
   };
 

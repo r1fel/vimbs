@@ -1,5 +1,5 @@
-import {useRef} from 'react';
-import {logger} from './logger';
+import { useRef } from 'react';
+import { logger } from './logger';
 
 const RenderCounter = (componentName: string) => {
   const renderCount = useRef(0);

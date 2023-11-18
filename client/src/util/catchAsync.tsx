@@ -1,4 +1,4 @@
-import {logger} from './logger';
+import { logger } from './logger';
 
 function catchAsync(asyncFunction: any) {
   return async function (...args: any) {

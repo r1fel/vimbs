@@ -25,8 +25,8 @@ export class ConsoleLogger implements Logger {
   readonly warn: LogFn;
   readonly error: LogFn;
 
-  constructor(options?: {level?: LogLevel}) {
-    const {level} = options || {};
+  constructor(options?: { level?: LogLevel }) {
+    const { level } = options || {};
 
     this.error = console.error.bind(console);
 
@@ -49,4 +49,4 @@ export class ConsoleLogger implements Logger {
   }
 }
 
-export const logger = new ConsoleLogger({level: LOG_LEVEL});
+export const logger = new ConsoleLogger({ level: LOG_LEVEL });

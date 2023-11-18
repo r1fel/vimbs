@@ -1,31 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useAtom} from 'jotai';
-import {IoEyeOffOutline, IoEye} from 'react-icons/io5';
-import {handleLogin} from '../services/AuthServices';
-import {logger} from '../../../util/logger';
-import {userDataAtom, isLoggedInAtom} from '../../../context/userAtoms';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { useAtom } from 'jotai';
+import { IoEyeOffOutline, IoEye } from 'react-icons/io5';
+import { handleLogin } from '../services/AuthServices';
+import { logger } from '../../../util/logger';
+import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
 import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
-  username: string;
+  email: string;
   password: string;
 }
 
 function LoginForm() {
   const [formData, setFormData] = useState<LoginFormData>({
-    username: '',
+    email: '',
     password: '',
   });
   const [userData, setUserData] = useAtom(userDataAtom);
   const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [showPassword, setShowPassword] = useState(false);
 
+  logger.log('userData from atom is:', userData);
+
   const navigate = useNavigate();
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
+  //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
+  const queryClient = useQueryClient();
+  //use createItem as mutation function
+  const loginMutation = useMutation({
+    mutationFn: handleLogin,
+    onSuccess: async (data) => {
+      await setUserData(data.data);
+      logger.log('loginQueryData is:', data.data);
+      await setIsLoggedIn(true);
+      await setFormData({ email: '', password: '' });
+      queryClient.invalidateQueries(['item'], { exact: true });
+      queryClient.invalidateQueries(['auth'], { exact: true });
+      navigate('/');
+    },
+    onError: (error) => logger.log('Login Mutation Did not happen', error),
+  });
 
   const handleChange = (e: any) => {
     const changedField = e.target.name;
@@ -33,70 +57,34 @@ function LoginForm() {
     logger.log('the login form value is: ', formData);
     setFormData((currData) => {
       currData[changedField] = newValue;
-      return {...currData};
+      return { ...currData };
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      // handle login in AuthServices
-      const userDataResponse = await handleLogin(
-        formData.username,
-        formData.password,
-      );
-      logger.log(
-        'the userDataResponse in handleSubmit is:',
-        userDataResponse.data,
-      );
-
-      if (userDataResponse && userDataResponse.data) {
-        await setUserData(userDataResponse.data);
-        await setIsLoggedIn(true);
-        await setFormData({username: '', password: ''});
-        navigate('/');
-      } else {
-        logger.error('Login failed.');
-      }
-    } catch (error) {
-      logger.error('login handleSubmit failed!', error);
-    }
+    loginMutation.mutate(formData);
   };
 
-  const handleSubmitBob = async (e) => {
+  const handleSubmitBob = (e) => {
     e.preventDefault();
-    try {
-      // handle login in AuthServices
-      const userDataResponse = await handleLogin('bob', 'bob');
-      logger.log('the userDataResponse in handleSubmit is:', userDataResponse);
-
-      if (userDataResponse && userDataResponse.data) {
-        await setUserData(userDataResponse.data);
-        await setIsLoggedIn(true);
-        await setFormData({username: '', password: ''});
-        navigate('/');
-      } else {
-        logger.error('Login failed.');
-      }
-    } catch (error) {
-      logger.error('login handleSubmit failed!', error);
-    }
+    loginMutation.mutate({ email: 'bob@gmail.com', password: 'bob' });
   };
 
   return (
     <div>
       <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
+      <form>
         <div>
-          <label htmlFor="username">Username </label>
+          <label htmlFor="email">Email </label>
           <input
             type="text"
-            placeholder="Username"
+            placeholder="Email"
             className="input"
-            value={formData.username}
+            value={formData.email}
             onChange={handleChange}
-            name="username"
-            id="username"
+            name="email"
+            id="email"
           />
         </div>
         <div>

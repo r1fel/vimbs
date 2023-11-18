@@ -1,11 +1,11 @@
-import {useState, useEffect} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {useAtom} from 'jotai';
-import {logger} from '../../util/logger';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useAtom } from 'jotai';
+import { logger } from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
-import {userDataAtom, isLoggedInAtom} from '../../context/userAtoms';
+import { userDataAtom, isLoggedInAtom } from '../../context/userAtoms';
 
 //! change type of image to string array later
 interface Item {
@@ -17,10 +17,10 @@ interface Item {
   owner: boolean;
 }
 
-function ItemList({url, fetchFunction, trigger}: {url: string}) {
+function ItemList({ url, fetchFunction, trigger }: { url: string }) {
   const [userData] = useAtom(userDataAtom);
   const [isLoggedIn] = useAtom(isLoggedInAtom);
-  const isUserLoggedInAndDataExists = isLoggedIn && userData.length > 0;
+  const isUserLoggedInAndDataExists = isLoggedIn && !!userData;
 
   RenderCounter('ItemList');
 
@@ -30,13 +30,19 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
     enabled: isUserLoggedInAndDataExists,
   });
 
-  logger.log(
-    'ItemList rendered with:',
-    'fetchfunction : ',
-    fetchFunction,
-    'URL:',
-    url,
-  );
+  // logger.log(
+  //   'ItemList rendered with:',
+  //   'fetchfunction : ',
+  //   fetchFunction,
+  //   'URL:',
+  //   url,
+  //   'isUserLoggedInAndDataExists:',
+  //   isUserLoggedInAndDataExists,
+  //   'isLoggedIn:',
+  //   isLoggedIn,
+  //   '!!userData:',
+  //   userData,
+  // );
 
   useEffect(() => {
     const refetch = async () => {
@@ -56,12 +62,6 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
   }, [trigger, isUserLoggedInAndDataExists]);
 
   if (itemsQuery.status === 'pending') {
-    logger.log(
-      'useQuery started with userData:',
-      userData,
-      'and isLoggedIn:',
-      isLoggedIn,
-    );
     return <p>Items are loading</p>;
   }
 
@@ -70,7 +70,7 @@ function ItemList({url, fetchFunction, trigger}: {url: string}) {
     return <p>{JSON.stringify(itemsQuery.error)}</p>;
   }
 
-  if (itemsQuery.status === 'success') {
+  if (itemsQuery.status === 'success' && isLoggedIn) {
     const items: Item[] = itemsQuery.data.data;
     // setItems(itemsQuery.data.data);
     logger.log('Items are:', itemsQuery.data.data);

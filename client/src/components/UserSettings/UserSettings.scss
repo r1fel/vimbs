@@ -4,6 +4,6 @@ $img-size: 10rem;
   &__img {
     heigth: $img-size;
     width: $img-size;
-    border-radius: $img-size / 2;
+    border-radius: calc($img-size / 2);
   }
 }
