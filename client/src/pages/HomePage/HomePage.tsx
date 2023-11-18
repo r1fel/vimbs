@@ -1,16 +1,16 @@
-import {useState} from 'react';
-import {useAtom} from 'jotai';
-import {fetchItems, searchItems} from '../../services/ItemServices';
+import { useState } from 'react';
+import { useAtom } from 'jotai';
+import { fetchItems, searchItems } from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
-import {userDataAtom, isLoggedInAtom} from '../../context/userAtoms';
+import { userDataAtom, isLoggedInAtom } from '../../context/userAtoms';
 import Button from '../../components/Button/Button';
 import ItemList from '../../components/ItemList/ItemList';
 import LoginForm from '../../features/authentication/components/LoginForm';
 import NoAuthRedirect from '../../features/authentication/components/NoAuthRedirect';
 import NavBar from '../../components/NavBar/NavBar';
 import SearchBar from '../../components/SearchBar/SearchBar';
-import {logger} from '../../util/logger';
+import { logger } from '../../util/logger';
 
 function HomePage(): JSX.Element {
   const [pageSearchTerm, setPageSearchTerm] = useState('');
@@ -40,8 +40,6 @@ function HomePage(): JSX.Element {
             setIsSearchExecuted={setIsSearchExecuted}
             setFetchMode={setFetchMode}
           />
-          Home Page
-          <LoginForm />
           <ItemList
             trigger={isSearchExecuted}
             setTrigger={setIsSearchExecuted}
