@@ -42,8 +42,8 @@ export const handleRegister = catchAsync(
 
 // Logout function to set all States back to 0
 export const handleLogout = catchAsync(async () => {
-  const logoutResponse = await axios.get(
-    `${import.meta.env.VITE_SERVER_URL}/auth/logout`,
+  const logoutResponse = await axios.post(
+    `${import.meta.env.VITE_SERVER_URL}auth/logout`,
     {
       withCredentials: true,
     },
