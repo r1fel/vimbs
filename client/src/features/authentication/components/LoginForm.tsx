@@ -38,6 +38,7 @@ function LoginForm() {
   const queryClient = useQueryClient();
   //use createItem as mutation function
   const loginMutation = useMutation({
+    mutationKey: ['login'],
     mutationFn: handleLogin,
     onSuccess: async (data) => {
       await setUserData(data.data);

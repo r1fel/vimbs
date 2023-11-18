@@ -19,6 +19,7 @@ function LogoutButton({ className }) {
   const queryClient = useQueryClient();
 
   const logoutMutation = useMutation({
+    mutationKey: ['logout'],
     mutationFn: handleLogout,
     onSuccess: async () => {
       // queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
