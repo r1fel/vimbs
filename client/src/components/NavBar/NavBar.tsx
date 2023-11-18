@@ -1,6 +1,8 @@
 import {Link} from 'react-router-dom';
 import './NavBar.scss';
 import {RiFeedbackLine} from 'react-icons/ri';
+import LogoutButton from '../../features/authentication/components/LogoutButton';
+
 import {
   IoStorefront,
   IoPersonCircleOutline,
@@ -34,6 +36,7 @@ function NavBar() {
         <Link className="navbar__link" to="/settings">
           <IoPersonCircleOutline />
         </Link>
+        <LogoutButton className="navbar__link" />
       </div>
     </div>
   );
