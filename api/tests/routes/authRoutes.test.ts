@@ -1,5 +1,8 @@
 import request from 'supertest';
-import app from './app';
+import makeApp from '../../src/app';
+import * as database from '../../src/database';
+
+const app = makeApp(database);
 
 describe('POST /auth/login', () => {
   describe('email and password included', () => {
