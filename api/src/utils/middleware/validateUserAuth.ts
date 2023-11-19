@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import userAuthSchema from './schemas/userAuthSchema';
 import ExpressError from '../ExpressError';
 
-const validateUserLogin = (req: Request, res: Response, next: NextFunction) => {
+const validateUserAuth = (req: Request, res: Response, next: NextFunction) => {
   const { error } = userAuthSchema.validate(req.body);
   if (error) {
     const msg = error.details.map((el) => el.message).join(',');
@@ -13,4 +13,4 @@ const validateUserLogin = (req: Request, res: Response, next: NextFunction) => {
   return next();
 };
 
-export default validateUserLogin;
+export default validateUserAuth;
