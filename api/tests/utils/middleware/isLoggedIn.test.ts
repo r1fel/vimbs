@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import isLoggedIn from '../../../src/utils/middleware/isLoggedIn';
+import ExpressError from '../../../src/utils/ExpressError';
 
+jest.mock('../../../src/utils/ExpressError');
 jest.mock('express');
 
 describe('isLoggedIn middleware', () => {
@@ -27,20 +29,19 @@ describe('isLoggedIn middleware', () => {
 
     // Check that next was called
     expect(next).toHaveBeenCalled();
-    // Check that res.send was not called
-    expect(res.send).not.toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalledWith(expect.any(ExpressError));
+    expect(ExpressError).not.toHaveBeenCalled();
   });
 
-  test('should send false if user is not authenticated', () => {
+  test('should send statusCode401 if user is not authenticated', () => {
     // Mock isAuthenticated to return false
     (req.isAuthenticated as jest.Mock).mockReturnValueOnce(false);
 
     // Call the middleware
     isLoggedIn(req as Request, res as Response, next);
 
-    // Check that next was not called
-    expect(next).not.toHaveBeenCalled();
-    // Check that res.send was called with false
-    expect(res.send).toHaveBeenCalledWith(false);
+    // Check that it returns an ExpressError with status 401
+    expect(next).toHaveBeenCalledWith(expect.any(ExpressError));
+    expect(ExpressError).toHaveBeenCalledWith('Unauthorized', 401);
   });
 });
