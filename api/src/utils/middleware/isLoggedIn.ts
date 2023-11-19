@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 const isLoggedIn = (req: Request, res: Response, next: NextFunction) => {
   if (!req.isAuthenticated()) {
     // res.redirect('http://localhost:5173/login');
-    return res.send(false);
+    return res.status(401).send('Unauthorized');
   }
   // console.log('isLoggedIn just ran');
   return next();
