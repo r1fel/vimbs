@@ -34,7 +34,7 @@ export const setUserData = catchAsync(
     if (newUserData.address) user.address = newUserData.address;
     user.save();
     res.send(user);
-  }
+  },
 );
 
 // changePassword
@@ -50,7 +50,7 @@ export const changePassword = catchAsync(
     await user.changePassword(oldPassword, newPassword);
     await user.save();
     return res.status(200).send('successfully changed password');
-  }
+  },
 );
 
 // fetch users inventory from DB and process for client
@@ -67,5 +67,18 @@ export const myItems = catchAsync(
     const response: Array<ResponseItemForClient> = [];
     processItemForClient(items, currentUser, response);
     return res.send(response);
-  }
+  },
+);
+
+// remove a user by his id from the mongoDB
+export const deleteUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (
+      req.body.deletionPW !==
+      'ifYouDontKnowThisPWToBeSentInTheBody,YouAreNotAllowedToDeleteAnyUsers'
+    )
+      return next(new ExpressError('You are not allowed to delete Users', 403));
+    await User.findByIdAndDelete(req.params.userId);
+    return res.send('successfully removed user from the MongoDB');
+  },
 );

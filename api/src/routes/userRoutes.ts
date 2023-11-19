@@ -13,6 +13,7 @@ import {
   setUserData,
   changePassword,
   myItems,
+  deleteUser,
 } from '../controllers/userControllers';
 
 const userRoutes = Router({ mergeParams: true });
@@ -24,7 +25,7 @@ userRoutes.route('/settings').put(
   isUser,
   validateUserData,
   //
-  setUserData
+  setUserData,
 );
 
 userRoutes.route('/changePassword').post(
@@ -32,12 +33,14 @@ userRoutes.route('/changePassword').post(
   isUser,
   validatePasswordChange,
   //
-  changePassword
+  changePassword,
 );
 
 userRoutes.route('/inventory/myItems').get(
   isLoggedIn,
   isUser,
   //
-  myItems
+  myItems,
 );
+
+userRoutes.route('/deleteUser').delete(deleteUser);
