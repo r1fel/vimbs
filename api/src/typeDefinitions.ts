@@ -27,6 +27,10 @@ export interface UserInDB extends Document {
     countryCode?: string;
     number?: number;
   };
+  myItems: mongoose.Types.ObjectId[];
+  getItems: mongoose.Types.ObjectId[];
+  getHistory: mongoose.Types.ObjectId[];
+  searchHistory: [{ searchToken: string; date: Date }];
 }
 
 export interface ItemInDB extends Document {
