@@ -10,7 +10,7 @@ import { useAtom } from 'jotai';
 import { IoEyeOffOutline, IoEye } from 'react-icons/io5';
 import { handleLogin } from '../services/AuthServices';
 import { logger } from '../../../util/logger';
-import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
+import { userDataAtom } from '../../../context/userAtoms';
 import Button from '../../../components/Button/Button';
 
 interface LoginFormData {
@@ -24,7 +24,6 @@ function LoginForm() {
     password: '',
   });
   const [userData, setUserData] = useAtom(userDataAtom);
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [showPassword, setShowPassword] = useState(false);
 
   logger.log('userData from atom is:', userData);
@@ -43,7 +42,6 @@ function LoginForm() {
     onSuccess: async (data) => {
       await setUserData(data.data);
       logger.log('loginQueryData is:', data.data);
-      await setIsLoggedIn(true);
       await setFormData({ email: '', password: '' });
       queryClient.invalidateQueries(['item'], { exact: true });
       queryClient.invalidateQueries(['auth'], { exact: true });
