@@ -29,6 +29,12 @@ function LogoutButton({ className }) {
     },
   });
 
+  // const logoutFunction = async() => {
+  //   await handleLogout()
+  //   await setUserData('')
+
+  // }
+
   return (
     <IoLogOutOutline className={className} onClick={logoutMutation.mutate} />
   );
