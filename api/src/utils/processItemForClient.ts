@@ -12,7 +12,7 @@ import mongoose from 'mongoose';
 const processItemForClient = async (
   items: PopulatedItemsFromDB,
   currentUser: mongoose.Types.ObjectId,
-  response: Array<ResponseItemForClient>
+  response: Array<ResponseItemForClient>,
 ) => {
   if (items === null) return (response = []);
 
@@ -36,6 +36,7 @@ const processItemForClient = async (
       available: item.available,
       picture: !item.picture ? null : item.picture,
       description: !item.description ? null : item.description,
+      categories: item.categories,
       dueDate: null,
       owner: ownerBool,
       interactions: ownerBool ? item.interactions : null,
@@ -64,7 +65,7 @@ const processItemForClient = async (
       if (lastInteraction.interestedParty.equals(currentUser)) {
         sendItem.interactions = [lastInteraction];
         lastInteraction.revealOwnerIdentity === true
-          ? {_id: item.owner._id, firstName: 'Hans'}
+          ? { _id: item.owner._id, firstName: 'Hans' }
           : null;
       }
     }

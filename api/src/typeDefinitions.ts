@@ -1,4 +1,14 @@
 import mongoose, { Document } from 'mongoose';
+import {
+  // EnumCategoryHouseAndGarden,
+  // EnumCategoryChildAndBaby,
+  // EnumCategoryMediaAndGames,
+  // EnumCategoryAdultClothing,
+  // EnumCategorySportAndCamping,
+  // EnumCategoryTechnology,
+  // EnumCategoryUndefined,
+  categoriesArray,
+} from './enums';
 
 // Extension of Express.User, so that req.user._id can be used
 declare global {
@@ -8,6 +18,18 @@ declare global {
     }
   }
 }
+
+export type Categories = (typeof categoriesArray)[number];
+
+// Array<{
+//   EnumCategoryHouseAndGarden?: EnumCategoryHouseAndGarden[];
+//   EnumCategoryChildAndBaby?: EnumCategoryChildAndBaby[];
+//   EnumCategoryMediaAndGames?: EnumCategoryMediaAndGames[];
+//   EnumCategoryAdultClothing?: EnumCategoryAdultClothing[];
+//   EnumCategorySportAndCamping?: EnumCategorySportAndCamping[];
+//   EnumCategoryTechnology?: EnumCategoryTechnology[];
+//   EnumCategoryUndefined?: EnumCategoryUndefined[];
+// }>;
 
 // DB related Types
 export interface UserInDB extends Document {
@@ -38,6 +60,7 @@ export interface ItemInDB extends Document {
   picture: string | undefined;
   name: string;
   description: string | undefined;
+  categories: Categories[];
   owner: mongoose.Types.ObjectId;
   interactions: mongoose.Types.ObjectId[];
   available: boolean;
@@ -48,6 +71,7 @@ export interface ItemInDBPopulated extends Document {
   picture: string | undefined;
   name: string;
   description: string | undefined;
+  categories: Categories[];
   owner: mongoose.Types.ObjectId | UserInDB | null;
   interactions: mongoose.Types.ObjectId[] | ItemInteractionInDB[] | null;
   available: boolean;
@@ -86,6 +110,7 @@ export interface ResponseItemForClient {
   available: boolean;
   picture: string | null;
   description: string | null;
+  categories: Categories[];
   dueDate: Date | null;
   owner: boolean;
   interactions: mongoose.Types.ObjectId[] | ItemInteractionInDB[] | null;
@@ -118,4 +143,11 @@ export type ChangeSettingsRequest = {
     plz: string;
     city: string;
   };
+};
+
+export type ItemRequest = {
+  picture?: string;
+  name: string;
+  description?: string;
+  categories: Categories[];
 };

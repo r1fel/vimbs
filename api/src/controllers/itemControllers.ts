@@ -18,6 +18,7 @@ import {
   ItemInteractionInDB,
   UserInDB,
   ItemInDB,
+  ItemRequest,
 } from '../typeDefinitions';
 
 // fetch all items from DB that don't belog to user and process for client
@@ -47,10 +48,14 @@ export const createItem = catchAsync(
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
+    const newItem: ItemRequest = req.body.item;
     // create item for saving to DB
-    const item: ItemInDB = new Item({ name: req.body.item.name });
-    if (req.body.item.picture) item.picture = req.body.item.picture;
-    if (req.body.item.description) item.description = req.body.item.description;
+    const item: ItemInDB = new Item({
+      name: newItem.name,
+      categories: newItem.categories,
+    });
+    if (newItem.picture) item.picture = newItem.picture;
+    if (newItem.description) item.description = newItem.description;
     item.owner = currentUser;
     // add item._id to myItems on user
     const user: UserInDB | null = await User.findById(currentUser);
