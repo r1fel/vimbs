@@ -9,10 +9,10 @@ function UserSettings() {
   const [userData, setUserData] = useAtom(userDataAtom);
   logger.log('userdata:', userData);
 
-  // const [updatedUserData, setUpdatedUserData] = useState({
-  //   username: userData[0].username,
-  //   email: userData[0].email,
-  // });
+  const [updatedUserData, setUpdatedUserData] = useState({
+    // username: userData[0].username,
+    email: userData.email,
+  });
 
   const [profileImgURL, setProfileImgUrl] = useState(
     `https://picsum.photos/seed/${userData.username}/200`,
@@ -45,7 +45,7 @@ function UserSettings() {
       </section>
       <section>
         <h2>Your Profile Details</h2>
-        <div>
+        {/* <div>
           <label htmlFor="user-settings__name">username</label>
           <input
             onChange={handleChange}
@@ -55,7 +55,7 @@ function UserSettings() {
             placeholder={userData[0].username}
             value={updatedUserData.username}
           ></input>
-        </div>
+        </div> */}
         <div>
           <label htmlFor="user-settings__email">email</label>
           <input
@@ -63,7 +63,7 @@ function UserSettings() {
             id="user-settings__email"
             className="user-settings__email"
             name="email"
-            placeholder={userData[0].email}
+            placeholder={userData.email}
             value={updatedUserData.email}
           ></input>
         </div>

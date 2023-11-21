@@ -1,5 +1,5 @@
 // all required packages
-import express, {Application, Request, Response, NextFunction} from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 // generic error handling function
 //TODO ER: implement
@@ -14,7 +14,7 @@ import session from 'express-session';
 //authentification package
 //TODO ER: google Login
 import passport from 'passport';
-import {Strategy as LocalStrategy} from 'passport-local';
+import { Strategy as LocalStrategy } from 'passport-local';
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 import cors from 'cors';
 
@@ -28,7 +28,7 @@ import userRoutes from './routes/userRoutes';
 import User from './models/user';
 
 // types
-import {GoogleEmailObject, UserInDB} from './typeDefinitions';
+import { GoogleEmailObject, UserInDB } from './typeDefinitions';
 
 // setup .env
 if (process.env.NODE_ENV !== 'production') {
@@ -112,6 +112,7 @@ passport.use(
       callbackURL: '/auth/google/callback',
     },
     function (accessToken: any, refreshToken: any, profile: any, cb: any) {
+      console.log('hit google Strategy');
       // get users email from profile.emails
       // array from api
       const emails: GoogleEmailObject[] = profile.emails;
@@ -130,11 +131,11 @@ passport.use(
 
       const googleEmail = getGoogleEmail(emails);
 
-      User.findOne({googleId: profile.id})
+      User.findOne({ googleId: profile.id })
         .exec()
         .then((doc) => {
           if (!doc) {
-            // console.log('hit !doc');
+            console.log('hit !doc');
             const newUser = new User({
               googleId: profile.id,
               firstName: profile.name.givenName,
@@ -186,13 +187,15 @@ app.get(
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', {
-    failureRedirect: 'http://localhost:3000/login',
-    // failureRedirect: `${process.env.CLIENT_URL}/auth`,
+    // failureRedirect: 'http://localhost:3000/login',
+    failureRedirect: `${process.env.CLIENT_URL}/auth`,
   }),
   function (req, res) {
-    // successful authentication, redirect home
-    res.redirect('http://localhost:3000');
-    // res.redirect(${process.env.CLIENT_URL});
+    // successful authentication, redirect home#
+    console.log(`google callback req.user ${req.user}`);
+    // res.redirect('http://localhost:3000');
+    res.redirect(`${process.env.CLIENT_URL}`);
+    // res.send(req.user);
   },
 );
 
@@ -221,7 +224,7 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((err: any, req: Request, res: Response) => {
-  const {statusCode = 500} = err;
+  const { statusCode = 500 } = err;
   if (!err.message) err.message = 'Oh No, Something went wrong!';
   res.status(statusCode).send(err);
 });

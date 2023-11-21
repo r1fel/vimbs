@@ -4,12 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useAtom } from 'jotai';
 import { checkAuthStatus } from '../services/AuthServices';
 import { logger } from '../../../util/logger';
-import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
+import { userDataAtom } from '../../../context/userAtoms';
 
 function NoAuthRedirect() {
   const navigate = useNavigate();
   const [userData] = useAtom(userDataAtom);
-  const [isLoggedIn] = useAtom(isLoggedInAtom);
   const currentURL = window.location.pathname;
 
   const authQuery = useQuery({
@@ -23,8 +22,6 @@ function NoAuthRedirect() {
         logger.log(
           'authQuery details are :',
           authQuery.data,
-          'isLoggedIn',
-          isLoggedIn,
           'userData:',
           userData,
           'currentURL:',
@@ -32,13 +29,12 @@ function NoAuthRedirect() {
         );
         if (
           authQuery.data &&
-          isLoggedIn &&
           userData &&
           window.location.pathname === '/auth'
         ) {
           logger.log('auth status true, going from auth back to the main page');
           navigate('/');
-        } else if (authQuery.data && isLoggedIn && userData) {
+        } else if (authQuery.data && userData) {
           logger.log('auth status true');
           return;
         } else {
@@ -54,7 +50,7 @@ function NoAuthRedirect() {
     };
 
     handleAuthStatus();
-  }, [authQuery, isLoggedIn, userData, currentURL]);
+  }, [authQuery, userData, currentURL]);
 }
 
 export default NoAuthRedirect;

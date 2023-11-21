@@ -10,6 +10,7 @@ import User from '../models/user';
 
 // simple auth for client route changes: isLoggedIn middleware ran previously
 export const sendIsAuthenticated = (req: Request, res: Response) => {
+  console.log(`req.user in sendIsAuthenticated is ${req.user}`);
   res.send(req.user);
 };
 

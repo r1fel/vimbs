@@ -19,15 +19,13 @@ interface Item {
 
 function ItemList({ url, fetchFunction, trigger }: { url: string }) {
   const [userData] = useAtom(userDataAtom);
-  const [isLoggedIn] = useAtom(isLoggedInAtom);
-  const isUserLoggedInAndDataExists = isLoggedIn && !!userData;
 
   RenderCounter('ItemList');
 
   const itemsQuery = useQuery({
     queryKey: ['item'],
     queryFn: () => fetchFunction(url),
-    enabled: isUserLoggedInAndDataExists,
+    enabled: !!userData,
   });
 
   // logger.log(
@@ -36,30 +34,26 @@ function ItemList({ url, fetchFunction, trigger }: { url: string }) {
   //   fetchFunction,
   //   'URL:',
   //   url,
-  //   'isUserLoggedInAndDataExists:',
-  //   isUserLoggedInAndDataExists,
-  //   'isLoggedIn:',
-  //   isLoggedIn,
   //   '!!userData:',
   //   userData,
   // );
 
   useEffect(() => {
     const refetch = async () => {
-      if (isUserLoggedInAndDataExists) {
+      if (userData) {
         await itemsQuery.refetch();
         logger.log('refetch in items list:', itemsQuery);
       } else {
         logger.log(
           'refetch didnt work! trigger:',
           trigger,
-          'isUserLoggedInAndDataExists:',
-          isUserLoggedInAndDataExists,
+          '!!userData:',
+          userData,
         );
       }
     };
     refetch();
-  }, [trigger, isUserLoggedInAndDataExists]);
+  }, [trigger, userData.length]);
 
   if (itemsQuery.status === 'pending') {
     return <p>Items are loading</p>;
@@ -70,7 +64,7 @@ function ItemList({ url, fetchFunction, trigger }: { url: string }) {
     return <p>{JSON.stringify(itemsQuery.error)}</p>;
   }
 
-  if (itemsQuery.status === 'success' && isLoggedIn) {
+  if (itemsQuery.status === 'success' && userData) {
     const items: Item[] = itemsQuery.data.data;
     // setItems(itemsQuery.data.data);
     logger.log('Items are:', itemsQuery.data.data);
