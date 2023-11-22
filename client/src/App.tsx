@@ -7,10 +7,10 @@ import SettingsPage from './pages/SettingsPage/SettingsPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import DetailsPage from './pages/DetailsPage/DetailsPage';
 import ItemList from './components/ItemList/ItemList';
-import AuthCheck from './features/authentication/components/AuthCheck';
 import CreateItemPage from './pages/CreateItemPage/CreateItemPage';
 import NotificationsPage from './pages/NotificationsPage/NotificationsPage';
-import MyItemsPage from './pages/MyItemsPage/MyItemsPAge';
+import MyItemsPage from './pages/MyItemsPage/MyItemsPage';
+import EditItemPage from './pages/EditItemPage/EditItemPage';
 
 function App() {
   return (
@@ -43,8 +43,8 @@ function App() {
             errorElement={<ErrorPage />}
           />
           <Route
-            path="/item/:id/request"
-            element={<ItemList url="books/" />}
+            path="/item/:id/edit"
+            element={<EditItemPage />}
             errorElement={<ErrorPage />}
           />
           <Route

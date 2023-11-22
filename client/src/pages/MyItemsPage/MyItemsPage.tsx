@@ -4,18 +4,19 @@ import ItemList from '../../components/ItemList/ItemList';
 import { fetchItems } from '../../services/ItemServices';
 import NavBar from '../../components/NavBar/NavBar';
 import { useAtom } from 'jotai';
-import { isDeleteItemModalOpenAtom } from '../../context/itemAtoms';
-import Modal from '../../components/Modal/Modal';
+import { userDataAtom } from '../../context/userAtoms';
 
 function MyItemsPage(): JSX.Element {
-  const [x, setX] = useState('x');
-  const [isModalOpen, setIsModalOpen] = useAtom(isDeleteItemModalOpenAtom);
+  const [userData, setUserData] = useAtom(userDataAtom);
+
   // NoAuthRedirect();
   return (
     <div>
       <NavBar />
-      <Modal>HAllo</Modal>
-      <ItemList url={'item/mine'} fetchFunction={fetchItems} trigger={x} />
+      <ItemList
+        url={`user/${userData._id}/inventory/myitems`}
+        fetchFunction={fetchItems}
+      />
     </div>
   );
 }
