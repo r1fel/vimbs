@@ -1,6 +1,6 @@
 import axios from 'axios';
 import catchAsync from '../util/catchAsync';
-import {logger} from '../util/logger';
+import { logger } from '../util/logger';
 
 // fetch items - use "/mine" in the url to get my items
 export const fetchItems = catchAsync(async (url: string) => {
@@ -58,6 +58,43 @@ export const createItem = catchAsync(
   },
 );
 
+// create item
+export const editItem = catchAsync(
+  async ({
+    id,
+    name,
+    description,
+    picture,
+  }: {
+    id: string;
+    name: string;
+    description: string;
+    picture: string;
+  }) => {
+    logger.log('service receives:', name, description, picture);
+    const input = {
+      item: {
+        name,
+        description,
+        picture,
+      },
+    };
+
+    const response = await axios.put(
+      `${import.meta.env.VITE_SERVER_URL}item/${id}`,
+      input,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    logger.log('creating item worked:', response);
+    return response;
+  },
+);
+
 //initalize new borrowing request
 export const initializeRequest = catchAsync(
   async (itemId, message, status, dueDate) => {
@@ -72,7 +109,7 @@ export const initializeRequest = catchAsync(
     const response = await axios.post(
       `http://localhost:8080/books/${itemId}/borrowingrequest`,
       input,
-      {withCredentials: true},
+      { withCredentials: true },
     );
     return response.data;
   },
