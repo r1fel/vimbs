@@ -7,7 +7,7 @@ import Chat from '../../components/Chat/Chat';
 import NavBar from '../../components/NavBar/NavBar';
 
 function DetailsPage(): JSX.Element {
-  // NoAuthRedirect();
+  NoAuthRedirect();
 
   const { id } = useParams();
 

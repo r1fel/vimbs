@@ -8,7 +8,7 @@ import { userDataAtom } from '../../../context/userAtoms';
 
 function NoAuthRedirect() {
   const navigate = useNavigate();
-  const [userData] = useAtom(userDataAtom);
+  const [userData, setUserData] = useAtom(userDataAtom);
   const currentURL = window.location.pathname;
 
   const authQuery = useQuery({
@@ -35,6 +35,10 @@ function NoAuthRedirect() {
           logger.log('auth status true, going from auth back to the main page');
           navigate('/');
         } else if (authQuery.data && userData) {
+          logger.log('auth status true');
+          return;
+        } else if (authQuery.data && !userData) {
+          setUserData(authQuery.data);
           logger.log('auth status true');
           return;
         } else {

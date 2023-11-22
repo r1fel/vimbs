@@ -5,7 +5,7 @@ import { logger } from '../../util/logger';
 import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
-import { userDataAtom, isLoggedInAtom } from '../../context/userAtoms';
+import { userDataAtom } from '../../context/userAtoms';
 
 //! change type of image to string array later
 interface Item {

@@ -1,8 +1,5 @@
 import { Link } from 'react-router-dom';
 import './NavBar.scss';
-import { RiFeedbackLine } from 'react-icons/ri';
-import LogoutButton from '../../features/authentication/components/LogoutButton';
-
 import {
   IoStorefront,
   IoPersonCircleOutline,
@@ -10,6 +7,8 @@ import {
   IoAddCircleOutline,
   IoNotificationsOutline,
 } from 'react-icons/io5';
+import { RiFeedbackLine } from 'react-icons/ri';
+import LogoutButton from '../../features/authentication/components/LogoutButton';
 
 function NavBar() {
   return (
