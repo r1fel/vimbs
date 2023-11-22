@@ -133,3 +133,23 @@ export const itemSearch = catchAsync(
     return res.send(response);
   },
 );
+
+// deleting a book from DB and pull it from owners myItems array
+export const deleteItem = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //uncomment when myItems exists on User with merge of user-model-for-search branch
+    // if (req.user === undefined)
+    //     return new ExpressError('user is undefined', 500);
+    // const currentUser = req.user._id;
+    // const user: UserInDB | null = await User.findById(currentUser);
+    // if (user === null)
+    //   return next(new ExpressError('this user doesnt exist', 500));
+    // if (!user.myItems.includes(item._id)) {
+    //   user.myItems.push(item._id);
+    //   await user.save();
+    // }
+    await Item.findByIdAndDelete(req.params.itemId);
+    // req.flash('success', 'Successfully deleted a item!');
+    res.send(`Successfully deleted item ${req.params.itemId}!`);
+  },
+);
