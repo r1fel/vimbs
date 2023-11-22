@@ -1,6 +1,7 @@
 // end of line functions when hitting item Routes
 
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 
 // utils
 import ExpressError from '../utils/ExpressError';
@@ -137,19 +138,19 @@ export const itemSearch = catchAsync(
 // deleting a book from DB and pull it from owners myItems array
 export const deleteItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    //uncomment when myItems exists on User with merge of user-model-for-search branch
-    // if (req.user === undefined)
-    //     return new ExpressError('user is undefined', 500);
-    // const currentUser = req.user._id;
-    // const user: UserInDB | null = await User.findById(currentUser);
-    // if (user === null)
-    //   return next(new ExpressError('this user doesnt exist', 500));
-    // if (!user.myItems.includes(item._id)) {
-    //   user.myItems.push(item._id);
-    //   await user.save();
-    // }
-    await Item.findByIdAndDelete(req.params.itemId);
+    const itemId = new mongoose.Types.ObjectId(req.params.itemId);
+    if (req.user === undefined)
+      return new ExpressError('user is undefined', 500);
+    const currentUser = req.user._id;
+    const user: UserInDB | null = await User.findById(currentUser);
+    if (user === null)
+      return next(new ExpressError('this user doesnt exist', 500));
+    if (user.myItems.includes(itemId)) {
+      (user.myItems as any).pull(itemId);
+      await user.save();
+    }
+    await Item.findByIdAndDelete(itemId);
     // req.flash('success', 'Successfully deleted a item!');
-    res.send(`Successfully deleted item ${req.params.itemId}!`);
+    res.send(`Successfully deleted item ${itemId}!`);
   },
 );
