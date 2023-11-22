@@ -29,21 +29,34 @@
     height: 152px;
     // border-radius: 12px;
   }
+
   &__link {
     display: grid;
     grid-template-rows: subgrid;
     grid-row: span 4;
     text-decoration: none;
     color: inherit;
+    &--edit {
+      position: absolute;
+    }
   }
-  &__edit {
+
+  &__action {
     font-size: 2rem;
     position: absolute;
-    right: 3rem;
+    transition: 0.15s;
+    &:hover {
+      cursor: pointer;
+      color: $col-sec-500;
+    }
+  }
+
+  &__edit {
+    @extend .item-card__action;
+    right: 5rem;
   }
   &__delete {
-    font-size: 2rem;
-    position: absolute;
+    @extend .item-card__action;
     right: 0.5rem;
   }
 
