@@ -36,7 +36,7 @@ export const index = catchAsync(
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(items, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 // create new item
@@ -67,7 +67,7 @@ export const showItem = catchAsync(
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(item, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 // edit item by itemId
@@ -79,7 +79,7 @@ export const updateItem = catchAsync(
     const item: PopulatedItemsFromDB | null = await Item.findOneAndUpdate(
       { _id: req.params.itemId },
       { ...req.body.item },
-      { new: true }
+      { new: true },
     )
       .populate<{ owner: UserInDB }>('owner')
       .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
@@ -88,7 +88,7 @@ export const updateItem = catchAsync(
     const response: ResponseItemForClient[] = [];
     processItemForClient(item, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 //TODO ER FR : revise search logic
@@ -107,5 +107,25 @@ export const itemSearch = catchAsync(
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(items, currentUser, response);
     return res.send(response);
-  }
+  },
+);
+
+// deleting a book from DB and pull it from owners myItems array
+export const deleteItem = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //uncomment when myItems exists on User with merge of user-model-for-search branch
+    // if (req.user === undefined)
+    //     return new ExpressError('user is undefined', 500);
+    // const currentUser = req.user._id;
+    // const user: UserInDB | null = await User.findById(currentUser);
+    // if (user === null)
+    //   return next(new ExpressError('this user doesnt exist', 500));
+    // if (!user.myItems.includes(item._id)) {
+    //   user.myItems.push(item._id);
+    //   await user.save();
+    // }
+    await Item.findByIdAndDelete(req.params.itemId);
+    // req.flash('success', 'Successfully deleted a item!');
+    res.send(`Successfully deleted item ${req.params.itemId}!`);
+  },
 );
