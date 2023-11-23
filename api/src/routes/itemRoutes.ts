@@ -29,7 +29,7 @@ itemRoutes
   )
   .post(
     isLoggedIn,
-    // validateItem,
+    validateItem,
     //
     createItem,
   );
