@@ -50,7 +50,7 @@ itemRoutes
   .put(
     isLoggedIn,
     isOwner,
-    // validateItem,
+    validateItem,
     //
     updateItem,
   )
