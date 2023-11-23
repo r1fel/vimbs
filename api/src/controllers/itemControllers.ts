@@ -136,7 +136,7 @@ export const itemSearch = catchAsync(
   },
 );
 
-// deleting a book from DB and pull it from owners myItems array
+// deleting am item from DB and pull it from owners myItems array
 export const deleteItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const itemId = new mongoose.Types.ObjectId(req.params.itemId);
