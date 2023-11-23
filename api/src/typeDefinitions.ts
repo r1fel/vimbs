@@ -60,16 +60,6 @@ export type SportAndCamping = (typeof SportAndCamping)[number];
 export type Technology = (typeof Technology)[number];
 export type Other = (typeof Other)[number];
 
-// Array<{
-//   EnumCategoryHouseAndGarden?: EnumCategoryHouseAndGarden[];
-//   EnumCategoryChildAndBaby?: EnumCategoryChildAndBaby[];
-//   EnumCategoryMediaAndGames?: EnumCategoryMediaAndGames[];
-//   EnumCategoryAdultClothing?: EnumCategoryAdultClothing[];
-//   EnumCategorySportAndCamping?: EnumCategorySportAndCamping[];
-//   EnumCategoryTechnology?: EnumCategoryTechnology[];
-//   EnumCategoryUndefined?: EnumCategoryUndefined[];
-// }>;
-
 // DB related Types
 export interface UserInDB extends Document {
   _id: mongoose.Types.ObjectId;

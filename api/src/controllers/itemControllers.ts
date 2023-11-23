@@ -50,7 +50,6 @@ export const createItem = catchAsync(
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
     const newItem: ItemRequest = req.body.item;
-    console.log(newItem.categories);
     // create item for saving to DB
     const item: ItemInDB = new Item({
       name: newItem.name,
