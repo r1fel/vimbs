@@ -18,7 +18,7 @@ import {
   SportAndCampingName,
   TechnologyName,
   OtherName,
-} from '../enums';
+} from '../utils/categoryStringDefinitions';
 
 const ItemSchema: Schema = new Schema({
   creationDate: {

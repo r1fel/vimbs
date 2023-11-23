@@ -7,7 +7,7 @@ import {
   SportAndCamping,
   Technology,
   Other,
-} from './enums';
+} from './utils/categoryStringDefinitions';
 
 // Extension of Express.User, so that req.user._id can be used
 declare global {
