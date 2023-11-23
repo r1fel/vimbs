@@ -1,13 +1,12 @@
 import mongoose, { Document } from 'mongoose';
 import {
-  // EnumCategoryHouseAndGarden,
-  // EnumCategoryChildAndBaby,
-  // EnumCategoryMediaAndGames,
-  // EnumCategoryAdultClothing,
-  // EnumCategorySportAndCamping,
-  // EnumCategoryTechnology,
-  // EnumCategoryUndefined,
-  categoriesArray,
+  HouseAndGarden,
+  ChildAndBaby,
+  MediaAndGames,
+  AdultClothing,
+  SportAndCamping,
+  Technology,
+  NotDefined,
 } from './enums';
 
 // Extension of Express.User, so that req.user._id can be used
@@ -19,7 +18,26 @@ declare global {
   }
 }
 
-export type Categories = (typeof categoriesArray)[number];
+// export type Categories = (typeof categoriesArray)[number];
+
+export type Categories = {
+  HouseAndGarden: HouseAndGarden;
+  ChildAndBaby: ChildAndBaby;
+  MediaAndGames: MediaAndGames;
+  AdultClothing: AdultClothing;
+  SportAndCamping: SportAndCamping;
+  Technology: Technology;
+  NotDefined: NotDefined;
+};
+
+// export type HouseAndGarden = 'Baustellengeräte' | 'Deko' | 'Gartengeräte';
+export type HouseAndGarden = (typeof HouseAndGarden)[number];
+export type ChildAndBaby = (typeof ChildAndBaby)[number];
+export type MediaAndGames = (typeof MediaAndGames)[number];
+export type AdultClothing = (typeof AdultClothing)[number];
+export type SportAndCamping = (typeof SportAndCamping)[number];
+export type Technology = (typeof Technology)[number];
+export type NotDefined = (typeof NotDefined)[number];
 
 // Array<{
 //   EnumCategoryHouseAndGarden?: EnumCategoryHouseAndGarden[];
@@ -60,7 +78,7 @@ export interface ItemInDB extends Document {
   picture: string | undefined;
   name: string;
   description: string | undefined;
-  categories: Categories[];
+  categories: Categories;
   owner: mongoose.Types.ObjectId;
   interactions: mongoose.Types.ObjectId[];
   available: boolean;
@@ -71,7 +89,7 @@ export interface ItemInDBPopulated extends Document {
   picture: string | undefined;
   name: string;
   description: string | undefined;
-  categories: Categories[];
+  categories: Categories;
   owner: mongoose.Types.ObjectId | UserInDB | null;
   interactions: mongoose.Types.ObjectId[] | ItemInteractionInDB[] | null;
   available: boolean;
@@ -110,7 +128,7 @@ export interface ResponseItemForClient {
   available: boolean;
   picture: string | null;
   description: string | null;
-  categories: Categories[];
+  categories: Categories;
   dueDate: Date | null;
   owner: boolean;
   interactions: mongoose.Types.ObjectId[] | ItemInteractionInDB[] | null;
@@ -149,5 +167,5 @@ export type ItemRequest = {
   picture?: string;
   name: string;
   description?: string;
-  categories: Categories[];
+  categories: Categories;
 };

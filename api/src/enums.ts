@@ -1,11 +1,109 @@
-export const categoriesArray = [
-  'Haus und Garten',
-  'Kind und Baby',
-  'Medien und Spiele',
-  'Mode',
-  'Sport und Camping',
-  'Technik und Zubehör',
+// export const categoriesArray = [
+//   'Haus und Garten',
+//   'Kind und Baby',
+//   'Medien und Spiele',
+//   'Mode',
+//   'Sport und Camping',
+//   'Technik und Zubehör',
+// ];
+
+export const HouseAndGarden = [
+  'Baustellengeräte',
+  'Deko',
+  'Gartengeräte',
+  'Garten- und Partymoebel',
+  'Haushalts- und Küchengeräte',
+  'Schutzkleidung',
+  'Werkzeuge',
+  'Sonstiges',
 ];
+export const ChildAndBaby = ['Kleidung', 'Spielzeug', 'Zubehör', 'Sonstiges'];
+export const MediaAndGames = [
+  'Bücher',
+  'Gesellschaftsspiele (Brett- und Kartenspiele)',
+  'Fachbücher (Schule und Studium)',
+  'Filme',
+  'Videospiele',
+  'Sonstiges',
+];
+export const AdultClothing = [
+  'Damenkleidung',
+  'Damenschuhe',
+  'Herrenkleidung',
+  'Herrenschuhe',
+  'Sonstiges',
+];
+export const SportAndCamping = [
+  'Campingutensilien',
+  'Fitnessgeräte',
+  'Outdoorkleidung',
+  'Wintersport',
+  'Sonstiges',
+];
+export const Technology = [
+  'Audio & Hifi',
+  'Computer und Zubehör',
+  'Kameras und Zubehör',
+  'Konsolen',
+  'TV, Beamer und Zubehör',
+  'Sonstiges',
+];
+export const NotDefined = ['Sonstiges'];
+
+// export const categoriesArray = [
+//   {
+//     HouseAndGarden = [
+//       'Baustellengeräte',
+//       'Deko',
+//       'Gartengeräte',
+//       'Garten- und Partymoebel',
+//       'Haushalts- und Küchengeräte',
+//       'Schutzkleidung',
+//       'Werkzeuge',
+//       'Sonstiges',
+//     ],
+//   },
+// { ChildAndBaby: ['Kleidung', 'Spielzeug', 'Zubehör', 'Sonstiges'] },
+// {
+//   MediaAndGames: [
+//     'Bücher',
+//     'Gesellschaftsspiele (Brett- und Kartenspiele)',
+//     'Fachbücher (Schule und Studium)',
+//     'Filme',
+//     'Videospiele',
+//     'Sonstiges',
+//   ],
+// },
+// {
+//   AdultClothing: [
+//     'Damenkleidung',
+//     'Damenschuhe',
+//     'Herrenkleidung',
+//     'Herrenschuhe',
+//     'Sonstiges',
+//   ],
+// },
+// {
+//   SportAndCamping: [
+//     'Campingutensilien',
+//     'Fitnessgeräte',
+//     'Outdoorkleidung',
+//     'Wintersport',
+//     'Sonstiges',
+//   ],
+// },
+// {
+//   Technology: [
+//     'Audio & Hifi',
+//     'Computer und Zubehör',
+//     'Kameras und Zubehör',
+//     'Konsolen',
+//     'TV, Beamer und Zubehör',
+//     'Sonstiges',
+//   ],
+// },
+//   { NotDefined: ['nicht zuordenbar'] },
+// ];
 
 // enums I defined to not have to define the same content different places
 

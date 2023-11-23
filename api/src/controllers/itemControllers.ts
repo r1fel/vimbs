@@ -50,6 +50,7 @@ export const createItem = catchAsync(
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
     const newItem: ItemRequest = req.body.item;
+    console.log(newItem.categories);
     // create item for saving to DB
     const item: ItemInDB = new Item({
       name: newItem.name,
@@ -57,8 +58,9 @@ export const createItem = catchAsync(
     });
     if (newItem.picture) item.picture = newItem.picture;
     if (newItem.description) item.description = newItem.description;
+    // item.categories = newItem.categories;
     item.owner = currentUser;
-    // add item._id to myItems on user
+    // add item._id to user.myItems
     const user: UserInDB | null = await User.findById(currentUser);
     if (user === null)
       return next(new ExpressError('this user doesnt exist', 500));
