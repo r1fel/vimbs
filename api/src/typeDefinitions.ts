@@ -6,7 +6,7 @@ import {
   AdultClothing,
   SportAndCamping,
   Technology,
-  NotDefined,
+  Other,
 } from './enums';
 
 // Extension of Express.User, so that req.user._id can be used
@@ -21,13 +21,20 @@ declare global {
 // export type Categories = (typeof categoriesArray)[number];
 
 export type Categories = {
-  HouseAndGarden: HouseAndGarden;
-  ChildAndBaby: ChildAndBaby;
-  MediaAndGames: MediaAndGames;
-  AdultClothing: AdultClothing;
-  SportAndCamping: SportAndCamping;
-  Technology: Technology;
-  NotDefined: NotDefined;
+  HouseAndGarden: {
+    name: string;
+    subcategories: Array<HouseAndGarden>;
+  };
+  ChildAndBaby: {
+    name: string;
+    subcategories: Array<ChildAndBaby>;
+  };
+  // ChildAndBaby: ChildAndBaby;
+  // MediaAndGames: MediaAndGames;
+  // AdultClothing: AdultClothing;
+  // SportAndCamping: SportAndCamping;
+  // Technology: Technology;
+  // Other : Other;
 };
 
 // export type HouseAndGarden = 'Baustellengeräte' | 'Deko' | 'Gartengeräte';
@@ -37,7 +44,7 @@ export type MediaAndGames = (typeof MediaAndGames)[number];
 export type AdultClothing = (typeof AdultClothing)[number];
 export type SportAndCamping = (typeof SportAndCamping)[number];
 export type Technology = (typeof Technology)[number];
-export type NotDefined = (typeof NotDefined)[number];
+export type Other = (typeof Other)[number];
 
 // Array<{
 //   EnumCategoryHouseAndGarden?: EnumCategoryHouseAndGarden[];

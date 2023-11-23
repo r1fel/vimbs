@@ -6,6 +6,13 @@
 //   'Sport und Camping',
 //   'Technik und Zubehör',
 // ];
+export const HouseAndGardenName = 'Haus und Garten';
+export const ChildAndBabyName = 'Kind und Baby';
+export const MediaAndGamesName = 'Medien und Spiele';
+export const AdultClothingName = 'Mode';
+export const SportAndCampingName = 'Sport und Camping';
+export const TechnologyName = 'Technik und Zubehör';
+export const OtherName = 'Sonstiges';
 
 export const HouseAndGarden = [
   'Baustellengeräte',
@@ -48,7 +55,7 @@ export const Technology = [
   'TV, Beamer und Zubehör',
   'Sonstiges',
 ];
-export const NotDefined = ['Sonstiges'];
+export const Other = ['Sonstiges'];
 
 // export const categoriesArray = [
 //   {

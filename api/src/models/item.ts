@@ -10,7 +10,14 @@ import {
   AdultClothing,
   SportAndCamping,
   Technology,
-  NotDefined,
+  Other,
+  HouseAndGardenName,
+  ChildAndBabyName,
+  MediaAndGamesName,
+  AdultClothingName,
+  SportAndCampingName,
+  TechnologyName,
+  OtherName,
 } from '../enums';
 
 const ItemSchema: Schema = new Schema({
@@ -26,48 +33,90 @@ const ItemSchema: Schema = new Schema({
   },
   description: String,
   categories: {
-    HouseAndGarden: [
-      {
-        enum: HouseAndGarden,
+    HouseAndGarden: {
+      name: {
         type: String,
+        default: HouseAndGardenName,
       },
-    ],
-    ChildAndBaby: [
-      {
-        enum: ChildAndBaby,
+      subcategories: [
+        {
+          enum: HouseAndGarden,
+          type: String,
+        },
+      ],
+    },
+    ChildAndBaby: {
+      name: {
         type: String,
+        default: ChildAndBabyName,
       },
-    ],
-    MediaAndGames: [
-      {
-        enum: MediaAndGames,
+      subcategories: [
+        {
+          enum: ChildAndBaby,
+          type: String,
+        },
+      ],
+    },
+    MediaAndGames: {
+      name: {
         type: String,
+        default: MediaAndGamesName,
       },
-    ],
-    AdultClothing: [
-      {
-        enum: AdultClothing,
+      subcategories: [
+        {
+          enum: MediaAndGames,
+          type: String,
+        },
+      ],
+    },
+    AdultClothing: {
+      name: {
         type: String,
+        default: AdultClothingName,
       },
-    ],
-    SportAndCamping: [
-      {
-        enum: SportAndCamping,
+      subcategories: [
+        {
+          enum: AdultClothing,
+          type: String,
+        },
+      ],
+    },
+    SportAndCamping: {
+      name: {
         type: String,
+        default: SportAndCampingName,
       },
-    ],
-    Technology: [
-      {
-        enum: Technology,
+      subcategories: [
+        {
+          enum: SportAndCamping,
+          type: String,
+        },
+      ],
+    },
+    Technology: {
+      name: {
         type: String,
+        default: TechnologyName,
       },
-    ],
-    NotDefined: [
-      {
-        enum: NotDefined,
+      subcategories: [
+        {
+          enum: Technology,
+          type: String,
+        },
+      ],
+    },
+    Other: {
+      name: {
         type: String,
+        default: OtherName,
       },
-    ],
+      subcategories: [
+        {
+          enum: Other,
+          type: String,
+        },
+      ],
+    },
   },
   owner: {
     type: Schema.Types.ObjectId,
