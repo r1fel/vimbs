@@ -29,12 +29,26 @@ export type Categories = {
     name: string;
     subcategories: Array<ChildAndBaby>;
   };
-  // ChildAndBaby: ChildAndBaby;
-  // MediaAndGames: MediaAndGames;
-  // AdultClothing: AdultClothing;
-  // SportAndCamping: SportAndCamping;
-  // Technology: Technology;
-  // Other : Other;
+  MediaAndGames: {
+    name: string;
+    subcategories: Array<MediaAndGames>;
+  };
+  AdultClothing: {
+    name: string;
+    subcategories: Array<AdultClothing>;
+  };
+  SportAndCamping: {
+    name: string;
+    subcategories: Array<SportAndCamping>;
+  };
+  Technology: {
+    name: string;
+    subcategories: Array<Technology>;
+  };
+  Other: {
+    name: string;
+    subcategories: Array<Other>;
+  };
 };
 
 // export type HouseAndGarden = 'Baustellengeräte' | 'Deko' | 'Gartengeräte';
