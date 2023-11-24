@@ -10,6 +10,7 @@ import { userDataAtom } from '../../../context/userAtoms';
 import { handleLogout } from '../services/AuthServices';
 import { IoLogOutOutline } from 'react-icons/io5';
 import { logger } from '../../../util/logger';
+import { useEffect } from 'react';
 
 function LogoutButton({ className }) {
   const [userData, setUserData] = useAtom(userDataAtom);
@@ -24,16 +25,33 @@ function LogoutButton({ className }) {
       // queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
       queryClient.invalidateQueries(['auth'], { exact: true });
       await setUserData('');
-      logger.log('logout mutation successful');
+      logger.log('logout mutation done. result:', logoutMutation);
       navigate('/auth');
     },
   });
 
-  // const logoutFunction = async() => {
-  //   await handleLogout()
-  //   await setUserData('')
-
+  // if (logoutMutation.status === 'success') {
+  //   async () => {
+  //     // queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
+  //     queryClient.invalidateQueries(['auth'], { exact: true });
+  //     await setUserData('');
+  //     logger.log('logout mutation done. result:', logoutMutation);
+  //     navigate('/auth');
+  //   };
   // }
+
+  // useEffect(
+  //   () => {
+  //     logger.log('Use Efect: logout mutation done. result:', logoutMutation);
+  //   },
+  //   logoutMutation.status,
+  //   logoutMutation,
+  // );
+
+  // const logoutFunction = async () => {
+  //   await handleLogout();
+  //   await setUserData('');
+  // };
 
   return (
     <IoLogOutOutline className={className} onClick={logoutMutation.mutate} />
