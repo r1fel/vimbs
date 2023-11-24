@@ -39,7 +39,7 @@ function NoAuthRedirect() {
           return;
         } else if (authQuery.data && !userData) {
           setUserData(authQuery.data);
-          logger.log('auth status true');
+          logger.log('auth status true, just set user data');
           return;
         } else {
           logger.log('auth status false, redirect now');

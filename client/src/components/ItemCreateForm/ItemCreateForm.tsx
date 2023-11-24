@@ -6,7 +6,6 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { createItem } from '../../services/ItemServices';
-import catchAsync from '../../util/catchAsync';
 import { logger } from '../../util/logger';
 import './ItemCreateForm.scss';
 
