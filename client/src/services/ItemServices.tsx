@@ -58,7 +58,7 @@ export const createItem = catchAsync(
   },
 );
 
-// create item
+// edit item
 export const editItem = catchAsync(
   async ({
     id,
@@ -94,6 +94,18 @@ export const editItem = catchAsync(
     return response;
   },
 );
+
+//delete item
+export const deleteItem = catchAsync(async ({ id }: { id: string }) => {
+  const response = await axios.delete(
+    `${import.meta.env.VITE_SERVER_URL}item/${id}`,
+    {
+      withCredentials: true,
+    },
+  );
+  logger.log('delete item worked:', response);
+  return response;
+});
 
 //initalize new borrowing request
 export const initializeRequest = catchAsync(
