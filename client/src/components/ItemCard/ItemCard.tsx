@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { deleteItem } from '../../services/ItemServices';
 import { logger } from '../../util/logger';
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import shortenText from '../../util/shortenText';
 import './ItemCard.scss';
 import { IoCreateOutline, IoTrashOutline } from 'react-icons/io5';
@@ -32,12 +38,23 @@ function ItemCard({
     setIsDeleteModalOpen(true);
   };
 
+  const queryClient = useQueryClient();
+  //use createItem as mutation function
+  const deleteItemMutation = useMutation({
+    mutationFn: () => deleteItem({ id: itemId }),
+    onSuccess: (itemData) => {
+      queryClient.invalidateQueries(['item', 'mine'], { exact: true });
+      setIsDeleteModalOpen(false);
+      // navigate(`/item/${itemData.data[0]._id}`);
+    },
+  });
+
   return (
     <div className="item-card">
       <Modal isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen}>
         do you really want to delete {itemName}
         <Button onClick={() => setIsDeleteModalOpen(false)}>cancel</Button>{' '}
-        <Button>Yes</Button>
+        <Button onClick={deleteItemMutation.mutate}>Yes</Button>
       </Modal>
       {itemOwner && (
         <Link className="item-card__link--edit" to={`/item/${itemId}/edit`}>
