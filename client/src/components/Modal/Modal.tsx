@@ -1,20 +1,16 @@
-import Button from '../Button/Button';
+import ReactDom from 'react-dom';
+
 import './Modal.scss';
 
-function Modal({ isOpen, setIsOpen, children }) {
+function Modal({ isOpen, children }) {
   if (!isOpen) return null;
 
-  return (
-    <div className="modal-delete-item">
-      {children}
-      <Button
-        onClick={() => {
-          setIsOpen(false);
-        }}
-      >
-        Close
-      </Button>
-    </div>
+  return ReactDom.createPortal(
+    <>
+      <div className="modal__overlay"></div>
+      <div className="modal">{children}</div>
+    </>,
+    document.getElementById('portal'),
   );
 }
 
