@@ -22,27 +22,27 @@ function ItemList({ url, fetchFunction, trigger }: { url: string }) {
 
   RenderCounter('ItemList');
 
-  const itemsQuery = useQuery({
-    queryKey: ['item'],
-    queryFn: () => fetchFunction(url),
-    enabled: !!userData,
-  });
-
-  // logger.log(
-  //   'ItemList rendered with:',
-  //   'fetchfunction : ',
-  //   fetchFunction,
-  //   'URL:',
-  //   url,
-  //   '!!userData:',
-  //   userData,
-  // );
+  //if my items are fetched they have a different query key
+  let query;
+  if (url.endsWith('/myitems')) {
+    query = useQuery({
+      queryKey: ['item', 'mine'],
+      queryFn: () => fetchFunction(url),
+      enabled: !!userData,
+    });
+  } else {
+    query = useQuery({
+      queryKey: ['item'],
+      queryFn: () => fetchFunction(url),
+      enabled: !!userData,
+    });
+  }
 
   useEffect(() => {
     const refetch = async () => {
       if (userData) {
-        await itemsQuery.refetch();
-        logger.log('refetch in items list:', itemsQuery);
+        await query.refetch();
+        logger.log('refetch in items list:', query);
       } else {
         logger.log(
           'refetch didnt work! trigger:',
@@ -55,19 +55,19 @@ function ItemList({ url, fetchFunction, trigger }: { url: string }) {
     refetch();
   }, [trigger, userData.length]);
 
-  if (itemsQuery.status === 'pending') {
+  if (query.status === 'pending') {
     return <p>Items are loading</p>;
   }
 
-  if (itemsQuery.status === 'error') {
-    logger.error('An error occured fetching the Items:', itemsQuery.error);
-    return <p>{JSON.stringify(itemsQuery.error)}</p>;
+  if (query.status === 'error') {
+    logger.error('An error occured fetching the Items:', query.error);
+    return <p>{JSON.stringify(query.error)}</p>;
   }
 
-  if (itemsQuery.status === 'success' && userData) {
-    const items: Item[] = itemsQuery.data.data;
+  if (query.status === 'success' && userData) {
+    const items: Item[] = query.data.data;
     // setItems(itemsQuery.data.data);
-    logger.log('Items are:', itemsQuery.data.data);
+    logger.log('Items are:', query.data.data);
 
     // RenderCounter('ItemList');
 
