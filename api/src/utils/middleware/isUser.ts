@@ -10,7 +10,10 @@ const isUser = (req: Request, res: Response, next: NextFunction) => {
   const reqUserId = new mongoose.Types.ObjectId(req.params.userId);
   if (!currentUser.equals(reqUserId))
     return next(
-      new ExpressError('You are not allowed to view this content!', 403),
+      new ExpressError(
+        'Unauthorized: You are not allowed to view this content!',
+        403,
+      ),
     );
 
   return next();

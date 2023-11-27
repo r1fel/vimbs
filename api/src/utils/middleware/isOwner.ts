@@ -12,15 +12,20 @@ const isOwner = catchAsync(
     const currentUser = req.user._id;
     const item: ItemInDB | null = await Item.findById(req.params.itemId);
     if (item === null)
-      return next(new ExpressError('this item doesnt exist', 500));
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
     if (!item.owner.equals(currentUser)) {
       return next(
-        new ExpressError('You do not have permission to do that!', 403)
+        new ExpressError(
+          'Forbidden: You do not have permission to do that!',
+          403,
+        ),
       );
     }
 
     return next();
-  }
+  },
 );
 
 export default isOwner;

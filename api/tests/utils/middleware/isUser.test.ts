@@ -58,7 +58,7 @@ describe('isUser middleware', () => {
     // Check that it returns an ExpressError with status 403
     expect(next).toHaveBeenCalledWith(expect.any(ExpressError));
     expect(ExpressError).toHaveBeenCalledWith(
-      'You are not allowed to view this content!',
+      'Unauthorized: You are not allowed to view this content!',
       403,
     );
   });

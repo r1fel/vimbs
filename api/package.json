@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/app.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --no-watch",
+    "test": "jest --detectOpenHandles --watch",
     "start:dev": "nodemon"
   },
   "keywords": [],
