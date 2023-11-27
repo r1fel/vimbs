@@ -1,4 +1,13 @@
 import mongoose, { Document } from 'mongoose';
+import {
+  HouseAndGarden,
+  ChildAndBaby,
+  MediaAndGames,
+  AdultClothing,
+  SportAndCamping,
+  Technology,
+  Other,
+} from './utils/categoryStringDefinitions';
 
 // Extension of Express.User, so that req.user._id can be used
 declare global {
@@ -8,6 +17,48 @@ declare global {
     }
   }
 }
+
+// export type Categories = (typeof categoriesArray)[number];
+
+export type Categories = {
+  HouseAndGarden: {
+    name: string;
+    subcategories: Array<HouseAndGarden>;
+  };
+  ChildAndBaby: {
+    name: string;
+    subcategories: Array<ChildAndBaby>;
+  };
+  MediaAndGames: {
+    name: string;
+    subcategories: Array<MediaAndGames>;
+  };
+  AdultClothing: {
+    name: string;
+    subcategories: Array<AdultClothing>;
+  };
+  SportAndCamping: {
+    name: string;
+    subcategories: Array<SportAndCamping>;
+  };
+  Technology: {
+    name: string;
+    subcategories: Array<Technology>;
+  };
+  Other: {
+    name: string;
+    subcategories: Array<Other>;
+  };
+};
+
+// export type HouseAndGarden = 'Baustellengeräte' | 'Deko' | 'Gartengeräte';
+export type HouseAndGarden = (typeof HouseAndGarden)[number];
+export type ChildAndBaby = (typeof ChildAndBaby)[number];
+export type MediaAndGames = (typeof MediaAndGames)[number];
+export type AdultClothing = (typeof AdultClothing)[number];
+export type SportAndCamping = (typeof SportAndCamping)[number];
+export type Technology = (typeof Technology)[number];
+export type Other = (typeof Other)[number];
 
 // DB related Types
 export interface UserInDB extends Document {
@@ -27,6 +78,10 @@ export interface UserInDB extends Document {
     countryCode?: string;
     number?: number;
   };
+  myItems: mongoose.Types.ObjectId[];
+  getItems: mongoose.Types.ObjectId[];
+  getHistory: mongoose.Types.ObjectId[];
+  searchHistory: [{ searchToken: string; date: Date }];
 }
 
 export interface ItemInDB extends Document {
@@ -34,6 +89,7 @@ export interface ItemInDB extends Document {
   picture: string | undefined;
   name: string;
   description: string | undefined;
+  categories: Categories;
   owner: mongoose.Types.ObjectId;
   interactions: mongoose.Types.ObjectId[];
   available: boolean;
@@ -44,6 +100,7 @@ export interface ItemInDBPopulated extends Document {
   picture: string | undefined;
   name: string;
   description: string | undefined;
+  categories: Categories;
   owner: mongoose.Types.ObjectId | UserInDB | null;
   interactions: mongoose.Types.ObjectId[] | ItemInteractionInDB[] | null;
   available: boolean;
@@ -82,6 +139,7 @@ export interface ResponseItemForClient {
   available: boolean;
   picture: string | null;
   description: string | null;
+  categories: Categories;
   dueDate: Date | null;
   owner: boolean;
   interactions: mongoose.Types.ObjectId[] | ItemInteractionInDB[] | null;
@@ -114,4 +172,11 @@ export type ChangeSettingsRequest = {
     plz: string;
     city: string;
   };
+};
+
+export type ItemRequest = {
+  picture?: string;
+  name: string;
+  description?: string;
+  categories: Categories;
 };

@@ -3,7 +3,6 @@
 import mongoose, { Schema } from 'mongoose';
 import passportLocalMongoose from 'passport-local-mongoose';
 import { UserInDB } from '../typeDefinitions';
-import { number } from 'joi';
 
 const UserSchema: Schema = new Schema({
   email: {
@@ -51,6 +50,30 @@ const UserSchema: Schema = new Schema({
     plz: String,
     city: String,
   },
+  myItems: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Item',
+    },
+  ],
+  getItems: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Item',
+    },
+  ],
+  getHistory: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Item',
+    },
+  ],
+  searchHistory: [
+    {
+      searchToken: String,
+      date: Date,
+    },
+  ],
 });
 
 UserSchema.plugin(passportLocalMongoose, {
