@@ -1,6 +1,7 @@
 // end of line functions when hitting item Routes
 
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 
 // utils
 import ExpressError from '../utils/ExpressError';
@@ -9,6 +10,7 @@ import catchAsync from '../utils/catchAsync';
 
 // models
 import Item from '../models/item';
+import User from '../models/user';
 
 // Type-Definitions
 import {
@@ -17,6 +19,7 @@ import {
   ItemInteractionInDB,
   UserInDB,
   ItemInDB,
+  ItemRequest,
 } from '../typeDefinitions';
 
 // fetch all items from DB that don't belog to user and process for client
@@ -33,25 +36,45 @@ export const index = catchAsync(
       .sort({ name: 1 });
     if (items === null)
       return next(new ExpressError('this item doesnt exist', 500));
+    // process for client
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(items, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 // create new item
-export const createItem = catchAsync(async (req: Request, res: Response) => {
-  if (req.user === undefined) return new ExpressError('user is undefined', 500);
-  const currentUser = req.user._id;
-  const item: ItemInDB = new Item({ name: req.body.item.name });
-  if (req.body.item.picture) item.picture = req.body.item.picture;
-  if (req.body.item.description) item.description = req.body.item.description;
-  item.owner = currentUser;
-  await item.save();
-  let response: Array<ResponseItemForClient> = [];
-  processItemForClient(item, currentUser, response);
-  return res.send(response);
-});
+export const createItem = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user === undefined)
+      return new ExpressError('user is undefined', 500);
+    const currentUser = req.user._id;
+    const newItem: ItemRequest = req.body.item;
+    // create item for saving to DB
+    const item: ItemInDB = new Item({
+      name: newItem.name,
+      categories: newItem.categories,
+    });
+    if (newItem.picture) item.picture = newItem.picture;
+    if (newItem.description) item.description = newItem.description;
+    // item.categories = newItem.categories;
+    item.owner = currentUser;
+    // add item._id to user.myItems
+    const user: UserInDB | null = await User.findById(currentUser);
+    if (user === null)
+      return next(new ExpressError('this user doesnt exist', 500));
+    if (!user.myItems.includes(item._id)) {
+      user.myItems.push(item._id);
+      await user.save();
+    }
+    // save item (after pushing to user, in case error of user not found happens)
+    await item.save();
+    // process for client
+    let response: Array<ResponseItemForClient> = [];
+    processItemForClient(item, currentUser, response);
+    return res.send(response);
+  },
+);
 
 // get item by itemId
 export const showItem = catchAsync(
@@ -64,10 +87,11 @@ export const showItem = catchAsync(
       .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
     if (item === null)
       return next(new ExpressError('this item doesnt exist', 500));
+    // process for client
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(item, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 // edit item by itemId
@@ -79,16 +103,17 @@ export const updateItem = catchAsync(
     const item: PopulatedItemsFromDB | null = await Item.findOneAndUpdate(
       { _id: req.params.itemId },
       { ...req.body.item },
-      { new: true }
+      { new: true },
     )
       .populate<{ owner: UserInDB }>('owner')
       .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
     if (item === null)
       return next(new ExpressError('this item doesnt exist', 500));
+    // process for client
     const response: ResponseItemForClient[] = [];
     processItemForClient(item, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 //TODO ER FR : revise search logic
@@ -104,8 +129,29 @@ export const itemSearch = catchAsync(
       .sort({ name: 1 });
     if (items === null)
       return next(new ExpressError('this item doesnt exist', 500));
+    // process for client
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(items, currentUser, response);
     return res.send(response);
-  }
+  },
+);
+
+// deleting am item from DB and pull it from owners myItems array
+export const deleteItem = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const itemId = new mongoose.Types.ObjectId(req.params.itemId);
+    if (req.user === undefined)
+      return new ExpressError('user is undefined', 500);
+    const currentUser = req.user._id;
+    const user: UserInDB | null = await User.findById(currentUser);
+    if (user === null)
+      return next(new ExpressError('this user doesnt exist', 500));
+    if (user.myItems.includes(itemId)) {
+      (user.myItems as any).pull(itemId);
+      await user.save();
+    }
+    await Item.findByIdAndDelete(itemId);
+    // req.flash('success', 'Successfully deleted a item!');
+    res.send(`Successfully deleted item ${itemId}!`);
+  },
 );

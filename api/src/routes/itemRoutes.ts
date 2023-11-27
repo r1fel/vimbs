@@ -14,6 +14,7 @@ import {
   itemSearch,
   showItem,
   updateItem,
+  deleteItem,
 } from '../controllers/itemControllers';
 
 const itemRoutes = Router();
@@ -24,19 +25,19 @@ itemRoutes
   .get(
     isLoggedIn,
     //
-    index
+    index,
   )
   .post(
     isLoggedIn,
     validateItem,
     //
-    createItem
+    createItem,
   );
 
 itemRoutes.route('/search').get(
   isLoggedIn,
   //
-  itemSearch
+  itemSearch,
 );
 
 itemRoutes
@@ -44,13 +45,18 @@ itemRoutes
   .get(
     isLoggedIn,
     //
-    showItem
+    showItem,
   )
   .put(
     isLoggedIn,
     isOwner,
     validateItem,
     //
-    updateItem
+    updateItem,
+  )
+  .delete(
+    isLoggedIn,
+    isOwner,
+    //
+    deleteItem,
   );
-// .delete(isLoggedIn, isOwner, items.deleteItem);
