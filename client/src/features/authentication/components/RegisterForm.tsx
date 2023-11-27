@@ -5,7 +5,7 @@ import { IoEyeOffOutline, IoEye } from 'react-icons/io5';
 import { handleRegister } from '../services/AuthServices';
 import { logger } from '../../../util/logger';
 import RegisterPwdValidator from './RegisterPwdValidator';
-import { userDataAtom, isLoggedInAtom } from '../../../context/userAtoms';
+import { userDataAtom } from '../../../context/userAtoms';
 
 interface RegisterFormData {
   email: string;
@@ -14,7 +14,6 @@ interface RegisterFormData {
 
 function RegisterForm() {
   const [userData, setUserData] = useAtom(userDataAtom);
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
@@ -56,7 +55,6 @@ function RegisterForm() {
     if (isEmailValid && isPasswordValid) {
       const user = await handleRegister(formData.email, formData.password);
       if (user) {
-        await setIsLoggedIn(true);
         await setUserData(user.data);
         logger.log('register response', user);
         navigate('/');

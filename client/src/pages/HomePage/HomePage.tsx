@@ -3,7 +3,7 @@ import { useAtom } from 'jotai';
 import { fetchItems, searchItems } from '../../services/ItemServices';
 import RenderCounter from '../../util/RenderCounter';
 import './HomePage.scss';
-import { userDataAtom, isLoggedInAtom } from '../../context/userAtoms';
+import { userDataAtom } from '../../context/userAtoms';
 import Button from '../../components/Button/Button';
 import ItemList from '../../components/ItemList/ItemList';
 import LoginForm from '../../features/authentication/components/LoginForm';
@@ -17,7 +17,6 @@ function HomePage(): JSX.Element {
   const [isSearchExecuted, setIsSearchExecuted] = useState(false);
   const [fetchMode, setFetchMode] = useState('fetchItems');
   const [userData] = useAtom(userDataAtom);
-  const [isLoggedIn] = useAtom(isLoggedInAtom);
 
   NoAuthRedirect();
 
@@ -30,7 +29,7 @@ function HomePage(): JSX.Element {
   );
   return (
     <div>
-      {userData && isLoggedIn && (
+      {userData && (
         <div>
           <NavBar />
           <SearchBar
