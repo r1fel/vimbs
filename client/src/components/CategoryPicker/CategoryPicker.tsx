@@ -1,60 +1,143 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import './CategoryPicker.scss';
+import { logger } from '../../util/logger';
+import { IoCheckmarkCircle } from 'react-icons/io5';
 
-const CategoryPicker = ({ onClose }) => {
+const CategoryPicker = ({
+  setConfirmedTopCategory,
+  setConfirmedSubCategory,
+  setIsCategoryModalOpen,
+}) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
-  const [isSubcategoryView, setSubcategoryView] = useState(false);
+  const [isSubCategoryView, setSubCategoryView] = useState(false);
 
-  const topCategories = ['Category A', 'Category B', 'Category C'];
+  const topCategories = {
+    HouseAndGardenName: 'Haus und Garten',
+    ChildAndBabyName: 'Kind und Baby',
+    MediaAndGamesName: 'Medien und Spiele',
+    AdultClothingName: 'Mode',
+    SportAndCampingName: 'Sport und Camping',
+    TechnologyName: 'Technik und Zubehör',
+    OtherName: 'Sonstiges',
+  };
 
-  const subcategories = {
-    'Category A': ['Subcategory A1', 'Subcategory A2'],
-    'Category B': ['Subcategory B1', 'Subcategory B2'],
-    'Category C': ['Subcategory C1', 'Subcategory C2'],
+  const subCategories = {
+    HouseAndGarden: [
+      'Baustellengeräte',
+      'Deko',
+      'Gartengeräte',
+      'Garten- und Partymoebel',
+      'Haushalts- und Küchengeräte',
+      'Schutzkleidung',
+      'Werkzeuge',
+      'Sonstiges',
+    ],
+    ChildAndBaby: ['Kleidung', 'Spielzeug', 'Zubehör', 'Sonstiges'],
+    MediaAndGames: [
+      'Bücher',
+      'Gesellschaftsspiele (Brett- und Kartenspiele)',
+      'Fachbücher (Schule und Studium)',
+      'Filme',
+      'Videospiele',
+      'Sonstiges',
+    ],
+    AdultClothing: [
+      'Damenkleidung',
+      'Damenschuhe',
+      'Herrenkleidung',
+      'Herrenschuhe',
+      'Sonstiges',
+    ],
+    SportAndCamping: [
+      'Campingutensilien',
+      'Fitnessgeräte',
+      'Outdoorkleidung',
+      'Wintersport',
+      'Sonstiges',
+    ],
+    Technology: [
+      'Audio & Hifi',
+      'Computer und Zubehör',
+      'Kameras und Zubehör',
+      'Konsolen',
+      'TV, Beamer und Zubehör',
+      'Sonstiges',
+    ],
+    Other: ['Sonstiges'],
   };
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
-    setSubcategoryView(true);
+    const categoryKey = category.replace(/Name$/, '');
+    setSelectedCategory(categoryKey);
+    setConfirmedTopCategory(category);
+    setSubCategoryView(true);
   };
 
-  const handleSubcategoryClick = (subcategory) => {
-    // Handle subcategory selection (you might want to do something with the selected subcategory)
-    console.log(`Selected Subcategory: ${subcategory}`);
+  const handleSubCategoryClick = (subCategory) => {
+    setSelectedSubCategory(subCategory);
+    console.log(`Selected Subcategory: ${subCategory}`);
   };
 
   const handleBackClick = () => {
-    setSubcategoryView(false);
+    setSubCategoryView(false);
     setSelectedCategory(null);
+    setSelectedSubCategory(null);
   };
+
+  const handleCancelClick = () => {
+    setSelectedCategory(null);
+    setSelectedSubCategory(null);
+    setConfirmedSubCategory(null);
+    setIsCategoryModalOpen(false);
+  };
+
+  const handleAcceptClick = () => {
+    setConfirmedSubCategory(selectedSubCategory);
+
+    setIsCategoryModalOpen(false);
+  };
+
+  useEffect(() => {
+    logger.log('selected category is:', selectedCategory);
+  }, [selectedCategory]);
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>{isSubcategoryView ? 'Subcategories' : 'Top Categories'}</h2>
-        <ul>
-          {isSubcategoryView && selectedCategory !== null
-            ? subcategories[selectedCategory].map((subcategory) => (
+        <h3>{isSubCategoryView ? 'Subcategories' : 'Categories'}</h3>
+        <ul className="category-picker__list">
+          {isSubCategoryView &&
+          selectedCategory !== null &&
+          subCategories[selectedCategory]
+            ? subCategories[selectedCategory].map((subCategory) => (
                 <li
-                  key={`category-selecter-${subcategory}`}
-                  onClick={() => handleSubcategoryClick(subcategory)}
+                  key={subCategory}
+                  onClick={() => handleSubCategoryClick(subCategory)}
+                  className="category-picker__category"
                 >
-                  {subcategory}
+                  {subCategory}
+                  {subCategory === selectedSubCategory ? (
+                    <IoCheckmarkCircle />
+                  ) : null}
                 </li>
               ))
-            : topCategories.map((category) => (
+            : Object.keys(topCategories).map((category) => (
                 <li
                   key={category}
                   onClick={() => handleCategoryClick(category)}
+                  className="category-picker__category"
                 >
-                  {category}
+                  {topCategories[category]}
                 </li>
               ))}
         </ul>
-        <button onClick={handleBackClick} disabled={!isSubcategoryView}>
+        <button onClick={handleBackClick} disabled={!isSubCategoryView}>
           Back
         </button>
-        <button onClick={onClose}>Accept</button>
+        {selectedSubCategory !== null ? (
+          <button onClick={handleAcceptClick}>Accept</button>
+        ) : null}
       </div>
     </div>
   );
