@@ -1,0 +1,12 @@
+.category-picker {
+  &__list {
+    list-style: none;
+  }
+  &__category {
+    padding: 0.2rem;
+    font-weight: 300;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
