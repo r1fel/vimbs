@@ -4,17 +4,42 @@ import * as database from '../../src/database';
 
 const app = makeApp(database);
 
-describe('POST /auth/login', () => {
+// routes
+const loginRoute = '/auth/login';
+const registerRoute = '/auth/register';
+const logoutRoute = '/auth/logout';
+const authRoute = '/auth';
+
+// frequently used functions
+const loginBodo4 = async () => {
+  const response = await request(app).post(loginRoute).send({
+    email: 'bodo4@gmail.com',
+    password: 'bodo4',
+  });
+  return response;
+};
+
+describe(`POST ${loginRoute}`, () => {
   describe('when both email and password are given', () => {
     it('should respond successful login with statusCode200, body._id and body.email for correct credentials', async () => {
-      const response = await request(app).post('/auth/login').send({
-        email: 'bodo4@gmail.com',
-        password: 'bodo4',
-      });
-      expect(response.statusCode).toBe(200);
-      expect(response.body._id).toBeDefined();
-      expect(response.body.email).toBeDefined();
-    });
+      const loginBodo4response = await loginBodo4();
+
+      // Access the headers and get the 'set-cookie' header
+      const setCookieHeader = loginBodo4response.headers['set-cookie'];
+      // Extract the connect.sid value from the 'set-cookie' header
+      const connectSidValue = setCookieHeader[0].split(';')[0].split('=')[1];
+      // console.log('connect.sid value:', connectSidValue);
+
+      const logoutResponse = await request(app)
+        .post(logoutRoute)
+        .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+      expect(loginBodo4response.statusCode).toBe(200);
+      expect(loginBodo4response.body._id.toString()).toEqual(
+        '6553b5bfa70b16a991b89001',
+      );
+      expect(loginBodo4response.body.email).toBe('bodo4@gmail.com');
+    }, 10000);
 
     it('should respond error with statusCode401 for invalid credentials', async () => {
       const bodyData = [
@@ -25,7 +50,7 @@ describe('POST /auth/login', () => {
       ];
 
       for (const body of bodyData) {
-        const response = await request(app).post('/auth/login').send(body);
+        const response = await request(app).post(loginRoute).send(body);
         expect(response.statusCode).toBe(401);
       }
     });
@@ -49,11 +74,11 @@ describe('POST /auth/login', () => {
   });
 });
 
-describe('POST /auth/register', () => {
+describe(`POST ${registerRoute}`, () => {
   describe('when both email and password are given', () => {
     it('should respond successful register with statusCode200, body._id and body.email', async () => {
       // actually creating user in the DB
-      const response = await request(app).post('/auth/register').send({
+      const response = await request(app).post(registerRoute).send({
         email: 'register-auth-test-user@gmail.com',
         password: 'register-auth-test-user',
       });
@@ -65,10 +90,10 @@ describe('POST /auth/register', () => {
       expect(response.statusCode).toBe(200);
       expect(response.body._id).toBeDefined();
       expect(response.body.email).toBeDefined();
-    });
+    }, 10000);
 
     it('should respond error with statusCode500 if user/given email already exists in UserDB', async () => {
-      const response = await request(app).post('/auth/register').send({
+      const response = await request(app).post(registerRoute).send({
         email: 'bodo4@gmail.com',
         password: 'bodo4',
       });
@@ -87,7 +112,7 @@ describe('POST /auth/register', () => {
         {},
       ];
       for (const body of bodyData) {
-        const response = await request(app).post('/auth/register').send(body);
+        const response = await request(app).post(registerRoute).send(body);
         expect(response.statusCode).toBe(400);
       }
     });
@@ -95,28 +120,42 @@ describe('POST /auth/register', () => {
 });
 
 // working version by bypassing isLoggedIn
-import * as Functions from '../../src/utils/middleware/functionForMocking';
+// import * as Functions from '../../src/utils/middleware/functionForMocking';
 
-describe('GET /auth', () => {
-  it('should respond successful with a statusCode 200', async () => {
-    jest.spyOn(Functions, 'isAuthenticated').mockReturnValue(true);
+// describe.skip('GET /auth', () => {
+//   it('should respond successful with a statusCode 200', async () => {
+//     jest.spyOn(Functions, 'isAuthenticated').mockReturnValue(true);
 
-    const response = await request(app).get('/auth/');
+//     const response = await request(app).get('/auth');
 
-    // Check the response
-    expect(response.statusCode).toBe(200);
-  });
-});
+//     // Check the response
+//     expect(response.statusCode).toBe(200);
+//   });
+// });
 
-// trying to bypass isLoggedIn with req.user data
-describe('GET /auth', () => {
+describe(`GET ${authRoute}`, () => {
   it('should respond successful with a statusCode 200 and user data for existing req.user and ongoing session', async () => {
-    jest.spyOn(Functions, 'isAuthenticated').mockReturnValue(true);
+    const loginBodo4response = await loginBodo4();
 
-    const response = await request(app).get('/auth/');
+    // Access the headers and get the 'set-cookie' header
+    const setCookieHeader = loginBodo4response.headers['set-cookie'];
+    // Extract the connect.sid value from the 'set-cookie' header
+    const connectSidValue = setCookieHeader[0].split(';')[0].split('=')[1];
+
+    const authResponse = await request(app)
+      .get(authRoute)
+      .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+    const logoutResponse = await request(app)
+      .post(logoutRoute)
+      .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
     // Check the response
-    expect(response.statusCode).toBe(200);
+    expect(authResponse.statusCode).toBe(200);
+    expect(authResponse.body._id.toString()).toEqual(
+      '6553b5bfa70b16a991b89001',
+    );
+    expect(authResponse.body.email).toBe('bodo4@gmail.com');
   });
 });
 
@@ -144,17 +183,32 @@ describe('GET /auth', () => {
 //   // });
 // });
 
-// describe('POST /auth/logout', () => {
-//   it('should respond successful with a statusCode200 for a previously logged in user', async () => {
-//   //
-//   });
-//   it('should respond error with a statusCode401 for NO previously logged in user', async () => {
-//     //
-//     });
-//   it('should respond error with a statusCode401 for any passed in body', async () => {
-//     //
-//     });
-// });
+describe('POST /auth/logout', () => {
+  it('should respond successful with a statusCode200 for a previously logged in user', async () => {
+    const loginBodo4response = await loginBodo4();
+
+    // Access the headers and get the 'set-cookie' header
+    const setCookieHeader = loginBodo4response.headers['set-cookie'];
+    // Extract the connect.sid value from the 'set-cookie' header
+    const connectSidValue = setCookieHeader[0].split(';')[0].split('=')[1];
+    // console.log('connect.sid value:', connectSidValue);
+
+    const logoutResponse = await request(app)
+      .post(logoutRoute)
+      .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+    expect(logoutResponse.statusCode).toBe(200);
+    expect(logoutResponse.text).toBe('successfully logged out!');
+  });
+  it('should respond error with a statusCode401 for NO previously logged in user', async () => {
+    const logoutResponse = await request(app).post(logoutRoute);
+
+    expect(logoutResponse.statusCode).toBe(401);
+  });
+  // it('should respond error with a statusCode401 for any passed in body', async () => {
+  //   //
+  //   });
+});
 
 // describe('GET /auth/google', () => {
 // it('should respond successful login with statusCode200, body._id and body.email for existing google user', async () => {
