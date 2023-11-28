@@ -8,6 +8,8 @@ import {
 import { createItem } from '../../services/ItemServices';
 import { logger } from '../../util/logger';
 import './ItemCreateForm.scss';
+import CategoryPicker from '../CategoryPicker/CategoryPicker';
+import Button from '../Button/Button';
 
 interface ItemCreateFormData {
   name: string;
@@ -23,11 +25,17 @@ function ItemCreateForm() {
     picture: '',
   });
 
+  const [confirmedTopCategory, setConfirmedTopCategory] = useState(null);
+  const [confirmedSubCategory, setConfirmedSubCategory] = useState(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  logger.log('selectedCategory is:', selectedCategory);
   const navigate = useNavigate();
   //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
   const queryClient = useQueryClient();
   //use createItem as mutation function
   const createItemMutation = useMutation({
+    mutationKey: ['item', 'new'],
     mutationFn: createItem,
     onSuccess: (itemData) => {
       queryClient.setQueryData(['item', itemData.data[0]._id], itemData);
@@ -64,6 +72,17 @@ function ItemCreateForm() {
   return (
     <div>
       <h2>Create Item</h2>
+
+      {
+        // isCategoryModalOpen &&
+        <CategoryPicker
+          confirmedTopCategory={confirmedTopCategory}
+          setConfirmedTopCategory={setConfirmedTopCategory}
+          confirmedSubCategory={confirmedSubCategory}
+          setConfirmedSubCategory={setConfirmedSubCategory}
+          setIsCategoryModalOpen={setIsCategoryModalOpen}
+        />
+      }
       <form onSubmit={handleSubmit}>
         <div>
           <label>Title </label>
@@ -90,6 +109,16 @@ function ItemCreateForm() {
           />
         </div>
         <div>
+          <p>
+            category:{' '}
+            {confirmedSubCategory &&
+              `${selectedCategory} / ${confirmedSubCategory}`}{' '}
+            <Button onClick={() => setIsCategoryModalOpen(true)}>
+              {confirmedSubCategory ? 'Change Category' : 'Set Category'}
+            </Button>
+          </p>
+        </div>
+        <div>
           <label>picture</label>
           <input
             type="text"
@@ -101,9 +130,9 @@ function ItemCreateForm() {
             id="picture"
           />
         </div>
-        <button onClick={handleSubmit} className="button">
+        <Button onClick={handleSubmit} className="button">
           Create!
-        </button>
+        </Button>
       </form>
     </div>
   );
