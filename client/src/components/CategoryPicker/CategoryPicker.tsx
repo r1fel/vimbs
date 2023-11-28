@@ -13,13 +13,13 @@ const CategoryPicker = ({
   const [isSubCategoryView, setSubCategoryView] = useState(false);
 
   const topCategories = {
-    HouseAndGardenName: 'Haus und Garten',
-    ChildAndBabyName: 'Kind und Baby',
-    MediaAndGamesName: 'Medien und Spiele',
-    AdultClothingName: 'Mode',
-    SportAndCampingName: 'Sport und Camping',
-    TechnologyName: 'Technik und Zubehör',
-    OtherName: 'Sonstiges',
+    HouseAndGarden: 'Haus und Garten',
+    ChildAndBaby: 'Kind und Baby',
+    MediaAndGames: 'Medien und Spiele',
+    AdultClothing: 'Mode',
+    SportAndCamping: 'Sport und Camping',
+    Technology: 'Technik und Zubehör',
+    Other: 'Sonstiges',
   };
 
   const subCategories = {
@@ -94,7 +94,7 @@ const CategoryPicker = ({
 
   const handleAcceptClick = () => {
     setConfirmedSubCategory(selectedSubCategory);
-
+    setConfirmedTopCategory(selectedCategory);
     setIsCategoryModalOpen(false);
   };
 
