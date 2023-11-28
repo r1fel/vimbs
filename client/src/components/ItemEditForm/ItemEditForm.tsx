@@ -17,7 +17,7 @@ interface ItemEditFormData {
   picture: string;
 }
 
-function ItemEditForm({ id }) {
+function ItemEditForm({ id }: { id: string }) {
   //Handle book submit form changes and submit
 
   // const { id } = useParams();
@@ -29,10 +29,11 @@ function ItemEditForm({ id }) {
 
   useEffect(() => {
     if (itemQuery.isSuccess) {
+      logger.log('edit item query:', itemQuery);
       setFormData({
-        name: itemQuery.data.data.name,
-        description: itemQuery.data.data.description,
-        picture: itemQuery.data.data.picture,
+        name: itemQuery.data.data[0].name,
+        description: itemQuery.data.data[0].description,
+        picture: itemQuery.data.data[0].picture,
       });
     }
 
