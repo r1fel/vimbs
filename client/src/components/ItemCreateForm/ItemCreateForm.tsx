@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   QueryClient,
@@ -15,6 +15,29 @@ interface ItemCreateFormData {
   name: string;
   description: string;
   picture: string;
+  categories: {
+    HouseAndGarden?: {
+      subcategories: [string];
+    };
+    ChildAndBaby?: {
+      subcategories: [string];
+    };
+    MediaAndGames?: {
+      subcategories: [string];
+    };
+    AdultClothing?: {
+      subcategories: [string];
+    };
+    SportAndCamping?: {
+      subcategories: [string];
+    };
+    Technology?: {
+      subcategories: [string];
+    };
+    Other?: {
+      subcategories: [string];
+    };
+  };
 }
 
 function ItemCreateForm() {
@@ -23,13 +46,14 @@ function ItemCreateForm() {
     name: '',
     description: '',
     picture: '',
+    categories: {},
   });
 
   const [confirmedTopCategory, setConfirmedTopCategory] = useState(null);
   const [confirmedSubCategory, setConfirmedSubCategory] = useState(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
-  logger.log('selectedCategory is:', selectedCategory);
+  logger.log('confirmedTopCategory is:', confirmedTopCategory);
   const navigate = useNavigate();
   //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
   const queryClient = useQueryClient();
@@ -43,6 +67,21 @@ function ItemCreateForm() {
       navigate(`/item/${itemData.data[0]._id}`);
     },
   });
+
+  useEffect(() => {
+    // change the categories field of the formData
+
+    setFormData((prevData) => ({
+      ...prevData,
+      categories: {
+        [confirmedTopCategory]: {
+          subcategories: [confirmedSubCategory],
+        },
+      },
+    }));
+
+    logger.log('the changed form data after setting categries is:', formData);
+  }, [confirmedSubCategory, confirmedTopCategory]);
 
   const handleChange = (event: any) => {
     const changedField = event.target.name;
@@ -110,9 +149,10 @@ function ItemCreateForm() {
         </div>
         <div>
           <p>
-            category:{' '}
-            {confirmedSubCategory &&
-              `${selectedCategory} / ${confirmedSubCategory}`}{' '}
+            category:
+            {confirmedSubCategory && confirmedTopCategory
+              ? formData.categories[0].subcategories
+              : null}{' '}
             <Button onClick={() => setIsCategoryModalOpen(true)}>
               {confirmedSubCategory ? 'Change Category' : 'Set Category'}
             </Button>
