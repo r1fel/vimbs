@@ -102,8 +102,8 @@ const CategoryPicker = ({
   }, [selectedCategory]);
 
   return (
-    <div className="modal">
-      <div className="modal-content">
+    <div className="category-picker">
+      <div className="category-picker__content">
         <h3>{isSubCategoryView ? 'Subcategories' : 'Categories'}</h3>
         <ul className="category-picker__list">
           {isSubCategoryView &&
