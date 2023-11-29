@@ -29,17 +29,20 @@ export const createItem = catchAsync(
     name,
     description,
     picture,
+    categories,
   }: {
     name: string;
     description: string;
     picture: string;
+    categories: { string };
   }) => {
-    logger.log('service receives:', name, description, picture);
+    logger.log('service receives:', name, description, picture, categories);
     const input = {
       item: {
         name,
         description,
         picture,
+        categories,
       },
     };
 
