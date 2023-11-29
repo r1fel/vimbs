@@ -68,9 +68,7 @@ const CategoryPicker = ({
   };
 
   const handleCategoryClick = (category) => {
-    const categoryKey = category.replace(/Name$/, '');
-    setSelectedCategory(categoryKey);
-    setConfirmedTopCategory(category);
+    setSelectedCategory(category);
     setSubCategoryView(true);
   };
 
