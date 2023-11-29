@@ -25,6 +25,7 @@ function ItemCreateForm() {
   const [confirmedTopCategory, setConfirmedTopCategory] = useState(null);
   const [confirmedSubCategory, setConfirmedSubCategory] = useState(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [wasSubmitTried, setWasSubmitTried] = useState(false);
 
   logger.log('confirmedTopCategory is:', confirmedTopCategory);
   const navigate = useNavigate();
@@ -41,6 +42,13 @@ function ItemCreateForm() {
       navigate(`/item/${itemData.data[0]._id}`);
     },
   });
+
+  const errors = {
+    name: 'name is required',
+    description: 'description is required',
+    picture: 'picture is required',
+    categories: 'please pick a category',
+  };
 
   useEffect(() => {
     // change the categories field of the formData
@@ -70,9 +78,20 @@ function ItemCreateForm() {
 
   // call the mutation (takes objects only)
   const handleSubmit = (event: any) => {
-    event.preventDefault();
-    createItemMutation.mutate(formData);
-    logger.log('data of create item mutation: ', createItemMutation);
+    if (
+      formData.name &&
+      formData.description &&
+      formData.picture &&
+      confirmedSubCategory
+    ) {
+      event.preventDefault();
+      createItemMutation.mutate(formData);
+      logger.log('data of create item mutation: ', createItemMutation);
+      setWasSubmitTried(false);
+    } else {
+      setWasSubmitTried(true);
+      logger.log('form data not ready for item creation ', formData);
+    }
   };
 
   if (createItemMutation.status === 'pending') {
@@ -95,13 +114,15 @@ function ItemCreateForm() {
       <h2>Create Item</h2>
 
       {isCategoryModalOpen && (
-        <CategoryPicker
-          confirmedTopCategory={confirmedTopCategory}
-          setConfirmedTopCategory={setConfirmedTopCategory}
-          confirmedSubCategory={confirmedSubCategory}
-          setConfirmedSubCategory={setConfirmedSubCategory}
-          setIsCategoryModalOpen={setIsCategoryModalOpen}
-        />
+        <Modal isOpen={isCategoryModalOpen}>
+          <CategoryPicker
+            confirmedTopCategory={confirmedTopCategory}
+            setConfirmedTopCategory={setConfirmedTopCategory}
+            confirmedSubCategory={confirmedSubCategory}
+            setConfirmedSubCategory={setConfirmedSubCategory}
+            setIsCategoryModalOpen={setIsCategoryModalOpen}
+          />
+        </Modal>
       )}
       <form onSubmit={handleSubmit}>
         <div>
@@ -115,6 +136,9 @@ function ItemCreateForm() {
             name="name"
             id="name"
           />
+          {!formData.name && wasSubmitTried && (
+            <p className="create-item-error">{errors.name}</p>
+          )}
         </div>
         <div>
           <label>description</label>
@@ -127,6 +151,9 @@ function ItemCreateForm() {
             name="description"
             id="description"
           />
+          {!formData.description && wasSubmitTried && (
+            <p className="create-item-error">{errors.description}</p>
+          )}
         </div>
         <div>
           <p>
@@ -140,6 +167,9 @@ function ItemCreateForm() {
               {confirmedSubCategory ? 'Change Category' : 'Set Category'}
             </Button>
           </p>
+          {!confirmedSubCategory && wasSubmitTried && (
+            <p className="create-item-error">{errors.categories}</p>
+          )}
         </div>
         <div>
           <label>picture</label>
@@ -152,6 +182,9 @@ function ItemCreateForm() {
             name="picture"
             id="picture"
           />
+          {!formData.picture && wasSubmitTried && (
+            <p className="create-item-error">{errors.picture}</p>
+          )}
         </div>
         <Button onClick={handleSubmit} className="button">
           Create!
