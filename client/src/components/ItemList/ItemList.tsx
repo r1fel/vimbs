@@ -7,7 +7,7 @@ import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
 import { userDataAtom } from '../../context/userAtoms';
 
-//! change type of image to string array later
+//! what is required, what not?
 interface Item {
   _id: string;
   name: string;
@@ -15,6 +15,7 @@ interface Item {
   picture: string;
   available: boolean;
   owner: boolean;
+  categories: { [key: string]: string };
 }
 
 function ItemList({ url, fetchFunction, trigger }: { url: string }) {
@@ -82,6 +83,7 @@ function ItemList({ url, fetchFunction, trigger }: { url: string }) {
             itemImages={item.picture}
             itemAvailable={item.available}
             itemOwner={item.owner}
+            itemCategories={item.categories}
           ></ItemCard>
         ));
       } else {
