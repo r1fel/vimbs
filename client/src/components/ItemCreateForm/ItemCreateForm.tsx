@@ -55,6 +55,7 @@ function ItemCreateForm() {
 
   logger.log('confirmedTopCategory is:', confirmedTopCategory);
   const navigate = useNavigate();
+
   //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
   const queryClient = useQueryClient();
   //use createItem as mutation function
@@ -120,8 +121,7 @@ function ItemCreateForm() {
     <div>
       <h2>Create Item</h2>
 
-      {
-        // isCategoryModalOpen &&
+      {isCategoryModalOpen && (
         <CategoryPicker
           confirmedTopCategory={confirmedTopCategory}
           setConfirmedTopCategory={setConfirmedTopCategory}
@@ -129,7 +129,7 @@ function ItemCreateForm() {
           setConfirmedSubCategory={setConfirmedSubCategory}
           setIsCategoryModalOpen={setIsCategoryModalOpen}
         />
-      }
+      )}
       <form onSubmit={handleSubmit}>
         <div>
           <label>Title </label>
@@ -159,8 +159,10 @@ function ItemCreateForm() {
           <p>
             category:
             {confirmedSubCategory && confirmedTopCategory
-              ? Object.values(formData.categories)[0]?.subcategories
-              : []}{' '}
+              ? `${confirmedTopCategory} / ${
+                  Object.values(formData.categories)[0]?.subcategories
+                }`
+              : null}{' '}
             <Button onClick={() => setIsCategoryModalOpen(true)}>
               {confirmedSubCategory ? 'Change Category' : 'Set Category'}
             </Button>
