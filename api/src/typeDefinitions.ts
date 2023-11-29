@@ -51,6 +51,30 @@ export type Categories = {
   };
 };
 
+export type CategoriesForInput = {
+  HouseAndGarden?: {
+    subcategories: Array<HouseAndGarden>;
+  };
+  ChildAndBaby?: {
+    subcategories: Array<ChildAndBaby>;
+  };
+  MediaAndGames?: {
+    subcategories: Array<MediaAndGames>;
+  };
+  AdultClothing?: {
+    subcategories: Array<AdultClothing>;
+  };
+  SportAndCamping?: {
+    subcategories: Array<SportAndCamping>;
+  };
+  Technology?: {
+    subcategories: Array<Technology>;
+  };
+  Other?: {
+    subcategories: Array<Other>;
+  };
+};
+
 // export type HouseAndGarden = 'Baustellengeräte' | 'Deko' | 'Gartengeräte';
 export type HouseAndGarden = (typeof HouseAndGarden)[number];
 export type ChildAndBaby = (typeof ChildAndBaby)[number];
@@ -178,5 +202,5 @@ export type ItemRequest = {
   picture?: string;
   name: string;
   description?: string;
-  categories: Categories;
+  categories: CategoriesForInput;
 };

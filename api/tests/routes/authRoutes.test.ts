@@ -183,7 +183,7 @@ describe(`GET ${authRoute}`, () => {
 //   // });
 // });
 
-describe('POST /auth/logout', () => {
+describe(`POST ${logoutRoute}`, () => {
   it('should respond successful with a statusCode200 for a previously logged in user', async () => {
     const loginBodo4response = await loginBodo4();
 
