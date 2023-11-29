@@ -20,6 +20,7 @@ interface ItemCardProps {
   itemImages: string;
   itemAvailable: boolean;
   itemOwner: boolean;
+  itemCategories: { [key: string]: string };
 }
 
 function ItemCard({
@@ -29,6 +30,7 @@ function ItemCard({
   itemImages,
   itemAvailable,
   itemOwner,
+  itemCategories,
 }: ItemCardProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const shortName = shortenText(15, itemName);
@@ -57,12 +59,12 @@ function ItemCard({
         <Button onClick={deleteItemMutation.mutate}>Yes</Button>
       </Modal>
       {itemOwner && (
-        <Link className="item-card__link--edit" to={`/item/${itemId}/edit`}>
-          <IoCreateOutline className="item-card__edit" />
-        </Link>
-      )}
-      {itemOwner && (
-        <IoTrashOutline className="item-card__delete" onClick={openModal} />
+        <>
+          <Link className="item-card__link--edit" to={`/item/${itemId}/edit`}>
+            <IoCreateOutline className="item-card__edit" />
+          </Link>
+          <IoTrashOutline className="item-card__delete" onClick={openModal} />
+        </>
       )}
       <Link className="item-card__link" to={`/item/${itemId}`}>
         <img className="item-card__img" src={itemImages}></img>

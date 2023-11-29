@@ -38,25 +38,25 @@
     color: inherit;
     &--edit {
       position: absolute;
+      right: 2.5rem;
     }
   }
 
   &__action {
     font-size: 2rem;
-    position: absolute;
     transition: 0.15s;
     &:hover {
       cursor: pointer;
       color: $col-sec-500;
     }
   }
-
   &__edit {
     @extend .item-card__action;
-    right: 5rem;
   }
+
   &__delete {
     @extend .item-card__action;
+    position: absolute;
     right: 0.5rem;
   }
 
