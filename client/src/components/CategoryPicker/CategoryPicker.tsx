@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './CategoryPicker.scss';
 import { logger } from '../../util/logger';
 import { IoCheckmarkCircle } from 'react-icons/io5';
+import Button from '../Button/Button';
 
 const CategoryPicker = ({
   setConfirmedTopCategory,
@@ -130,11 +131,13 @@ const CategoryPicker = ({
                 </li>
               ))}
         </ul>
-        <button onClick={handleBackClick} disabled={!isSubCategoryView}>
-          Back
-        </button>
+        {isSubCategoryView ? (
+          <Button onClick={handleBackClick}>Back</Button>
+        ) : (
+          <Button onClick={handleCancelClick}>Cancel</Button>
+        )}
         {selectedSubCategory !== null ? (
-          <button onClick={handleAcceptClick}>Accept</button>
+          <Button onClick={handleAcceptClick}>Accept</Button>
         ) : null}
       </div>
     </div>
