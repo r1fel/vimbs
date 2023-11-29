@@ -23,12 +23,16 @@ function ItemDetails({ id }: { id: string }) {
 
   if (itemQuery.status === 'success') {
     //get the actual data from query object
+    logger.log('the item data from item details is:', itemQuery.data.data[0]);
     const item = itemQuery.data.data[0];
 
     return (
       <div className="item-details">
         <img src={item.picture}></img>
         <h1 className="item-details__name">{item.name}</h1>
+        <p className="item-details__categories">
+          Kategorie: {Object.values(item.categories)[0]?.subcategories}
+        </p>
         <p className="item-details__descr">{item.description}</p>
       </div>
     );
