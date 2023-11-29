@@ -10,35 +10,8 @@ import { logger } from '../../util/logger';
 import './ItemCreateForm.scss';
 import CategoryPicker from '../CategoryPicker/CategoryPicker';
 import Button from '../Button/Button';
-
-interface ItemCreateFormData {
-  name: string;
-  description: string;
-  picture: string;
-  categories: {
-    HouseAndGarden?: {
-      subcategories: [string];
-    };
-    ChildAndBaby?: {
-      subcategories: [string];
-    };
-    MediaAndGames?: {
-      subcategories: [string];
-    };
-    AdultClothing?: {
-      subcategories: [string];
-    };
-    SportAndCamping?: {
-      subcategories: [string];
-    };
-    Technology?: {
-      subcategories: [string];
-    };
-    Other?: {
-      subcategories: [string];
-    };
-  };
-}
+import { ItemCreateFormData } from '../../types/itemTypes';
+import Modal from '../Modal/Modal';
 
 function ItemCreateForm() {
   //Handle book submit form changes and submit
