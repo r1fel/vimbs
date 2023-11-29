@@ -70,18 +70,20 @@ function ItemCreateForm() {
 
   useEffect(() => {
     // change the categories field of the formData
-
-    setFormData((prevData) => ({
-      ...prevData,
-      categories: {
-        [confirmedTopCategory]: {
-          subcategories: [confirmedSubCategory],
+    const updateCategories = async () => {
+      await setFormData((prevData) => ({
+        ...prevData,
+        categories: {
+          [confirmedTopCategory]: {
+            subcategories: [confirmedSubCategory],
+          },
         },
-      },
-    }));
+      }));
 
-    logger.log('the changed form data after setting categries is:', formData);
-  }, [confirmedSubCategory, confirmedTopCategory]);
+      logger.log('the changed form data after setting categries is:', formData);
+    };
+    updateCategories();
+  }, [confirmedSubCategory]);
 
   const handleChange = (event: any) => {
     const changedField = event.target.name;
@@ -99,12 +101,18 @@ function ItemCreateForm() {
     logger.log('data of create item mutation: ', createItemMutation);
   };
 
-  if (createItemMutation.status === 'error') {
-    logger.error('Error loading items:', createItemMutation.error);
-    return <p>an error occured: {JSON.stringify(createItemMutation.error)}</p>;
-  }
   if (createItemMutation.status === 'pending') {
     return <p>New Item Loading</p>;
+  }
+
+  if (createItemMutation.status === 'error') {
+    logger.error(
+      'Error loading items! The Form data was:',
+      formData,
+      'the error was:',
+      createItemMutation.error,
+    );
+    return <p>an error occured: {JSON.stringify(createItemMutation.error)}</p>;
   }
 
   //Book creation form
@@ -151,8 +159,8 @@ function ItemCreateForm() {
           <p>
             category:
             {confirmedSubCategory && confirmedTopCategory
-              ? formData.categories[0].subcategories
-              : null}{' '}
+              ? Object.values(formData.categories)[0]?.subcategories
+              : []}{' '}
             <Button onClick={() => setIsCategoryModalOpen(true)}>
               {confirmedSubCategory ? 'Change Category' : 'Set Category'}
             </Button>
