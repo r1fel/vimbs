@@ -6,6 +6,7 @@ import passport from 'passport';
 // middleware
 import isLoggedIn from '../utils/middleware/isLoggedIn';
 import validateUserAuth from '../utils/middleware/validateUserAuth';
+import setReqBodyToEmpty from '../utils/middleware/setReqBodyToEmpty';
 
 // controllers
 import {
@@ -49,6 +50,7 @@ authRoutes.route('/login').post(
 );
 
 authRoutes.route('/logout').post(
+  setReqBodyToEmpty,
   isLoggedIn,
   //
   logout,

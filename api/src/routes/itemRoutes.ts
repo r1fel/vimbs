@@ -6,6 +6,7 @@ import { Router } from 'express';
 import isLoggedIn from '../utils/middleware/isLoggedIn';
 import validateItem from '../utils/middleware/validateItem';
 import isOwner from '../utils/middleware/isOwner';
+import setReqBodyToEmpty from '../utils/middleware/setReqBodyToEmpty';
 
 // controllers
 import {
@@ -55,6 +56,7 @@ itemRoutes
     updateItem,
   )
   .delete(
+    setReqBodyToEmpty,
     isLoggedIn,
     isOwner,
     //
