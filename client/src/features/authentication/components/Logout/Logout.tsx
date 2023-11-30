@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useMutation,
   QueryClient,
@@ -5,14 +6,14 @@ import {
 } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import '../../../components/NavBar/NavBar.scss';
-import { userDataAtom } from '../../../context/userAtoms';
-import { handleLogout } from '../services/AuthServices';
+import '../../../../components/NavBar/NavBar.scss';
+import { userDataAtom } from '../../../../context/userAtoms';
+import { handleLogout } from '../../services/AuthServices';
 import { IoLogOutOutline } from 'react-icons/io5';
-import { logger } from '../../../util/logger';
-import { useEffect } from 'react';
+import { logger } from '../../../../util/logger';
+import '../../../../components/DropdownMenu/DropdownMenu.scss';
 
-function LogoutButton({ className }) {
+function Logout({ className, children }) {
   const [userData, setUserData] = useAtom(userDataAtom);
 
   const navigate = useNavigate();
@@ -54,8 +55,10 @@ function LogoutButton({ className }) {
   // };
 
   return (
-    <IoLogOutOutline className={className} onClick={logoutMutation.mutate} />
+    <div className={className} onClick={logoutMutation.mutate}>
+      {children}
+    </div>
   );
 }
 
-export default LogoutButton;
+export default Logout;

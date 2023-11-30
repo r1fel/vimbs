@@ -1,0 +1,9 @@
+@import '../../../../styles/variables.scss';
+
+.logout {
+  cursor: pointer;
+
+  &:hover {
+    color: $col-prim2-400;
+  }
+}
