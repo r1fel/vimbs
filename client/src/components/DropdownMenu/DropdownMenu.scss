@@ -1,0 +1,37 @@
+@import '../../styles/variables.scss';
+
+.dropdown-menu {
+  transition: 0.3s;
+  top: 4rem;
+  right: 0.5rem;
+  padding: 1rem;
+  // border: 2px solid $col-prim2-400;
+  border-radius: 0.5rem;
+  background-color: $col-prim2-700;
+  position: absolute;
+  z-index: 10;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    border-radius: 0.2rem;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    font-size: 1.3rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: $col-prim2-100;
+    &:hover {
+      background-color: $col-prim2-600;
+    }
+  }
+}
+
+.dropdown-menu--open {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-menu--closed {
+  display: none;
+}
