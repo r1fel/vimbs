@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './NavBar.scss';
 import {
@@ -8,34 +9,49 @@ import {
   IoNotificationsOutline,
 } from 'react-icons/io5';
 import { RiFeedbackLine } from 'react-icons/ri';
-import LogoutButton from '../../features/authentication/components/LogoutButton';
+import DropdownMenu from '../DropdownMenu/DropdownMenu';
 
 function NavBar() {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+
   return (
     <div className="navbar">
-      <Link className="navbar__link" to="/">
+      <Link className="navbar__logo" to="/">
         <IoStorefront />
       </Link>
 
       <div className="navbar__links">
-        <IoSearch className="navbar__link" />
-
+        <div
+          className="navbar__icon-circle navbar__link"
+          onClick={() => setIsDropdownOpen(!isSearchBarOpen)}
+        >
+          <IoSearch />
+        </div>
         <Link className="navbar__link" to="/item/new">
-          <IoAddCircleOutline />
+          <div className="navbar__icon-circle">
+            <IoAddCircleOutline />
+          </div>
         </Link>
 
         <Link className="navbar__link" to="/settings">
-          <RiFeedbackLine />
+          <div className="navbar__icon-circle">
+            <RiFeedbackLine />
+          </div>
         </Link>
 
         <Link className="navbar__link" to="/user/notifications">
-          <IoNotificationsOutline />
+          <div className="navbar__icon-circle">
+            <IoNotificationsOutline />
+          </div>
         </Link>
-
-        <Link className="navbar__link" to="/settings">
+        <div
+          className="navbar__icon-circle navbar__link"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        >
           <IoPersonCircleOutline />
-        </Link>
-        <LogoutButton className="navbar__link" />
+        </div>
+        <DropdownMenu isOpen={isDropdownOpen} />
       </div>
     </div>
   );
