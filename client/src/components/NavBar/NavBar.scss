@@ -11,21 +11,39 @@
   }
 
   &__link {
-    font-size: 2rem;
+    font-size: 1.8rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: $col-prim2-800;
+    color: $col-prim2-100;
     cursor: pointer;
     transition: 0.15s;
-
     &:not(:first-child) {
       margin-left: 1rem;
     }
-
     &:hover {
       color: $col-prim2-400;
+    }
+  }
+
+  &__logo {
+    @extend .navbar__link;
+    font-size: 2.5rem;
+    color: $col-prim2-600;
+  }
+
+  &__icon-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $col-prim2-600;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.3rem;
+    border-radius: 50%;
+    &:hover {
+      background-color: $col-prim2-500;
     }
   }
 }
