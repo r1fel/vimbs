@@ -95,14 +95,26 @@ export const showItem = catchAsync(
 );
 
 // edit item by itemId
+// TODO ER: if description or pictrure are not given, they are set to the value null in the DB
+// TODO nicer would be to have the key value pair removed off the object - but $unset wouldn't work for me here, when I tried
 export const updateItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log('new put request', req.body);
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
+
+    // define the item details that is supposed to be updated.
+    // if picture or description are not supplied, since they are optional, there value is to be set to null
+    const updatedItem = {
+      ...req.body.item,
+      description: req.body.item.description ? req.body.item.description : null,
+      picture: req.body.item.picture ? req.body.item.picture : null,
+    };
+
     const item: PopulatedItemsFromDB | null = await Item.findOneAndUpdate(
       { _id: req.params.itemId },
-      { ...req.body.item },
+      updatedItem,
       { new: true },
     )
       .populate<{ owner: UserInDB }>('owner')
@@ -141,7 +153,7 @@ export const deleteItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const itemId = new mongoose.Types.ObjectId(req.params.itemId);
     if (req.user === undefined)
-      return new ExpressError('user is undefined', 500);
+      return next(new ExpressError('user is undefined', 500));
     const currentUser = req.user._id;
     const user: UserInDB | null = await User.findById(currentUser);
     if (user === null)
