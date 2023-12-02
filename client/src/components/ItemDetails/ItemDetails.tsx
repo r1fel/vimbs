@@ -2,6 +2,7 @@ import { fetchItems } from '../../services/ItemServices';
 import { useQuery } from '@tanstack/react-query';
 import { logger } from '../../util/logger';
 import './ItemDetails.scss';
+import { Item } from './ItemDetailsTypes';
 
 function ItemDetails({ id }: { id: string }) {
   // const [item, setItem] = useState({});
@@ -24,7 +25,7 @@ function ItemDetails({ id }: { id: string }) {
   if (itemQuery.status === 'success') {
     //get the actual data from query object
     logger.log('the item data from item details is:', itemQuery.data.data[0]);
-    const item = itemQuery.data.data[0];
+    const item: Item = itemQuery.data.data[0];
 
     return (
       <div className="item-details">
