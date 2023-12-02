@@ -12,6 +12,7 @@ import { handleLogin } from '../services/AuthServices';
 import { logger } from '../../../util/logger';
 import { userDataAtom } from '../../../context/userAtoms';
 import Button from '../../../components/Button/Button';
+import NoAuthRedirect from './NoAuthRedirect';
 
 interface LoginFormData {
   email: string;
@@ -32,6 +33,8 @@ function LoginForm() {
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
+  NoAuthRedirect();
 
   //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
   const queryClient = useQueryClient();
