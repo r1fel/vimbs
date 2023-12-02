@@ -3,6 +3,7 @@ import { ButtonProps } from './ButtonTypes';
 import './Button.scss';
 
 function Button({
+  type = 'button',
   children,
   primary,
   secondary,
@@ -33,7 +34,7 @@ function Button({
   //className makes sure the classes are correctly written. rest.className is important to make sure, that this object doesn't overwrite the custom classNames, passed in by props. Like this they get added to the object before being overwritten.
 
   return (
-    <button type="button" {...rest} className={classes}>
+    <button type={type} {...rest} className={classes}>
       {children}
     </button>
   );

@@ -1,5 +1,6 @@
 export interface ButtonProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  type?: 'reset' | 'button' | 'submit' | undefined;
   primary?: boolean;
   secondary?: boolean;
   success?: boolean;
