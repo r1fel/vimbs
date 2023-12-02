@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react';
 import './CategoryPicker.scss';
+import {
+  CategoryPickerProps,
+  TopCategories,
+  SubCategories,
+} from './CategoryPickerTypes';
 import { logger } from '../../util/logger';
 import { IoCheckmarkCircle } from 'react-icons/io5';
 import Button from '../Button/Button';
 
-const CategoryPicker = ({
+const CategoryPicker: React.FC<CategoryPickerProps> = ({
   setConfirmedTopCategory,
   setConfirmedSubCategory,
   setIsCategoryModalOpen,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
-  const [isSubCategoryView, setSubCategoryView] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(
+    null,
+  );
+  const [isSubCategoryView, setSubCategoryView] = useState<boolean>(false);
 
-  const topCategories = {
+  const topCategories: TopCategories = {
     HouseAndGarden: 'Haus und Garten',
     ChildAndBaby: 'Kind und Baby',
     MediaAndGames: 'Medien und Spiele',
@@ -23,7 +30,7 @@ const CategoryPicker = ({
     Other: 'Sonstiges',
   };
 
-  const subCategories = {
+  const subCategories: SubCategories = {
     HouseAndGarden: [
       'Baustellengeräte',
       'Deko',
@@ -68,12 +75,12 @@ const CategoryPicker = ({
     Other: ['Sonstiges'],
   };
 
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (category: string) => {
     setSelectedCategory(category);
     setSubCategoryView(true);
   };
 
-  const handleSubCategoryClick = (subCategory) => {
+  const handleSubCategoryClick = (subCategory: string) => {
     setSelectedSubCategory(subCategory);
     console.log(`Selected Subcategory: ${subCategory}`);
   };
