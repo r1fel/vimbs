@@ -1,27 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { deleteItem } from '../../services/ItemServices';
-import { logger } from '../../util/logger';
-import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import shortenText from '../../util/shortenText';
 import './ItemCard.scss';
 import { IoCreateOutline, IoTrashOutline } from 'react-icons/io5';
 import Modal from '../../components/Modal/Modal';
 import Button from '../Button/Button';
-
-interface ItemCardProps {
-  itemId: string;
-  itemName: string;
-  itemDescription: string;
-  itemImages: string;
-  itemAvailable: boolean;
-  itemOwner: boolean;
-  itemCategories: { [key: string]: string };
-}
+import { ItemCardProps } from './ItemCardTypes';
 
 function ItemCard({
   itemId,
@@ -41,22 +27,22 @@ function ItemCard({
   };
 
   const queryClient = useQueryClient();
-  //use createItem as mutation function
+  //delete item mutation is activated from the button in the modal
   const deleteItemMutation = useMutation({
     mutationFn: () => deleteItem({ id: itemId }),
-    onSuccess: (itemData) => {
+    onSuccess: () => {
       queryClient.invalidateQueries(['item', 'mine'], { exact: true });
       setIsDeleteModalOpen(false);
-      // navigate(`/item/${itemData.data[0]._id}`);
     },
   });
 
   return (
     <div className="item-card">
-      <Modal isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen}>
-        do you really want to delete {itemName}
+      <Modal isOpen={isDeleteModalOpen}>
+        Do you really want to delete {itemName}
         <Button onClick={() => setIsDeleteModalOpen(false)}>cancel</Button>{' '}
         <Button onClick={deleteItemMutation.mutate}>Yes</Button>
+        {/* when you are item owner you have edit and delete options */}
       </Modal>
       {itemOwner && (
         <>
