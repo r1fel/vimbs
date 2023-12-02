@@ -31,8 +31,8 @@ function ItemCard({
   const deleteItemMutation = useMutation({
     mutationFn: () => deleteItem({ id: itemId }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['item', 'mine'], { exact: true });
-      setIsDeleteModalOpen(false);
+      queryClient.invalidateQueries(['item', 'mine'], { exact: true }),
+        setIsDeleteModalOpen(false);
     },
   });
 

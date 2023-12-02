@@ -24,7 +24,7 @@ function NavBar() {
       <div className="navbar__links">
         <div
           className="navbar__icon-circle navbar__link"
-          onClick={() => setIsDropdownOpen(!isSearchBarOpen)}
+          onClick={() => setIsSearchBarOpen(!isSearchBarOpen)}
         >
           <IoSearch />
         </div>
