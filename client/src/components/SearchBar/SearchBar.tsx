@@ -70,7 +70,7 @@ function SearchBar({
       handleSuggestionClick(searchQuery.data.data[activeIndex]);
     }
   };
-  const handleSearchClick = async () => {
+  const handleSearchSubmit = async () => {
     if (searchTerm) {
       await setFetchMode('searchItems');
       await setPageSearchTerm(searchTerm);
@@ -87,7 +87,7 @@ function SearchBar({
   const handleEnterPress = (e) => {
     if (e.key === 'Enter') {
       console.log('handle enterPress triggered');
-      handleSearchClick();
+      handleSearchSubmit();
     }
   };
 
@@ -96,7 +96,7 @@ function SearchBar({
     //make request to backend
   };
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSearchSubmit}>
       <input
         type="text"
         placeholder={placeholder}
@@ -107,7 +107,7 @@ function SearchBar({
           handleEnterPress(e);
         }}
       />
-      <Button onClick={handleSearchClick}>Search!</Button>
+      <Button type="submit">Search!</Button>
       {searchQuery.status === 'success' &&
         searchQuery.data.data.length > 0 &&
         searchTerm && (
