@@ -1,31 +1,32 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createItem } from '../../services/ItemServices';
 import { logger } from '../../util/logger';
 import './ItemCreateForm.scss';
 import CategoryPicker from '../CategoryPicker/CategoryPicker';
 import Button from '../Button/Button';
-import { ItemCreateFormData } from '../../types/itemTypes';
+import { ItemCreateFormDataProps } from './ItemCreateFormTypes';
 import Modal from '../Modal/Modal';
 
 function ItemCreateForm() {
   //Handle book submit form changes and submit
-  const [formData, setFormData] = useState<ItemCreateFormData>({
+  const [formData, setFormData] = useState<ItemCreateFormDataProps>({
     name: '',
     description: '',
     picture: '',
     categories: {},
   });
 
-  const [confirmedTopCategory, setConfirmedTopCategory] = useState(null);
-  const [confirmedSubCategory, setConfirmedSubCategory] = useState(null);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [wasSubmitTried, setWasSubmitTried] = useState(false);
+  const [confirmedTopCategory, setConfirmedTopCategory] = useState<
+    string | null
+  >(null);
+  const [confirmedSubCategory, setConfirmedSubCategory] = useState<
+    string | null
+  >(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] =
+    useState<boolean>(false);
+  const [wasSubmitTried, setWasSubmitTried] = useState<boolean>(false);
 
   logger.log('confirmedTopCategory is:', confirmedTopCategory);
   const navigate = useNavigate();
@@ -53,31 +54,34 @@ function ItemCreateForm() {
   useEffect(() => {
     // change the categories field of the formData
     const updateCategories = async () => {
-      await setFormData((prevData) => ({
-        ...prevData,
-        categories: {
-          [confirmedTopCategory]: {
-            subcategories: [confirmedSubCategory],
+      if (confirmedTopCategory !== null) {
+        setFormData((prevData) => ({
+          ...prevData,
+          categories: {
+            [confirmedTopCategory as string]: {
+              subcategories: [confirmedSubCategory],
+            },
           },
-        },
-      }));
-
+        }));
+      }
       logger.log('the changed form data after setting categries is:', formData);
     };
     updateCategories();
   }, [confirmedSubCategory]);
 
-  const handleChange = (event: any) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const changedField = event.target.name;
     const newValue = event.target.value;
     setFormData((currData) => {
-      currData[changedField] = newValue;
-      return { ...currData };
+      return {
+        ...currData,
+        [changedField]: newValue,
+      } as ItemCreateFormDataProps;
     });
   };
 
   // call the mutation (takes objects only)
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     if (
       formData.name &&
       formData.description &&
@@ -116,9 +120,7 @@ function ItemCreateForm() {
       {isCategoryModalOpen && (
         <Modal isOpen={isCategoryModalOpen}>
           <CategoryPicker
-            confirmedTopCategory={confirmedTopCategory}
             setConfirmedTopCategory={setConfirmedTopCategory}
-            confirmedSubCategory={confirmedSubCategory}
             setConfirmedSubCategory={setConfirmedSubCategory}
             setIsCategoryModalOpen={setIsCategoryModalOpen}
           />
@@ -186,7 +188,7 @@ function ItemCreateForm() {
             <p className="create-item-error">{errors.picture}</p>
           )}
         </div>
-        <Button onClick={handleSubmit} className="button">
+        <Button type="submit" className="button">
           Create!
         </Button>
       </form>
