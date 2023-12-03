@@ -6,38 +6,19 @@ import RenderCounter from '../../util/RenderCounter';
 import './ItemList.scss';
 import ItemCard from '../ItemCard/ItemCard';
 import { userDataAtom } from '../../context/userAtoms';
+import { Item, ItemListProps } from './ItemListTypes';
 
-//! what is required, what not?
-interface Item {
-  _id: string;
-  name: string;
-  description: string;
-  picture: string;
-  available: boolean;
-  owner: boolean;
-  categories: { [key: string]: string };
-}
-
-function ItemList({ url, fetchFunction, trigger }: { url: string }) {
+function ItemList({ url, fetchFunction, trigger }: ItemListProps) {
   const [userData] = useAtom(userDataAtom);
 
   RenderCounter('ItemList');
 
   //if my items are fetched they have a different query key
-  let query;
-  if (url.endsWith('/myitems')) {
-    query = useQuery({
-      queryKey: ['item', 'mine'],
-      queryFn: () => fetchFunction(url),
-      enabled: !!userData,
-    });
-  } else {
-    query = useQuery({
-      queryKey: ['item'],
-      queryFn: () => fetchFunction(url),
-      enabled: !!userData,
-    });
-  }
+  const query = useQuery({
+    queryKey: url.endsWith('/myitems') ? ['item', 'mine'] : ['item'],
+    queryFn: () => fetchFunction(url),
+    enabled: !!userData,
+  });
 
   useEffect(() => {
     const refetch = async () => {
