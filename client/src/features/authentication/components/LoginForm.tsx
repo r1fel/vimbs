@@ -34,7 +34,7 @@ function LoginForm() {
     setShowPassword(!showPassword);
   };
 
-  NoAuthRedirect();
+  // NoAuthRedirect();
 
   //load to invalidate all related data (e.g. itemList) exact: true makes sure not every query that starts with 'items' gets invalidated
   const queryClient = useQueryClient();
