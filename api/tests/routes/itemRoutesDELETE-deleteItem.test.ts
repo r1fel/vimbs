@@ -282,6 +282,33 @@ describe('item Routes', () => {
         // logout bodo4
         await logout(connectSidValue);
       });
+
+      // TODO ER: i would have to look inside the delete request and check the req.body there
+      // it('should set req.body to {} even for sent in data', async () => {
+      //   // login bodo4
+      //   const connectSidValue = await loginBodo4();
+      //   // create item as bodo4
+      //   const createItemResponse = await request(app)
+      //     .post(itemRoute)
+      //     .send({
+      //       item: {
+      //         name: 'Item for testing DELETE Route',
+      //         categories: { Other: { subcategories: ['Sonstiges'] } },
+      //       },
+      //     })
+      //     .set('Cookie', [`connect.sid=${connectSidValue}`]);
+      //   // extract itemId
+      //   const itemId = createItemResponse.body[0]._id;
+
+      //   // delete item
+      //   const deleteItemResponse = await request(app)
+      //     .delete(`${itemRoute}/${itemId}`)
+      //     .send({ some: 'body, that is not supposed to be here' })
+      //     .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+      //   // expect
+      // });
+      // TODO ER: it should in the future set a bool of deleted to true on item, so that it can be shown for users having item in watchlist etc
     });
   });
 });
