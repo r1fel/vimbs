@@ -12,8 +12,8 @@ import { RiFeedbackLine } from 'react-icons/ri';
 import DropdownMenu from '../DropdownMenu/DropdownMenu';
 
 function NavBar() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState<boolean>(false);
 
   return (
     <div className="navbar">
