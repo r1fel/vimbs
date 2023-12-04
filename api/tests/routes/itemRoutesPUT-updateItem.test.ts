@@ -254,7 +254,7 @@ describe('item Routes', () => {
 
     notPassedIsOwner('put', itemRoute); // can only pass itemRoute and not item/:itemId because itemId is created in function
 
-    describe('and when valid body given', () => {
+    describe('when valid body given', () => {
       // define update Test for valid bodies
       const updateTest = async (updateBody: { item: ItemRequest }) => {
         //  login Bodo4
@@ -682,9 +682,26 @@ describe('item Routes', () => {
             invalidUpdateBody10,
           );
         }, 10000);
+
+        // not defined subcategory
+        const invalidCreateBody11 = {
+          item: {
+            name: 'Item from Test11',
+            categories: {
+              HouseAndGarden: { subcategories: ['SomeNotExistingSubcategory'] },
+            },
+          },
+        };
+        // test
+        it('for not defined subcategory', async () => {
+          await testForInvalidBody(
+            'Error: &quot;item.categories.HouseAndGarden.subcategories[0]&quot; must be one of [Baustellengeräte, Deko, Gartengeräte, Garten- und Partymoebel, Haushalts- und Küchengeräte, Schutzkleidung, Werkzeuge, Sonstiges, Kleidung, Spielzeug, Zubehör, Bücher, Gesellschaftsspiele (Brett- und Kartenspiele), Fachbücher (Schule und Studium), Filme, Videospiele, Damenkleidung, Damenschuhe, Herrenkleidung, Herrenschuhe, Campingutensilien, Fitnessgeräte, Outdoorkleidung, Wintersport, Audio &amp; Hifi, Computer und Zubehör, Kameras und Zubehör, Konsolen, TV, Beamer und Zubehör]',
+            invalidCreateBody11,
+          );
+        }, 10000);
       });
 
-      // ! ER: Adjust validate Item to make an error here!!!
+      // ! ER: Adjust validate Item to make an error in this case!!!
       // describe('should respond error with a statusCode500', () => {
       //   // expect statements for all tests in this block
       //   const expectsForInvalidBody = (
@@ -736,22 +753,22 @@ describe('item Routes', () => {
 
       //   // invalid body given from client to be tested in this block
 
-      //   // not defined subcategory
-      //   const invalidUpdateBody11 = {
-      //     item: {
-      //       name: 'Item from Test11',
-      //       categories: {
-      //         HouseAndGarden: { subcategories: ['SomeNotExistingSubcategory'] },
-      //       },
+      //   // wrongly paired top and subcategory
+      // const invalidCreateBody = {
+      //   item: {
+      //     name: 'Item from Test of wrongly paired top and subcategory',
+      //     categories: {
+      //       HouseAndGarden: { subcategories: ['Konsolen'] },
       //     },
-      //   };
-      //   // test
-      //   it('for not defined subcategory', async () => {
-      //     await testForInvalidBody(
-      //       'ValidationError: Item validation failed: categories.HouseAndGarden.subcategories.0: `SomeNotExistingSubcategory` is not a valid enum value for path `categories.HouseAndGarden.subcategories.0`.',
-      //       invalidUpdateBody11,
-      //     );
-      //   }, 10000);
+      //   },
+      // };
+      // // test
+      // it('for wrongly paired top and subcategory', async () => {
+      //   await testForInvalidBody(
+      //     'ValidationError: Item validation failed: categories.HouseAndGarden.subcategories.0: `Konsolen` is not a valid enum value for path `categories.HouseAndGarden.subcategories.0`.',
+      //     invalidCreateBody,
+      //   );
+      // }, 10000);
       // });
     });
   });

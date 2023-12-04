@@ -583,6 +583,23 @@ describe('item Routes', () => {
             invalidCreateBody10,
           );
         }, 10000);
+
+        // not defined subcategory
+        const invalidCreateBody11 = {
+          item: {
+            name: 'Item from Test11',
+            categories: {
+              HouseAndGarden: { subcategories: ['SomeNotExistingSubcategory'] },
+            },
+          },
+        };
+        // test
+        it('for not defined subcategory', async () => {
+          await testForInvalidBody(
+            'Error: &quot;item.categories.HouseAndGarden.subcategories[0]&quot; must be one of [Baustellengeräte, Deko, Gartengeräte, Garten- und Partymoebel, Haushalts- und Küchengeräte, Schutzkleidung, Werkzeuge, Sonstiges, Kleidung, Spielzeug, Zubehör, Bücher, Gesellschaftsspiele (Brett- und Kartenspiele), Fachbücher (Schule und Studium), Filme, Videospiele, Damenkleidung, Damenschuhe, Herrenkleidung, Herrenschuhe, Campingutensilien, Fitnessgeräte, Outdoorkleidung, Wintersport, Audio &amp; Hifi, Computer und Zubehör, Kameras und Zubehör, Konsolen, TV, Beamer und Zubehör]',
+            invalidCreateBody11,
+          );
+        }, 10000);
       });
 
       describe('should respond error with a statusCode500', () => {
@@ -622,20 +639,20 @@ describe('item Routes', () => {
 
         // invalid body given from client to be tested in this block
 
-        // not defined subcategory
-        const invalidCreateBody9 = {
+        // wrongly paired top and subcategory
+        const invalidCreateBody = {
           item: {
-            name: 'Item from Test9',
+            name: 'Item from Test of wrongly paired top and subcategory',
             categories: {
-              HouseAndGarden: { subcategories: ['SomeNotExistingSubcategory'] },
+              HouseAndGarden: { subcategories: ['Konsolen'] },
             },
           },
         };
         // test
-        it('for not defined subcategory', async () => {
+        it('for wrongly paired top and subcategory', async () => {
           await testForInvalidBody(
-            'ValidationError: Item validation failed: categories.HouseAndGarden.subcategories.0: `SomeNotExistingSubcategory` is not a valid enum value for path `categories.HouseAndGarden.subcategories.0`.',
-            invalidCreateBody9,
+            'ValidationError: Item validation failed: categories.HouseAndGarden.subcategories.0: `Konsolen` is not a valid enum value for path `categories.HouseAndGarden.subcategories.0`.',
+            invalidCreateBody,
           );
         }, 10000);
       });
