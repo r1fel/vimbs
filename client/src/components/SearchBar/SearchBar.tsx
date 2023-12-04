@@ -5,15 +5,8 @@ import './SearchBar.scss';
 import { searchItems } from '../../services/ItemServices';
 import Button from '../Button/Button';
 import { logger } from '../../util/logger';
-
-function debounce(func, wait) {
-  let timeout;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
-}
+import debounce from '../../util/debounce';
+import { SearchBarProps } from './SearchBarTypes';
 
 function SearchBar({
   pageSearchTerm,
@@ -21,11 +14,11 @@ function SearchBar({
   isSearchExecuted,
   setIsSearchExecuted,
   setFetchMode,
-}) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeIndex, setActiveIndex] = useState(-1);
+}: SearchBarProps) {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
-  const [placeholder, setPlaceholder] = useState('Was suchst du?');
+  const [placeholder, setPlaceholder] = useState<string>('Was suchst du?');
   const navigate = useNavigate();
 
   const searchQuery = useQuery({
@@ -36,7 +29,9 @@ function SearchBar({
 
   useEffect(() => {
     // Trigger a refetch when searchTerm changes
-    searchQuery.refetch();
+    const debouncedRefetch = debounce(searchQuery.refetch, 300);
+    debouncedRefetch();
+    return () => clearTimeout(debouncedRefetch);
   }, [searchTerm]);
 
   // if (searchQuery.status === 'success') {
@@ -91,10 +86,6 @@ function SearchBar({
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    //make request to backend
-  };
   return (
     <form onSubmit={handleSearchSubmit}>
       <input
