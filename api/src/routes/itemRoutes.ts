@@ -16,6 +16,7 @@ import {
   showItem,
   updateItem,
   deleteItem,
+  suggestItems,
 } from '../controllers/itemControllers';
 
 const itemRoutes = Router();
@@ -39,6 +40,12 @@ itemRoutes.route('/search').get(
   isLoggedIn,
   //
   itemSearch,
+);
+
+itemRoutes.route('/suggest').get(
+  isLoggedIn,
+  //
+  suggestItems,
 );
 
 itemRoutes

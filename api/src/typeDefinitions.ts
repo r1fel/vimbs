@@ -21,31 +21,31 @@ declare global {
 // export type Categories = (typeof categoriesArray)[number];
 
 export type Categories = {
-  HouseAndGarden: {
+  HouseAndGarden?: {
     name: string;
     subcategories: Array<HouseAndGarden>;
   };
-  ChildAndBaby: {
+  ChildAndBaby?: {
     name: string;
     subcategories: Array<ChildAndBaby>;
   };
-  MediaAndGames: {
+  MediaAndGames?: {
     name: string;
     subcategories: Array<MediaAndGames>;
   };
-  AdultClothing: {
+  AdultClothing?: {
     name: string;
     subcategories: Array<AdultClothing>;
   };
-  SportAndCamping: {
+  SportAndCamping?: {
     name: string;
     subcategories: Array<SportAndCamping>;
   };
-  Technology: {
+  Technology?: {
     name: string;
     subcategories: Array<Technology>;
   };
-  Other: {
+  Other?: {
     name: string;
     subcategories: Array<Other>;
   };
