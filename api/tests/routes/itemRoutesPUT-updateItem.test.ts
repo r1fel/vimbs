@@ -15,7 +15,7 @@ import {
 } from './utilsForRoutes';
 
 // frequently used functions
-export const loginBodo4 = async () => {
+const loginBodo4 = async () => {
   const loginBodo4Response = await request(app).post(loginRoute).send({
     email: 'bodo4@gmail.com',
     password: 'bodo4',
@@ -29,7 +29,7 @@ export const loginBodo4 = async () => {
   return connectSidValue;
 };
 
-export const loginUser = async (email: string, password: string) => {
+const loginUser = async (email: string, password: string) => {
   const loginUserResponse = await request(app).post(loginRoute).send({
     email: email,
     password: password,
@@ -43,7 +43,7 @@ export const loginUser = async (email: string, password: string) => {
   return connectSidValue;
 };
 
-export const logout = async (connectSidValue: string) => {
+const logout = async (connectSidValue: string) => {
   await request(app)
     .post(logoutRoute)
     .set('Cookie', [`connect.sid=${connectSidValue}`]);
@@ -51,7 +51,7 @@ export const logout = async (connectSidValue: string) => {
 
 // pass in the route which is protected by the isLoggedIn middleware
 // test, that middleware is doing it's route protecting properly
-export const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
+const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
   const invalidConnectSidValue =
     's%3AnFsjM4XUm0O8fA0JrqIKBQFDjTOp538v.uJgEmwcCkUfu1fIRpleL0DTM58naHwgEzD5gDw%2B82tY';
 
@@ -77,7 +77,7 @@ export const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
   });
 };
 
-export const notPassedIsOwner = (httpVerb: string, route: string) => {
+const notPassedIsOwner = (httpVerb: string, route: string) => {
   describe('when isOwner was not passed', () => {
     describe('when valid itemId is given', () => {
       it('should respond error with a statusCode403 if user is not item.owner', async () => {

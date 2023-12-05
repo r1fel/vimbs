@@ -86,7 +86,9 @@ export const showItem = catchAsync(
       .populate<{ owner: UserInDB }>('owner')
       .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
     if (item === null)
-      return next(new ExpressError('this item doesnt exist', 500));
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
     // process for client
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(item, currentUser, response);
@@ -99,7 +101,7 @@ export const showItem = catchAsync(
 // TODO nicer would be to have the key value pair removed off the object - but $unset wouldn't work for me here, when I tried
 export const updateItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log('new put request', req.body);
+    // console.log('new put request', req.body);
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
