@@ -169,3 +169,26 @@ export const deleteItem = catchAsync(
     res.send(`Successfully deleted item ${itemId}!`);
   },
 );
+
+// deleting all item a user has from DB and empty owners myItems array
+export const deleteAllOfUsersItems = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user === undefined)
+      return next(new ExpressError('user is undefined', 500));
+
+    const currentUser = req.user._id;
+    const user: UserInDB | null = await User.findById(currentUser);
+
+    if (user === null)
+      return next(new ExpressError('this user doesnt exist', 500));
+
+    // Delete all items owned by the user
+    await Item.deleteMany({ owner: currentUser });
+
+    // Empty out myItems array
+    user.myItems = [];
+    await user.save();
+
+    res.send('Successfully deleted all of your items!');
+  },
+);
