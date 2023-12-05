@@ -16,3 +16,5 @@ describe('dummy', () => {
 //     });
 //   });
 // });
+
+console.log('all tests in itemInteractionRoutes.test.ts ran');

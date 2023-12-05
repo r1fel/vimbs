@@ -113,3 +113,5 @@ describe('dummy', () => {
 //     });
 //   });
 // });
+
+console.log('all tests in userRoutes.test.ts ran');

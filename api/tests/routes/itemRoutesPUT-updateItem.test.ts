@@ -480,7 +480,7 @@ describe('item Routes', () => {
           expect(updateItemResponse.text).toContain(invalidity);
 
           // log for checking that all validation test ran completely
-          console.log('expectsForInvalidBody ran for invalidity', invalidity);
+          // console.log('expectsForInvalidBody ran for invalidity', invalidity);
         };
 
         // test function for all bodys in this block
@@ -773,3 +773,5 @@ describe('item Routes', () => {
     });
   });
 });
+
+console.log('all tests in itemRoutesPUT-updateItem.test.ts ran');

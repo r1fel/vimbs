@@ -659,3 +659,5 @@ describe('item Routes', () => {
     });
   });
 });
+
+console.log('all tests in itemRoutesPOST-createItem.test.ts ran');

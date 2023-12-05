@@ -312,3 +312,5 @@ describe('item Routes', () => {
     });
   });
 });
+
+console.log('all tests in itemRoutesDELETE-deleteItem.test.ts ran');

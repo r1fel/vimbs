@@ -403,3 +403,5 @@ describe('item Routes', () => {
     requestToInvalidId('get', itemRoute); // can only pass itemRoute and not item/:itemId because itemId is created in function
   });
 });
+
+console.log('all tests in itemRoutesGET-itemShowPage.test.ts ran');
