@@ -65,7 +65,7 @@ const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
 
       expect(response.statusCode).toBe(401);
       expect(response.text).toContain('Error: Unauthorized');
-    });
+    }, 10000);
     it('should respond error with a statusCode401 if invalid session cookie is sent', async () => {
       const response = await (request(app) as any)
         [httpVerb](route)
@@ -75,7 +75,7 @@ const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
 
       expect(response.statusCode).toBe(401);
       expect(response.text).toContain('Error: Unauthorized');
-    });
+    }, 10000);
   });
 };
 
@@ -106,7 +106,7 @@ const notPassedIsUser = (
       expect(response.text).toContain(
         'Forbidden: You are not allowed to view this content!',
       );
-    });
+    }, 10000);
     it('should respond error with a statusCode500 for userId value that is no ObjectId', async () => {
       // login bodo4
       const connectSidValue = await loginBodo4();
@@ -138,7 +138,7 @@ const notPassedIsUser = (
 
       // logout bodo4
       await logout(connectSidValue);
-    });
+    }, 10000);
   });
 };
 
@@ -162,14 +162,72 @@ describe('user Routes', () => {
       userIdMyItemsRoute.split(':userId/').slice(-1)[0],
     );
 
-    // describe('when isLoggedIn was passed', () => {
-    //   it('should respond successful with a statusCode200 and processedItemData for user with items', async () => {
-    //     //
-    //   });
-    //   it('should respond successful with a statusCode200 and empty array for user with NO items', async () => {
-    //     //
-    //   });
-    // });
+    describe('when isLoggedIn was passed', () => {
+      it('should respond successful with a statusCode200 and empty array if user has no items', async () => {
+        // login bodo, delete all of his items, run auth for bodos id, run user myInventory, logout bodo
+        //  login Bodo4
+        const connectSidValue = await loginBodo4();
+
+        // delete all of Bodo4s Items
+        const deleteAllOfUsersItemsResponse = await request(app)
+          .delete(itemRoute)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        const bodosUserId = '6553b5bfa70b16a991b89001';
+
+        const myInventoryResponse = await request(app)
+          .get(
+            `${userRoute}/${bodosUserId}/${
+              userIdMyItemsRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // logout
+        await logout(connectSidValue);
+
+        expect(myInventoryResponse.statusCode).toBe(200);
+
+        // // expect the body array to be empty
+        expect(myInventoryResponse.body).toHaveLength(0);
+      }, 10000);
+
+      it('should respond successful with a statusCode200 and processedItemData for user with one item', async () => {
+        // define create body1
+        // login bodo, delete all of his items, create an item, run auth for bodos id, run user myInventory, delete item, logout bodo
+        // expect(myInventoryResponse.statusCode).toBe(200);
+        // // expect the body array to only have one object inside
+        // expect(myInventoryResponse.body).toHaveLength(1);
+        // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
+        // const getShowItem = getShowItemResponse.body[0];
+        //   expect(getShowItem).toEqual(
+        //     checkResponseToBeCorrectlyProcessedItemForClient(createbody1));
+      });
+
+      // it('should respond successful with a statusCode200 and processedItemData for user with several items', async () => {
+      // define create body1
+      // define create body2
+      // define create body3
+
+      // login bodo, delete all of his items, create items 1-3, run auth for bodos id, run user myInventory, delete ALL items, logout bodo
+
+      // expect(myInventoryResponse.statusCode).toBe(200);
+
+      // // expect the body array to only have one object inside
+      // expect(myInventoryResponse.body).toHaveLength(3);
+
+      // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
+      // const getShowItem = getShowItemResponse.body[0];
+      //   expect(getShowItem).toEqual(
+      //     checkResponseToBeCorrectlyProcessedItemForClient(createbody1));
+      // do same expects for body2 and body3
+
+      // });
+
+      // it('should respond successful with a statusCode200 and empty array for user with NO items', async () => {
+      //   //
+      // });
+    });
   });
 
   // describe('POST /user/:userId/changePassword', () => {
