@@ -413,6 +413,8 @@ describe('item Routes', () => {
             .send(createBody)
             .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
+          // no delete request necessary, cause invalid body won't create an item
+
           expectsForInvalidBody(invalidity, createItemResponse);
         };
 
@@ -634,6 +636,8 @@ describe('item Routes', () => {
             .send(createBody)
             .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
+          // no delete request necessary, cause invalid body won't create an item
+
           expectsForInvalidBody(invalidity, createItemResponse);
         };
 
@@ -658,6 +662,23 @@ describe('item Routes', () => {
       });
     });
   });
-});
+  describe('DELETE all items', () => {
+    it('should delete all of bodo4s items', async () => {
+      // login bodo4
+      const connectSidValue = await loginBodo4();
+      // create item as bodo4
+      const deleteAllOfUsersItemsResponse = await request(app)
+        .delete(itemRoute)
+        .set('Cookie', [`connect.sid=${connectSidValue}`]);
+      // logout bodo4
+      await logout(connectSidValue);
 
-console.log('all tests in itemRoutesPOST-createItem.test.ts ran');
+      expect([
+        'You had no items to delete.',
+        'Successfully deleted all of your items!',
+      ]).toEqual(expect.arrayContaining([deleteAllOfUsersItemsResponse.text]));
+
+      console.log('all tests in itemRoutesPOST-createItem.test.ts ran');
+    }, 10000);
+  });
+});

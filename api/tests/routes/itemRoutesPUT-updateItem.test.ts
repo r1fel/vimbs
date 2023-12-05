@@ -273,13 +273,15 @@ describe('item Routes', () => {
           .post(itemRoute)
           .send({
             item: {
-              name: 'Item for testing PUT Route',
+              name: 'Item for testing PUT Route valid body',
               categories: { Other: { subcategories: ['Sonstiges'] } },
             },
           })
           .set('Cookie', [`connect.sid=${connectSidValue}`]);
         // extract itemId
         const itemId = createItemResponse.body[0]._id;
+
+        // console.log('when valid body given updateTest created ItemId:', itemId);
 
         // for monitoring the test
         // // get users detail to extract myItems
@@ -498,7 +500,7 @@ describe('item Routes', () => {
             .post(itemRoute)
             .send({
               item: {
-                name: 'Item for testing PUT Route',
+                name: 'Item for testing PUT Route invalid body',
                 categories: { Other: { subcategories: ['Sonstiges'] } },
               },
             })
@@ -506,11 +508,24 @@ describe('item Routes', () => {
           // extract itemId
           const itemId = createItemResponse.body[0]._id;
 
+          // console.log(
+          //   'when invalid body given updateTest created ItemId:',
+          //   itemId,
+          // );
+
           //update item in DB
           const updateItemResponse = await request(app)
             .put(`${itemRoute}/${itemId}`)
             .send(updateBody)
             .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+          // delete just created and updated item from DB
+          const deleteItemResponse = await request(app)
+            .delete(`${itemRoute}/${itemId}`)
+            .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+          // logout
+          await logout(connectSidValue);
 
           expectsForInvalidBody(invalidity, updateItemResponse);
         };
@@ -772,6 +787,23 @@ describe('item Routes', () => {
       // });
     });
   });
-});
+  describe('DELETE all items', () => {
+    it('should delete all of bodo4s items', async () => {
+      // login bodo4
+      const connectSidValue = await loginBodo4();
+      // create item as bodo4
+      const deleteAllOfUsersItemsResponse = await request(app)
+        .delete(itemRoute)
+        .set('Cookie', [`connect.sid=${connectSidValue}`]);
+      // logout bodo4
+      await logout(connectSidValue);
 
-console.log('all tests in itemRoutesPUT-updateItem.test.ts ran');
+      expect([
+        'You had no items to delete.',
+        'Successfully deleted all of your items!',
+      ]).toEqual(expect.arrayContaining([deleteAllOfUsersItemsResponse.text]));
+
+      console.log('all tests in itemRoutesPUT-updateItem.test.ts ran');
+    }, 10000);
+  });
+});

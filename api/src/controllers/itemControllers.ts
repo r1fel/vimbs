@@ -182,13 +182,16 @@ export const deleteAllOfUsersItems = catchAsync(
     if (user === null)
       return next(new ExpressError('this user doesnt exist', 500));
 
-    // Delete all items owned by the user
-    await Item.deleteMany({ owner: currentUser });
+    if (user.myItems.length > 0) {
+      // Delete all items owned by the user
+      await Item.deleteMany({ owner: currentUser });
 
-    // Empty out myItems array
-    user.myItems = [];
-    await user.save();
+      // Empty out myItems array
+      user.myItems = [];
+      await user.save();
+      return res.send('Successfully deleted all of your items!');
+    }
 
-    res.send('Successfully deleted all of your items!');
+    return res.send('You had no items to delete.');
   },
 );

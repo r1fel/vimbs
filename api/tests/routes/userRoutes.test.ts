@@ -254,6 +254,24 @@ describe('user Routes', () => {
   //     //
   //     });
   //   });
-});
 
-console.log('all tests in userRoutes.test.ts ran');
+  describe('DELETE all items', () => {
+    it('should delete all of bodo4s items', async () => {
+      // login bodo4
+      const connectSidValue = await loginBodo4();
+      // create item as bodo4
+      const deleteAllOfUsersItemsResponse = await request(app)
+        .delete(itemRoute)
+        .set('Cookie', [`connect.sid=${connectSidValue}`]);
+      // logout bodo4
+      await logout(connectSidValue);
+
+      expect([
+        'You had no items to delete.',
+        'Successfully deleted all of your items!',
+      ]).toEqual(expect.arrayContaining([deleteAllOfUsersItemsResponse.text]));
+
+      console.log('all tests in userRoutes.test.ts ran');
+    }, 10000);
+  });
+});

@@ -38,7 +38,7 @@ export const login = catchAsync(
     const user: UserInDB | null = await User.findOne({ email: email });
     if (!user) return next(new ExpressError('user not found', 500));
 
-    console.log('usersItemsbefore:', user.myItems);
+    // console.log('usersItemsbefore:', user.myItems);
 
     const validItemIds: mongoose.Types.ObjectId[] = [];
 
@@ -61,7 +61,7 @@ export const login = catchAsync(
     user.myItems = validItemIds;
     await user.save();
 
-    console.log('usersItems after:', user.myItems);
+    // console.log('usersItems after:', user.myItems);
     res.send(user);
   },
 );
