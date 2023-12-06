@@ -14,7 +14,10 @@ import {
   itemIdRoute,
   userIdMyItemsRoute,
   userRoute,
+  bodosUserId,
+  bibisUserId,
 } from './utilsForRoutes';
+import exp from 'constants';
 
 // frequently used functions
 const loginBodo4 = async () => {
@@ -87,9 +90,6 @@ const notPassedIsUser = (
   describe('when isUser was not passed', () => {
     it('should respond error with a statusCode403 if req.user is not :userId', async () => {
       // situation: bodo4 tries to access bibis inventory
-
-      const bibisUserId = '6544bd1bdf354e46068d74bf';
-
       //  login Bodo4
       const connectSidValue = await loginBodo4();
 
@@ -142,6 +142,61 @@ const notPassedIsUser = (
   });
 };
 
+const checkResponseToBeCorrectlyProcessedItemForClient = (validBody: {
+  item: ItemRequest;
+}) => {
+  const correctlyProcessedItemForClient = {
+    _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+    name: validBody.item.name,
+    available: true,
+    picture: validBody.item.picture || null,
+    description: validBody.item.description || null,
+    categories: {
+      AdultClothing: {
+        name: 'Mode',
+        subcategories:
+          validBody.item.categories.AdultClothing?.subcategories ?? [],
+      },
+      ChildAndBaby: {
+        name: 'Kind und Baby',
+        subcategories:
+          validBody.item.categories.ChildAndBaby?.subcategories ?? [],
+      },
+      HouseAndGarden: {
+        name: 'Haus und Garten',
+        subcategories:
+          validBody.item.categories.HouseAndGarden?.subcategories ?? [],
+      },
+      MediaAndGames: {
+        name: 'Medien und Spiele',
+        subcategories:
+          validBody.item.categories.MediaAndGames?.subcategories ?? [],
+      },
+      Other: {
+        name: 'Sonstiges',
+        subcategories: validBody.item.categories.Other?.subcategories ?? [],
+      },
+      SportAndCamping: {
+        name: 'Sport und Camping',
+        subcategories:
+          validBody.item.categories.SportAndCamping?.subcategories ?? [],
+      },
+      Technology: {
+        name: 'Technik und Zubehör',
+        subcategories:
+          validBody.item.categories.Technology?.subcategories ?? [],
+      },
+    },
+    dueDate: null,
+    owner: true,
+    interactions: [],
+    ownerData: null,
+    commonCommunity: null,
+  };
+
+  return correctlyProcessedItemForClient;
+};
+
 // TESTS
 describe('user Routes', () => {
   // close DB after tests ran - to get rid of db related error
@@ -163,6 +218,7 @@ describe('user Routes', () => {
     );
 
     describe('when isLoggedIn was passed', () => {
+      // TODO ER: these tests are weirdly buggy, sometimes not giving the right amount of created items
       it('should respond successful with a statusCode200 and empty array if user has no items', async () => {
         // login bodo, delete all of his items, run auth for bodos id, run user myInventory, logout bodo
         //  login Bodo4
@@ -173,8 +229,7 @@ describe('user Routes', () => {
           .delete(itemRoute)
           .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
-        const bodosUserId = '6553b5bfa70b16a991b89001';
-
+        // get bodos empty inventory
         const myInventoryResponse = await request(app)
           .get(
             `${userRoute}/${bodosUserId}/${
@@ -188,45 +243,149 @@ describe('user Routes', () => {
 
         expect(myInventoryResponse.statusCode).toBe(200);
 
-        // // expect the body array to be empty
+        // expect the body array to be empty
         expect(myInventoryResponse.body).toHaveLength(0);
       }, 10000);
 
       it('should respond successful with a statusCode200 and processedItemData for user with one item', async () => {
-        // define create body1
-        // login bodo, delete all of his items, create an item, run auth for bodos id, run user myInventory, delete item, logout bodo
-        // expect(myInventoryResponse.statusCode).toBe(200);
-        // // expect the body array to only have one object inside
-        // expect(myInventoryResponse.body).toHaveLength(1);
+        // define create body
+        const inventoryTestBody: { item: ItemRequest } = {
+          item: {
+            name: 'Item from Inventory Test with one item in myItems',
+            categories: { Other: { subcategories: ['Sonstiges'] } },
+          },
+        };
+
+        // login bodo, delete all of his items, create an item, run user myInventory, delete item, logout bodo
+
+        //  login Bodo4
+        const connectSidValue = await loginBodo4();
+
+        // delete all of Bodo4s Items
+        const deleteAllOfUsersItemsResponse = await request(app)
+          .delete(itemRoute)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        //create item in DB
+        const createItemResponse = await request(app)
+          .post(itemRoute)
+          .send(inventoryTestBody)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // get bodos empty inventory
+        const myInventoryResponse = await request(app)
+          .get(
+            `${userRoute}/${bodosUserId}/${
+              userIdMyItemsRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // delete all of Bodo4s Items
+        const deleteAllOfUsersItemsResponse2 = await request(app)
+          .delete(itemRoute)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // logout
+        await logout(connectSidValue);
+
+        // expects
+        expect(myInventoryResponse.statusCode).toBe(200);
+
+        // expect the body array to only have one object inside
+        expect(myInventoryResponse.body).toHaveLength(1);
+
         // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
-        // const getShowItem = getShowItemResponse.body[0];
-        //   expect(getShowItem).toEqual(
-        //     checkResponseToBeCorrectlyProcessedItemForClient(createbody1));
+        const InventoryItem = myInventoryResponse.body[0];
+        expect(InventoryItem).toEqual(
+          checkResponseToBeCorrectlyProcessedItemForClient(inventoryTestBody),
+        );
       });
 
-      // it('should respond successful with a statusCode200 and processedItemData for user with several items', async () => {
-      // define create body1
-      // define create body2
-      // define create body3
+      it('should respond successful with a statusCode200 and processedItemData for user with several items', async () => {
+        // define create body
+        const inventoryTestBody: { item: ItemRequest } = {
+          item: {
+            name: 'Item from Inventory Test with several items in myItems',
+            categories: { Other: { subcategories: ['Sonstiges'] } },
+          },
+        };
 
-      // login bodo, delete all of his items, create items 1-3, run auth for bodos id, run user myInventory, delete ALL items, logout bodo
+        // login bodo, delete all of his items, create 3 item, run user myInventory, delete items, logout bodo
 
-      // expect(myInventoryResponse.statusCode).toBe(200);
+        //  login Bodo4
+        const connectSidValue = await loginBodo4();
 
-      // // expect the body array to only have one object inside
-      // expect(myInventoryResponse.body).toHaveLength(3);
+        // delete all of Bodo4s Items
+        const deleteAllOfUsersItemsResponse = await request(app)
+          .delete(itemRoute)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
-      // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
-      // const getShowItem = getShowItemResponse.body[0];
-      //   expect(getShowItem).toEqual(
-      //     checkResponseToBeCorrectlyProcessedItemForClient(createbody1));
-      // do same expects for body2 and body3
+        //create items in DB
+        const createItemResponse1 = await request(app)
+          .post(itemRoute)
+          .send(inventoryTestBody)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+        const createItemResponse2 = await request(app)
+          .post(itemRoute)
+          .send(inventoryTestBody)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+        const createItemResponse3 = await request(app)
+          .post(itemRoute)
+          .send(inventoryTestBody)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
-      // });
+        // get bodos empty inventory
+        const myInventoryResponse = await request(app)
+          .get(
+            `${userRoute}/${bodosUserId}/${
+              userIdMyItemsRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
-      // it('should respond successful with a statusCode200 and empty array for user with NO items', async () => {
-      //   //
-      // });
+        // get users detail to compare items array with recived response
+        const authResponse = await request(app)
+          .get(authRoute)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // delete all of Bodo4s Items
+        const deleteAllOfUsersItemsResponse2 = await request(app)
+          .delete(itemRoute)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // logout
+        await logout(connectSidValue);
+
+        // expects
+        expect(myInventoryResponse.statusCode).toBe(200);
+
+        // expect the body array to only have one object inside
+        expect(myInventoryResponse.body).toHaveLength(3);
+
+        // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
+        const InventoryItem1 = myInventoryResponse.body[0];
+        expect(InventoryItem1).toEqual(
+          checkResponseToBeCorrectlyProcessedItemForClient(inventoryTestBody),
+        );
+        // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
+        const InventoryItem2 = myInventoryResponse.body[1];
+        expect(InventoryItem2).toEqual(
+          checkResponseToBeCorrectlyProcessedItemForClient(inventoryTestBody),
+        );
+        // expect the body[0] to resemble the data inputs from getShowItemBody with the owner settings from processed item
+        const InventoryItem3 = myInventoryResponse.body[2];
+        expect(InventoryItem3).toEqual(
+          checkResponseToBeCorrectlyProcessedItemForClient(inventoryTestBody),
+        );
+
+        const inventoryItemsArray = [
+          myInventoryResponse.body[0]._id,
+          myInventoryResponse.body[1]._id,
+          myInventoryResponse.body[2]._id,
+        ];
+        expect(authResponse.body.myItems).toEqual(inventoryItemsArray);
+      });
     });
   });
 
