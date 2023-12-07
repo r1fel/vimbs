@@ -22,6 +22,7 @@ import {
   ItemRequest,
   ItemInDBPopulated,
 } from '../typeDefinitions';
+import { isConstructorDeclaration } from 'typescript';
 
 // fetch all items from DB that don't belog to user and process for client
 export const index = catchAsync(
@@ -162,7 +163,7 @@ export const deleteItem = catchAsync(
   },
 );
 
-// TODO currently a mess, define what we want to suggest and not only test
+// TODO beschreibe den rückgabe wert und füge noch begrenzung ein in den individuellen funktionen
 export const suggestItems = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
       if (req.user === undefined)
@@ -177,23 +178,25 @@ export const suggestItems = catchAsync(
       
       if (items === null)
         return next(new ExpressError('this item doesnt exist', 500));
-        
-      // get random items and most borrowed items
+
+
       const most_borrowed_items = await getMostBorrowedItems(items);
+      const search_history_items = await getSearchHistoryItems(items, req.user as UserInDB);
+      const catagory_items = await getItemsBasedOnCatagories(items, req.user as UserInDB);
       const random_items = await getRandomItems(items);
-      //const seaarch_history_items = await getSearchHistoryItems(items, req.user);
-      //const catagory_items = await getItemsBasedOnCatagories(items, req.user);
-      
-      //console.log("history" , seaarch_history_items);
 
-      const response_one: Array<ResponseItemForClient> = [];
-      const response_two: Array<ResponseItemForClient> = [];
-      const response_three: Array<ResponseItemForClient> = [];
-      processItemForClient(random_items, currentUser, response_one);
-      processItemForClient(most_borrowed_items, currentUser, response_two);
-      //processItemForClient(seaarch_history_items, currentUser, response_three);
 
-      const response: Array<Array<ResponseItemForClient>> = [response_one, response_two];
+      const response_borrowed_items: Array<ResponseItemForClient> = [];
+      const response_history_items: Array<ResponseItemForClient> = [];
+      const response_catagory_items: Array<ResponseItemForClient> = [];
+      const response_random_items: Array<ResponseItemForClient> = [];
+
+      processItemForClient(most_borrowed_items, currentUser, response_borrowed_items);
+      processItemForClient(search_history_items, currentUser, response_history_items);
+      processItemForClient(catagory_items, currentUser, response_catagory_items);
+      processItemForClient(random_items, currentUser, response_random_items);
+
+      const response: Array<Array<ResponseItemForClient>> = [response_borrowed_items, response_history_items, response_catagory_items, response_random_items]
       
       return res.send(response);
   } 
@@ -255,45 +258,111 @@ export const getSearchHistoryItems = (
   return Promise.resolve(interestingItems);
 };
 
-// TODO: Could not be tested because of missing history
-// TODO: check case if user has valid history
+
+// TODO: naming überdenken sondercases null cases mitdenken
 // get items based on catagories
 export const getItemsBasedOnCatagories = (
   items: any[],
   user: any,
+  thresh: number = 10
 ): Promise<PopulatedItemsFromDB> => {
   
-  if (!items) 
-    throw new Error('No accessible items found');
+  if (!items || user.searchHistory.length < thresh) 
+    return Promise.resolve([]);
 
-  // get catagories of items from user search history
-  const search_history_catagories = user.searchHistory.map((item: any) => item.name);
-  // find top three most used catagories
-  const topThreeSearchCatagories = search_history_catagories.sort((a: any, b: any) =>
-    search_history_catagories.filter((v: any) => v === a).length -
-    search_history_catagories.filter((v: any) => v === b).length
-  ).slice(0, 3);
-
-  // get catagories based on user borrow history
-  const borrow_history_catagories = user.getHistory.map((item: any) => item.categories);
-  // find top three most used catagories
-  const topThreeBorrowCatagories = borrow_history_catagories.sort((a: any, b: any) =>
-    borrow_history_catagories.filter((v: any) => v === a).length -
-    borrow_history_catagories.filter((v: any) => v === b).length
-  ).slice(0, 3);
-  
-  // find available items based on catagories
-  const suggestedItems = items.filter((item: any) => {
-    if (item.categories.some((catagory: any) => topThreeSearchCatagories.includes(catagory))) {
-      return true;
-    }
-    if (item.categories.some((catagory: any) => topThreeBorrowCatagories.includes(catagory))) {
-      return true;
-    }
-    return false;
+  // emtpy array
+  const searchTokens: string[] = [];
+  for (const searchData of user.searchHistory) {
+    searchTokens.push(searchData.searchToken);
   }
+
+  const SearchCategoryCounts = new Map<string, number>();
+
+  for (const searchToken of searchTokens) {
+    const filteredItems = items.filter(item => item.name === searchToken);
+    for (const item of filteredItems) {
+      const categories = item.categories; // Get all category names
+      const keys = Object.keys(categories);
+      for (const key of keys) {
+        const subcategories = categories[key].subcategories;
+        if (typeof categories[key].name === 'string') {
+          // count category and subcategory
+          SearchCategoryCounts.set(categories[key], (SearchCategoryCounts.get(categories[key]) || 0) + 1);
+        }
+      }
+    }
+  }
+
+  const searchSubcategoryCounts = new Map<string, number>();
+
+  SearchCategoryCounts.forEach((value: any, key: any) => {
+    const subcategories = (key as any).subcategories;
+    subcategories.forEach((subcategory: string) => {
+        searchSubcategoryCounts.set(subcategory, (searchSubcategoryCounts.get(subcategory) || 0) + 1);
+    });
+  });
+
+  const topSeachHistoryCategories = Array.from(searchSubcategoryCounts.entries()).sort((a, b) => b[1] - a[1]);
+
+  const BorrowCategoryCounts = new Map<string, number>();
+  const borrowedObjectIds = user.getHistory;
+  for (const objectId of borrowedObjectIds) {
+      const item = items.find(item => item._id.toString() === objectId.toString());
+      const categories = item.categories; // Get all category names
+      const keys = Object.keys(categories);
+      for (const key of keys) {
+        const subcategories = categories[key].subcategories;
+        if (typeof categories[key].name === 'string') {
+          // count category and subcategory
+          BorrowCategoryCounts.set(categories[key], (BorrowCategoryCounts.get(categories[key]) || 0) + 1);
+        }
+      }
+    
+  }
+
+  const historySubcategoryCounts = new Map<string, number>();
+
+  BorrowCategoryCounts.forEach((value: any, key: any) => {
+    const subcategories = (key as any).subcategories;
+    subcategories.forEach((subcategory: string) => {
+      historySubcategoryCounts.set(subcategory, (historySubcategoryCounts.get(subcategory) || 0) + 1);
+    });
+  });
+
+  const topHistoryCategories = Array.from(historySubcategoryCounts.entries()).sort((a, b) => b[1] - a[1]);
+
+  // suggested items array
+  const historySuggestedItems: any[] = Object.values(topHistoryCategories)
+  .filter(([_, count]) => count > 1)
+  .flatMap(([subcategory]) =>
+    Object.keys(items[0].categories)
+      .flatMap(key =>
+        items
+          .filter(item =>
+            item.categories &&
+            item.categories[key] &&
+            item.categories[key].subcategories &&
+            item.categories[key].subcategories.includes(subcategory)
+          )
+      )
   );
-  return Promise.resolve(suggestedItems);
+
+  const searchSuggestedItems: any[] = Object.values(topHistoryCategories)
+  .filter(([_, count]) => count > 1)
+  .flatMap(([subcategory]) =>
+    Object.keys(items[0].categories)
+      .flatMap(key =>
+        items
+          .filter(item =>
+            item.categories &&
+            item.categories[key] &&
+            item.categories[key].subcategories &&
+            item.categories[key].subcategories.includes(subcategory)
+          )
+      )
+  );
+
+  return Promise.resolve(historySuggestedItems.concat(searchSuggestedItems));
 };
 
 // TODO: check logic and token words again

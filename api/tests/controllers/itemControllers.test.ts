@@ -4,8 +4,9 @@ import makeApp from '../../src/app';
 import * as database from '../../src/database';
 import ExpressError from '../../src/utils/ExpressError';
 import { ResponseItemForClient } from '../../src/typeDefinitions';
-import { filterItemsBySeason, getRandomItems, getMostBorrowedItems, getSearchHistoryItems, getPopulatItems } from '../../src/controllers/itemControllers';
+import { filterItemsBySeason, getRandomItems, getMostBorrowedItems, getSearchHistoryItems, getPopulatItems, getItemsBasedOnCatagories } from '../../src/controllers/itemControllers';
 import { ItemInDBPopulated, UserInDB} from '../../src/typeDefinitions'; // Replace 'path/to/ItemInDBPopulated' with the actual path
+import { boolean } from 'joi';
 
 const app = makeApp(database);
 
@@ -198,7 +199,6 @@ describe('item Routes', () => {
           .query({ q: searchToken})
           .set('Cookie', [`connect.sid=${connectSidValue}`]);
           
-          console.log(searchToken, itemSearchResponse.body);
           // Assert the response code
           expect(itemSearchResponse.status).toBe(200);
           //expect response body to be an array
@@ -279,6 +279,7 @@ describe('item Routes', () => {
       it('should return array of objects', async () => {
         const connectSidValue = await loginBodo4();
         const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
+        
         if (items === null)
           throw new Error('items is null');
         let itemsArray: ItemInDBPopulated[] = [];
@@ -288,6 +289,10 @@ describe('item Routes', () => {
           itemsArray = [items];
         }
 
+        /* for (const item of itemsArray) {
+          console.log(item.name, item.categories, item._id)
+        } */
+
         //print catagories
         itemsArray[0].categories = {HouseAndGarden: {name: 'HouseAndGarden', subcategories: ['Gartengeräte']}}
         
@@ -296,7 +301,82 @@ describe('item Routes', () => {
         expect(filteredItems).toBeInstanceOf(Array);
       }, 10000);
     });
-  });
+
+    //TODO Erwartungen und check spezifizieren
+    // macht der test auch so sinn für später, umformulieren wäre besser
+    describe('getItemsBasedonCatagory for valid input', () => {
+      it('should return array of objects', async () => {
+        const connectSidValue = await loginBodo4();
+        const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
+
+          if (items === null)
+            throw new Error('items is null');
+          let itemsArray: ItemInDBPopulated[] = [];
+          if (Array.isArray(items)) {
+            itemsArray = items;
+          } else {
+            itemsArray = [items];
+          }
+
+        globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+        globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+        globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+        globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+        globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+
+        let jd = 0;
+        // Find all items with name Fahrrad and change catagories
+        for (const item of itemsArray) {
+          if (item.name === 'Fahrrad') {
+            item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
+            if (jd === 0) {
+              item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] }, SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] }}
+            }
+            if (jd === 1) {
+              item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['House'] } }
+            }
+            jd++;
+            //console.log(item.name, item.categories, item._id)
+          }
+        }
+
+
+        globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId("6553bc9a22932b85d2937a53"));
+        globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId("6553bc9a22932b85d2937a59"));
+        globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId("6553bc9b22932b85d2937a73"));
+
+        const objectids = [new mongoose.Types.ObjectId("6553bc9a22932b85d2937a53"), new mongoose.Types.ObjectId("6553bc9a22932b85d2937a59"), new mongoose.Types.ObjectId("6553bc9b22932b85d2937a73")]
+        jd = 0;
+        for (const item of itemsArray) {
+          for (const id of objectids) {
+            if (item._id.toString() === id.toString()) {
+              item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
+              if (jd === 0) {
+                item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] }, SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] }}
+              }
+              if (jd === 1) {
+                item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['House'] } }
+              }
+              jd++;
+            }
+          }
+          if (item._id.toString() === '6553bc9a22932b85d2937a55')
+            item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
+          if (item._id.toString() === '6553bc9b22932b85d2937a6f')
+            item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
+          if (item._id.toString() === '6553bc9b22932b85d2937a77')
+            item.categories = { SportAndCamping: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
+          if (item._id.toString() === '6553bc9a22932b85d2937a5f')
+            item.categories = { SportAndCamping: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
+
+
+        }
+
+        const itemsBasedonCatagory = await getItemsBasedOnCatagories(itemsArray, globalUserBodo, 2);
+        
+      });
+    });
+  });  
   });
 });
 
