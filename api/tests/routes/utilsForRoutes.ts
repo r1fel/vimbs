@@ -14,3 +14,4 @@ export const itemIdRoute = '/item/:itemId';
 // user routes
 export const userRoute = '/user';
 export const userIdMyItemsRoute = '/user/:userId/inventory/myItems';
+export const userIdChangePasswordRoute = '/user/:userId/changePassword';

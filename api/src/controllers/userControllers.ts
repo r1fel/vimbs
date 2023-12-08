@@ -62,8 +62,7 @@ export const myItems = catchAsync(
     const items: PopulatedItemsFromDB = await Item.find({ owner: currentUser })
       .populate<{ interactions: ItemInteractionInDB[] }>('interactions')
       .sort({ title: 1 });
-    if (items === null)
-      return next(new ExpressError('this item doesnt exist', 500));
+    if (items === null) return res.send([]);
     const response: Array<ResponseItemForClient> = [];
     processItemForClient(items, currentUser, response);
     return res.send(response);

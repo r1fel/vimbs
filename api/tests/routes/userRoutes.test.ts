@@ -13,6 +13,7 @@ import {
   itemRoute,
   itemIdRoute,
   userIdMyItemsRoute,
+  userIdChangePasswordRoute,
   userRoute,
   bodosUserId,
   bibisUserId,
@@ -208,16 +209,19 @@ describe('user Routes', () => {
     // check if isLoggedIn throws appropriate errors
     notPassedIsLoggedIn(
       'get',
-      `${userRoute}/65673cc5811318fde3968147/inventory/myItems`,
+      `${userRoute}/65673cc5811318fde3968147/${
+        userIdMyItemsRoute.split(':userId/').slice(-1)[0]
+      }`,
     );
 
+    // check if isUser throws appropriate errors
     notPassedIsUser(
       'get',
       userRoute,
       userIdMyItemsRoute.split(':userId/').slice(-1)[0],
     );
 
-    describe('when isLoggedIn was passed', () => {
+    describe('when controller ran', () => {
       // TODO ER: these tests are weirdly buggy, sometimes not giving the right amount of created items
       it('should respond successful with a statusCode200 and empty array if user has no items', async () => {
         // login bodo, delete all of his items, run auth for bodos id, run user myInventory, logout bodo
@@ -389,45 +393,209 @@ describe('user Routes', () => {
     });
   });
 
-  // describe('POST /user/:userId/changePassword', () => {
-  //   // reset password after every test
-  //   describe('when isLoggedIn was not passed', () => {
-  //     it('should respond error with a statusCode401 if req.user undefined', async () => {
-  //       //
-  //     });
-  //     it('should respond error with a statusCode401 if req.user but no ongoing session', async () => {
-  //       //
-  //     });
-  //   });
-  //   describe('when isUser was not passed', () => {
-  //     it('should respond error with a statusCode403 if req.user is not :userId', async () => {
-  //       //
-  //     });
-  //   });
-  //   // define valid input
-  //   describe('when changePassword body is given', () => {
-  //     it('should respond successful with a statusCode200 and user data for valid old and new password', async () => {
-  //       //
-  //     });
-  //     it('should respond error with a statusCode400 for old and new passwords being equal', async () => {
-  //       // change input to equal pws
-  //     });
-  //     it('should respond error with a statusCode400 for only old or new password given', async () => {
-  //       // change input to a) only old given, b) only new given
-  //     });
-  // it('should respond error with a statusCode400 for invalid field(s)', async () => {
-  //   // add field(s) to inout
-  // });
-  //     it('should respond error with a statusCode500 for old password being incorrect', async () => {
-  //       // change input to having wrong old password
-  //     });
-  //   });
-  //   describe('when changePassword body is NOT given', () => {
-  //     it('should respond error with a statusCode400 for empty body', async () => {
-  //       // change input to empty
-  //     });
-  //   });
-  // });
+  describe(`POST ${userIdChangePasswordRoute}`, () => {
+    // check if isLoggedIn throws appropriate errors
+    notPassedIsLoggedIn(
+      'post',
+      `${userRoute}/65673cc5811318fde3968147/${
+        userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
+      }`,
+    );
+
+    // check if isUser throws appropriate errors
+    notPassedIsUser(
+      'post',
+      userRoute,
+      userIdChangePasswordRoute.split(':userId/').slice(-1)[0],
+    );
+
+    // reset password after every test
+
+    // define valid input
+    describe('when valid changePassword body is given', () => {
+      it('should respond successful with a statusCode200 and response text for valid old and new password', async () => {
+        // login bodo4, change password, change password back, logout bodo4
+
+        //  login Bodo4
+        const connectSidValue = await loginBodo4();
+
+        // change password
+        const changePasswordResponse = await request(app)
+          .post(
+            `${userRoute}/${bodosUserId}/${
+              userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .send({
+            oldPassword: 'bodo4',
+            newPassword: 'bodo44',
+          })
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // change password back
+        const changePasswordBackResponse = await request(app)
+          .post(
+            `${userRoute}/${bodosUserId}/${
+              userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .send({
+            oldPassword: 'bodo44',
+            newPassword: 'bodo4',
+          })
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // logout
+        await logout(connectSidValue);
+
+        // expects
+        expect(changePasswordResponse.statusCode).toBe(200);
+        expect(changePasswordResponse.text).toBe(
+          'successfully changed password',
+        );
+
+        // successful change PW back
+        expect(changePasswordBackResponse.statusCode).toBe(200);
+        expect(changePasswordBackResponse.text).toBe(
+          'successfully changed password',
+        );
+      });
+    });
+    describe('when invalid changePassword body is given', () => {
+      // expect statements for all tests in this block
+      const expectsForInvalidPasswordBody = (
+        statusCode: number,
+        invalidity: string,
+        changePasswordResponse: request.Response,
+      ) => {
+        // console.log(changePasswordResponse.statusCode, changePasswordResponse.error);
+
+        // expects
+        expect(changePasswordResponse.statusCode).toBe(statusCode);
+        expect(changePasswordResponse.text).toContain(invalidity);
+
+        // log for checking that all validation test ran completely
+        // console.log('expectsForInvalidBody ran for invalidity', invalidity);
+      };
+
+      // test function for all bodys in this block
+      const testForInvalidPasswordBody = async (
+        statusCode: number,
+        invalidity: string,
+        invalidPasswordBody: any,
+      ) => {
+        // define Body to be used in this test
+        const passwordBody = invalidPasswordBody;
+
+        // login Bodo4, let him create Item with passed in Body
+        const connectSidValue = await loginBodo4();
+
+        // change password
+        const changePasswordResponse = await request(app)
+          .post(
+            `${userRoute}/${bodosUserId}/${
+              userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .send(passwordBody)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // logout
+        await logout(connectSidValue);
+
+        expectsForInvalidPasswordBody(
+          statusCode,
+          invalidity,
+          changePasswordResponse,
+        );
+      };
+
+      // old and new PW are equal
+      const invalidPasswordBody1 = {
+        oldPassword: 'bodo4',
+        newPassword: 'bodo4',
+      };
+
+      // only old PW given
+      const invalidPasswordBody2 = {
+        oldPassword: 'bodo4',
+        // newPassword: 'bodo4',
+      };
+
+      // only new PW given
+      const invalidPasswordBody3 = {
+        // oldPassword: 'bodo4',
+        newPassword: 'bodo44',
+      };
+
+      // invalid field given
+      const invalidPasswordBody4 = {
+        oldPassword: 'bodo4',
+        newPassword: 'bodo44',
+        color: 'blue',
+      };
+
+      // empty body
+      const invalidPasswordBody5 = {
+        // oldPassword: 'bodo4',
+        // newPassword: 'bodo4',
+      };
+
+      // incorrect old PW
+      const invalidPasswordBody6 = {
+        oldPassword: 'bodo444',
+        newPassword: 'bodo44',
+      };
+
+      describe('should respond error with a statusCode400', () => {
+        it('for old and new passwords being equal', async () => {
+          await testForInvalidPasswordBody(
+            400,
+            'Error: pick new password',
+            invalidPasswordBody1,
+          );
+        }, 10000);
+        it('for only old password given', async () => {
+          await testForInvalidPasswordBody(
+            400,
+            'Error: &quot;newPassword&quot; is required<br> &nbsp; &nbsp;at validatePasswordChange',
+            invalidPasswordBody2,
+          );
+        }, 10000);
+        it('for only new password given', async () => {
+          await testForInvalidPasswordBody(
+            400,
+            'Error: &quot;oldPassword&quot; is required<br> &nbsp; &nbsp;at validatePasswordChange',
+            invalidPasswordBody3,
+          );
+        }, 10000);
+        it('for invalid field given', async () => {
+          await testForInvalidPasswordBody(
+            400,
+            'Error: &quot;color&quot; is not allowed<br> &nbsp; &nbsp;at validatePasswordChange',
+            invalidPasswordBody4,
+          );
+        }, 10000);
+        it('for empty body', async () => {
+          await testForInvalidPasswordBody(
+            400,
+            'Error: &quot;oldPassword&quot; is required<br> &nbsp; &nbsp;at validatePasswordChange',
+            invalidPasswordBody5,
+          );
+        }, 10000);
+      });
+
+      describe('should respond error with a statusCode500', () => {
+        it('for old PW incorrect', async () => {
+          await testForInvalidPasswordBody(
+            500,
+            'IncorrectPasswordError: Password or username is incorrect',
+            invalidPasswordBody6,
+          );
+        }, 10000);
+      });
+    });
+  });
 
   // describe('PUT /user/:userId/settings', () => {
   //   describe('when isLoggedIn was not passed', () => {
