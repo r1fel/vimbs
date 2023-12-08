@@ -238,12 +238,16 @@ export const getMostBorrowedItems = async (
 // but didn't exist back then
 export const getSearchHistoryItems = (
   accessibleItems: ItemInDBPopulated[],
-  user: UserInDB
+  user: UserInDB,
+  thresh: number = 5
 ): Promise<PopulatedItemsFromDB> => {
   if (!accessibleItems) 
     return Promise.resolve([]);
   
   const searchHistory = user.searchHistory;
+  if (!searchHistory || searchHistory.length < thresh) 
+    return Promise.resolve([]);
+
   const interestingItems: PopulatedItemsFromDB = [];
   for (const searchData of user.searchHistory) {
     const items = accessibleItems.filter(
@@ -365,54 +369,34 @@ export const getItemsBasedOnCatagories = (
   return Promise.resolve(historySuggestedItems.concat(searchSuggestedItems));
 };
 
-// TODO: check logic and token words again
-// filter items out based on season
-export const filterItemsBySeason = (
-  accessibleItems: any[],
-): Promise<PopulatedItemsFromDB> => {
+export const WinterSubcategories = ['Winter Sports', 'Wintersport'];
+export const SummerSubcategories = ['Baustellengeräte', 'Gartengeräte', 'Campingutensilien', 'Construction equipment', 'Gardening tools', 'Camping gear'];
+
+export const filterItemsBySeason = (accessibleItems: any[]): Promise<PopulatedItemsFromDB> => {
   if (!accessibleItems || accessibleItems.length === 0) {
-    throw new Error('No accessible items found');
+    return Promise.resolve([]);
   }
 
   const currentMonth = new Date().getMonth();
-  let filteredItems: any[];
+  const isWinter = currentMonth < 3 || currentMonth > 10;
 
-  if (currentMonth < 3 || currentMonth > 10) {
-    // Winter -> Don't show items related to 'Gartengeräte'
-    filteredItems = accessibleItems.filter((item) => {
-      const categories = Object.values(item.categories);
-      const isGartengerate = categories.some((category: any) => {
-        if (
-          category &&
-          category.subcategories &&
-          Array.isArray(category.subcategories)
-        ) {
-          return category.subcategories.includes('Gartengeräte');
-        }
-        return false;
-      });
-      return !isGartengerate;
-    });
-  } else {
-    // Summer -> Don't show items related to 'Winter Sports'
-    filteredItems = accessibleItems.filter((item) => {
-      const categories = Object.values(item.categories);
-      const isWinterSports = categories.some((category: any) => {
-        if (
-          category &&
-          category.subcategories &&
-          Array.isArray(category.subcategories)
-        ) {
-          return category.subcategories.includes('Winter Sports');
-        }
-        return false;
-      });
-      return !isWinterSports;
-    });
-  }
+  const filteredItems = accessibleItems.filter(item => {
+    const categories = Object.values(item.categories) as { subcategories?: string[] }[];
+    const subcategories = categories.flatMap(category => category.subcategories || []);
+
+    if (isWinter) {
+      // If it's winter, filter out items with summer subcategories
+      return !subcategories.some(subcat => SummerSubcategories.includes(subcat));
+    } else {
+      // If it's summer, filter out items with winter subcategories
+      return !subcategories.some(subcat => WinterSubcategories.includes(subcat));
+    }
+  });
 
   return Promise.resolve(filteredItems);
 };
+
+
 
 // Don't remove
 // this function is only used for testing the helper functions above in itemControllers.test.ts
