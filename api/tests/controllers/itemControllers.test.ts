@@ -441,13 +441,18 @@ describe('item Routes', () => {
         }
       });
 
-      // TODO user hat net genug search history oder borrow history leer, leere items leer
-      /* describe('getItemsBasedonCatagory for invalid input', () => {
-        it('should return array of item, which only belong to the subcatagories of Sport and Garden', async () => {
+
+      describe('getItemsBasedonCatagory for invalid input', () => {
+        it('should return an empty array', async () => {
   
           const connectSidValue = await loginBodo4();
           const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
-        }); */
+          const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
+          const itemsBasedonCatagory = await getItemsBasedOnCatagories(itemsArray, globalUserBodo);
+          expect(itemsBasedonCatagory).toEqual([]);
+          const emptyInputResponse = await getItemsBasedOnCatagories([], globalUserBodo, 2);
+          expect(emptyInputResponse).toEqual([]);
+        });
     }); 
   });  
 });

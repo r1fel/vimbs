@@ -268,37 +268,35 @@ export const getSearchHistoryItems = (
 export const getItemsBasedOnCatagories = (
   items: any[],
   user: any,
-  thresh: number = 10
+  min_length_user_history: number = 5
 ): Promise<PopulatedItemsFromDB> => {
   
-  if (!items || user.searchHistory.length < thresh) 
+  if (!items || user.searchHistory.length < min_length_user_history || user.getHistory.length < min_length_user_history) 
     return Promise.resolve([]);
 
-  // emtpy array
+  // get search tokens from user search history
   const searchTokens: string[] = [];
   for (const searchData of user.searchHistory) {
     searchTokens.push(searchData.searchToken);
   }
 
+  // get catagory of items, which were searched for in the past
   const SearchCategoryCounts = new Map<string, number>();
-
   for (const searchToken of searchTokens) {
     const filteredItems = items.filter(item => item.name === searchToken);
     for (const item of filteredItems) {
       const categories = item.categories; // Get all category names
       const keys = Object.keys(categories);
       for (const key of keys) {
-        const subcategories = categories[key].subcategories;
         if (typeof categories[key].name === 'string') {
-          // count category and subcategory
           SearchCategoryCounts.set(categories[key], (SearchCategoryCounts.get(categories[key]) || 0) + 1);
         }
       }
     }
   }
 
+  // get top 3 catagories of items, which were searched for in the past
   const searchSubcategoryCounts = new Map<string, number>();
-
   SearchCategoryCounts.forEach((value: any, key: any) => {
     const subcategories = (key as any).subcategories;
     subcategories.forEach((subcategory: string) => {
@@ -308,6 +306,7 @@ export const getItemsBasedOnCatagories = (
 
   const topSeachHistoryCategories = Array.from(searchSubcategoryCounts.entries()).sort((a, b) => b[1] - a[1]);
 
+  // get catagoires of items, which were borrowed in the past
   const BorrowCategoryCounts = new Map<string, number>();
   const borrowedObjectIds = user.getHistory;
   for (const objectId of borrowedObjectIds) {
@@ -321,22 +320,21 @@ export const getItemsBasedOnCatagories = (
           BorrowCategoryCounts.set(categories[key], (BorrowCategoryCounts.get(categories[key]) || 0) + 1);
         }
       }
-    
-  }
+    }
 
-  const historySubcategoryCounts = new Map<string, number>();
-
+  // get top 3 catagories of items, which were borrowed in the past
+  const borrowSubcategoryCounts = new Map<string, number>();
   BorrowCategoryCounts.forEach((value: any, key: any) => {
     const subcategories = (key as any).subcategories;
     subcategories.forEach((subcategory: string) => {
-      historySubcategoryCounts.set(subcategory, (historySubcategoryCounts.get(subcategory) || 0) + 1);
+      borrowSubcategoryCounts.set(subcategory, (borrowSubcategoryCounts.get(subcategory) || 0) + 1);
     });
   });
 
-  const topHistoryCategories = Array.from(historySubcategoryCounts.entries()).sort((a, b) => b[1] - a[1]);
+  const topBorrowCategories = Array.from(borrowSubcategoryCounts.entries()).sort((a, b) => b[1] - a[1]);
 
   // suggested items array
-  const historySuggestedItems: any[] = Object.values(topHistoryCategories)
+  const borrowSuggestedItems: any[] = Object.values(topBorrowCategories)
   .filter(([_, count]) => count > 1)
   .flatMap(([subcategory]) =>
     Object.keys(items[0].categories)
@@ -351,7 +349,7 @@ export const getItemsBasedOnCatagories = (
       )
   );
 
-  const searchSuggestedItems: any[] = Object.values(topHistoryCategories)
+  const searchHistorySuggestedItems: any[] = Object.values(topSeachHistoryCategories)
   .filter(([_, count]) => count > 1)
   .flatMap(([subcategory]) =>
     Object.keys(items[0].categories)
@@ -366,7 +364,7 @@ export const getItemsBasedOnCatagories = (
       )
   );
 
-  return Promise.resolve(historySuggestedItems.concat(searchSuggestedItems));
+  return Promise.resolve(borrowSuggestedItems.concat(searchHistorySuggestedItems));
 };
 
 export const WinterSubcategories = ['Winter Sports', 'Wintersport'];
