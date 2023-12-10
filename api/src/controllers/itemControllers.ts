@@ -22,7 +22,6 @@ import {
   ItemRequest,
   ItemInDBPopulated,
 } from '../typeDefinitions';
-import { isConstructorDeclaration } from 'typescript';
 
 // fetch all items from DB that don't belog to user and process for client
 export const index = catchAsync(
@@ -80,7 +79,7 @@ export const createItem = catchAsync(
 
 // get item by itemId
 export const showItem = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {  
+  async (req: Request, res: Response, next: NextFunction) => {
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
@@ -88,23 +87,37 @@ export const showItem = catchAsync(
       .populate<{ owner: UserInDB }>('owner')
       .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
     if (item === null)
-      return next(new ExpressError('this item doesnt exist', 500));
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
     // process for client
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(item, currentUser, response);
     return res.send(response);
-  }
+  },
 );
 
 // edit item by itemId
+// TODO ER: if description or pictrure are not given, they are set to the value null in the DB
+// TODO nicer would be to have the key value pair removed off the object - but $unset wouldn't work for me here, when I tried
 export const updateItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // console.log('new put request', req.body);
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
     const currentUser = req.user._id;
+
+    // define the item details that is supposed to be updated.
+    // if picture or description are not supplied, since they are optional, there value is to be set to null
+    const updatedItem = {
+      ...req.body.item,
+      description: req.body.item.description ? req.body.item.description : null,
+      picture: req.body.item.picture ? req.body.item.picture : null,
+    };
+
     const item: PopulatedItemsFromDB | null = await Item.findOneAndUpdate(
       { _id: req.params.itemId },
-      { ...req.body.item },
+      updatedItem,
       { new: true },
     )
       .populate<{ owner: UserInDB }>('owner')
@@ -148,7 +161,7 @@ export const deleteItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const itemId = new mongoose.Types.ObjectId(req.params.itemId);
     if (req.user === undefined)
-      return new ExpressError('user is undefined', 500);
+      return next(new ExpressError('user is undefined', 500));
     const currentUser = req.user._id;
     const user: UserInDB | null = await User.findById(currentUser);
     if (user === null)
@@ -163,7 +176,33 @@ export const deleteItem = catchAsync(
   },
 );
 
-// TODO beschreibe den rückgabe wert und füge noch begrenzung ein in den individuellen funktionen
+// deleting all item a user has from DB and empty owners myItems array
+export const deleteAllOfUsersItems = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user === undefined)
+      return next(new ExpressError('user is undefined', 500));
+
+    const currentUser = req.user._id;
+    const user: UserInDB | null = await User.findById(currentUser);
+
+    if (user === null)
+      return next(new ExpressError('this user doesnt exist', 500));
+
+    if (user.myItems.length > 0) {
+      // Delete all items owned by the user
+      await Item.deleteMany({ owner: currentUser });
+
+      // Empty out myItems array
+      user.myItems = [];
+      await user.save();
+      return res.send('Successfully deleted all of your items!');
+    }
+
+    return res.send('You had no items to delete.');
+  },
+);
+
+// suggest items for user
 export const suggestItems = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
       if (req.user === undefined)
@@ -206,11 +245,11 @@ export const suggestItems = catchAsync(
 
 // get random items
 export const getRandomItems = (
-  items: PopulatedItemsFromDB,
+  items: PopulatedItemsFromDB[],
   numberOfItems: number = 2
 ): Promise<PopulatedItemsFromDB> => {
-  if (!items) 
-    return Promise.resolve(null);
+  if (!items || items.length === 0) 
+    return Promise.resolve([]);
   const randomItems = Item.aggregate([{ $sample: { size: numberOfItems}}]).exec(); 
   return randomItems;
 };

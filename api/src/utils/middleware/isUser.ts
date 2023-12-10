@@ -5,13 +5,13 @@ import mongoose from 'mongoose';
 import ExpressError from '../ExpressError';
 
 const isUser = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) return next(new ExpressError('user is undefined', 500));
+  if (!req.user) return next(new ExpressError('Error: Unauthorized', 401));
   const currentUser = req.user._id;
   const reqUserId = new mongoose.Types.ObjectId(req.params.userId);
   if (!currentUser.equals(reqUserId))
     return next(
       new ExpressError(
-        'Unauthorized: You are not allowed to view this content!',
+        'Forbidden: You are not allowed to view this content!',
         403,
       ),
     );

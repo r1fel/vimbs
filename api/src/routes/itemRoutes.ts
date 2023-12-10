@@ -15,8 +15,9 @@ import {
   itemSearch,
   showItem,
   updateItem,
-  deleteItem,
   suggestItems,
+  deleteItem,
+  deleteAllOfUsersItems,
 } from '../controllers/itemControllers';
 
 const itemRoutes = Router();
@@ -34,6 +35,12 @@ itemRoutes
     validateItem,
     //
     createItem,
+  )
+  .delete(
+    setReqBodyToEmpty,
+    isLoggedIn,
+    //
+    deleteAllOfUsersItems,
   );
 
 itemRoutes.route('/search').get(

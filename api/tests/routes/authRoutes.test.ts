@@ -229,3 +229,5 @@ describe(`POST ${logoutRoute}`, () => {
 //     });
 //   });
 // });
+
+console.log('all tests in authRoutes.test.ts ran');
