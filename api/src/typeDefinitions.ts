@@ -100,7 +100,7 @@ export interface UserInDB extends Document {
   };
   phone?: {
     countryCode?: string;
-    number?: number;
+    number?: string;
   };
   myItems: mongoose.Types.ObjectId[];
   getItems: mongoose.Types.ObjectId[];
@@ -189,7 +189,7 @@ export type ChangeSettingsRequest = {
   lastName?: string;
   phone?: {
     countryCode: string;
-    number: number;
+    number: string;
   };
   address?: {
     street: string;

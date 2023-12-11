@@ -14,11 +14,14 @@ import {
   itemIdRoute,
   userIdMyItemsRoute,
   userIdChangePasswordRoute,
+  userIdSettingsRoute,
   userRoute,
   bodosUserId,
   bibisUserId,
 } from './utilsForRoutes';
-import exp from 'constants';
+
+// type Definintions
+import { ChangeSettingsRequest } from '../../src/typeDefinitions';
 
 // frequently used functions
 const loginBodo4 = async () => {
@@ -409,9 +412,6 @@ describe('user Routes', () => {
       userIdChangePasswordRoute.split(':userId/').slice(-1)[0],
     );
 
-    // reset password after every test
-
-    // define valid input
     describe('when valid changePassword body is given', () => {
       it('should respond successful with a statusCode200 and response text for valid old and new password', async () => {
         // login bodo4, change password, change password back, logout bodo4
@@ -597,38 +597,632 @@ describe('user Routes', () => {
     });
   });
 
-  // describe('PUT /user/:userId/settings', () => {
-  //   describe('when isLoggedIn was not passed', () => {
-  //     it('should respond error with a statusCode401 if req.user undefined', async () => {
-  //       //
-  //     });
-  //     it('should respond error with a statusCode401 if req.user but no ongoing session', async () => {
-  //       //
-  //     });
-  //   });
-  //   describe('when isUser was not passed', () => {
-  //     it('should respond error with a statusCode403 if req.user is not :userId', async () => {
-  //       //
-  //     });
-  //   });
-  //   // define valid input
-  //   describe('when newUserData body is given', () => {
-  //     it('should respond successful with a statusCode200 and user data for input including a newUserData Object', async () => {
-  //       //
-  //     });
-  //     it('should respond successful with a statusCode200 and user data for input including any of the optional newUserData fields firstName, lastName, phone, adress', async () => {
-  //       // change input to include any only one and some combinations
-  //     });
-  //     it('should respond error with a statusCode400 for invalid field(s)', async () => {
-  //       // add field(s) to input
-  //     });
-  //   });
-  //   describe('when newUserData body is NOT given', () => {
-  //     it('should respond error with a statusCode400 for empty body', async () => {
-  //       // change input to empty
-  //     });
-  //   });
-  // });
+  describe(`PUT ${userIdSettingsRoute}`, () => {
+    // check if isLoggedIn throws appropriate errors
+    notPassedIsLoggedIn(
+      'put',
+      `${userRoute}/65673cc5811318fde3968147/${
+        userIdSettingsRoute.split(':userId/').slice(-1)[0]
+      }`,
+    );
+
+    // check if isUser throws appropriate errors
+    notPassedIsUser(
+      'put',
+      userRoute,
+      userIdSettingsRoute.split(':userId/').slice(-1)[0],
+    );
+
+    // define valid input
+    describe('when valid settings body is given', () => {
+      describe('should respond successful with a statusCode200 and user data ', () => {
+        // expect valids
+        // for lastName is empty string
+        // for phone.countryCode has + and 2 numbers
+        // for phone.number is empty string
+        // for phone.number has 9 digits
+        // for phone.number has 10 digits
+        // for phone.number has 11 digits
+        // for address.street is empty string
+        // for address.plz is empty string
+        // for address.city is empty string
+
+        it('for input including a newUserData Object', async () => {
+          // define Body to be used in this test
+          const validSettingsBody: { newUserData: ChangeSettingsRequest } = {
+            newUserData: {
+              firstName: 'bodo4',
+              lastName: 'The Big',
+              phone: { countryCode: '+49', number: '17298086213' },
+              address: {
+                street: 'Hans-Meyer-Str',
+                plz: '79543',
+                city: 'Down Town',
+              },
+            },
+          };
+
+          // login Bodo4, let him change his settings with passed in Body
+          const connectSidValue = await loginBodo4();
+
+          // change settings
+          const changeSettingsResponse = await request(app)
+            .put(
+              `${userRoute}/${bodosUserId}/${
+                userIdSettingsRoute.split(':userId/').slice(-1)[0]
+              }`,
+            )
+            .send(validSettingsBody)
+            .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+          // logout
+          await logout(connectSidValue);
+
+          // console.log(changeSettingsResponse.body);
+
+          // successful change PW back
+          expect(changeSettingsResponse.statusCode).toBe(200);
+          expect(changeSettingsResponse.body).toEqual({
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+            _id: '6553b5bfa70b16a991b89001',
+            email: 'bodo4@gmail.com',
+            __v: expect.any(Number),
+            creationDate: '2023-11-16T11:42:55.615Z',
+            lastName: 'The Big',
+            firstName: 'bodo4',
+            getHistory: expect.any(Array),
+            getItems: expect.any(Array),
+            searchHistory: expect.any(Array),
+            myItems: expect.any(Array),
+          });
+        });
+      });
+    });
+    describe('when invalid settings body is given', () => {
+      // expect statements for all tests in this block
+      const expectsForInvalidSettingsBody = (
+        statusCode: number,
+        invalidity: string,
+        changeSettingsResponse: request.Response,
+      ) => {
+        // console.log(changeSettingsResponse.statusCode, changeSettingsResponse.error);
+
+        // expects
+        expect(changeSettingsResponse.statusCode).toBe(statusCode);
+        expect(changeSettingsResponse.text).toContain(invalidity);
+
+        // log for checking that all validation test ran completely
+        // console.log('expectsForInvalidBody ran for invalidity', invalidity);
+      };
+
+      // test function for all bodys in this block
+      const testForInvalidSettingsBody = async (
+        statusCode: number,
+        invalidity: string,
+        invalidSettingsBody: any,
+      ) => {
+        // define Body to be used in this test
+        const settingsBody = invalidSettingsBody;
+
+        // login Bodo4, let him create Item with passed in Body
+        const connectSidValue = await loginBodo4();
+
+        // change settings
+        const changeSettingsResponse = await request(app)
+          .put(
+            `${userRoute}/${bodosUserId}/${
+              userIdSettingsRoute.split(':userId/').slice(-1)[0]
+            }`,
+          )
+          .send(settingsBody)
+          .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+        // logout
+        await logout(connectSidValue);
+
+        expectsForInvalidSettingsBody(
+          statusCode,
+          invalidity,
+          changeSettingsResponse,
+        );
+      };
+
+      // for empty body object
+      const invalidSettingsBody1 = {
+        // no newUserData
+      };
+
+      // for empty newUserData object
+      const invalidSettingsBody2 = {
+        newUserData: {
+          //  everything missing
+        },
+      };
+
+      // for missing firstName
+      const invalidSettingsBody3 = {
+        newUserData: {
+          //   firstName missing
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for firstName is an empty string
+      const invalidSettingsBody4 = {
+        newUserData: {
+          firstName: '', // fistName empty string
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing lastName
+      const invalidSettingsBody5 = {
+        newUserData: {
+          firstName: 'bodo4',
+          // lastName is missing
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing phone
+      const invalidSettingsBody6 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          // phone is missing
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing phone.countryCode
+      const invalidSettingsBody7 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            // countryCode is missing
+            number: '17298086213',
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.countryCode is an empty string
+      const invalidSettingsBody8 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '', // empty string
+            number: '17298086213',
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.countryCode lacks + in the first position
+      const invalidSettingsBody9 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '49', // lacks +
+            number: '17298086213',
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.countryCode has 4 numbers
+      const invalidSettingsBody10 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '+4935', // 4 digits
+            number: '17298086213',
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing phone.number
+      const invalidSettingsBody11 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '+49',
+            // number is missing
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.number has less than 9 digits
+      const invalidSettingsBody12 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '+49',
+            number: '12345678', // less than 9 digits
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.number has more than 11 digits
+      const invalidSettingsBody13 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '+49',
+            number: '123456789012', // more than 11 digits
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.number is a number
+      const invalidSettingsBody14 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '+49',
+            number: 17298086213, // should be a string
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for phone.number does contain other string values than digits
+      const invalidSettingsBody15 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: {
+            countryCode: '+49',
+            number: '17298a086213', // contains non-digit characters
+          },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing address
+      const invalidSettingsBody16 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          // address is missing
+        },
+      };
+
+      // for missing address.street
+      const invalidSettingsBody17 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            // street is missing
+            plz: '79543',
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing address.plz
+      const invalidSettingsBody18 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            // plz is missing
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for address.plz has less than 5 digits
+      const invalidSettingsBody18a = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '795', // less than 5 digits
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for address.plz has more than 5 digits
+      const invalidSettingsBody18b = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '7954563', //more than 5 digits
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for address.plz containing other value than number
+      const invalidSettingsBody18c = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '123m5', //contianing a non digit value
+            city: 'Down Town',
+          },
+        },
+      };
+
+      // for missing address.city
+      const invalidSettingsBody19 = {
+        newUserData: {
+          firstName: 'bodo4',
+          lastName: 'The Big',
+          phone: { countryCode: '+49', number: '17298086213' },
+          address: {
+            street: 'Hans-Meyer-Str',
+            plz: '79543',
+            // city is missing
+          },
+        },
+      };
+
+      describe('should respond error with a statusCode400', () => {
+        it('for empty body object', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody1,
+          );
+        }, 10000);
+        it('for empty newUserData object', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.firstName&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody2,
+          );
+        }, 10000);
+        it('for missing firstName', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.firstName&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody3,
+          );
+        }, 10000);
+        it('for firstName is an empty string', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.firstName&quot; is not allowed to be empty<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody4,
+          );
+        }, 10000);
+
+        it('for missing lastName', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.lastName&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody5,
+          );
+        }, 10000);
+
+        it('for missing phone', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody6,
+          );
+        }, 10000);
+
+        it('for missing phone.countryCode', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.countryCode&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody7,
+          );
+        }, 10000);
+
+        it('for phone.countryCode is an empty string', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.countryCode&quot; is not allowed to be empty<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody8,
+          );
+        }, 10000);
+
+        it('for phone.countryCode lacks + in the first position', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.countryCode&quot; with value &quot;49&quot; fails to match the required pattern: /^\\+\\d{1,3}$/<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody9,
+          );
+        }, 10000);
+
+        it('for phone.countryCode has 4 numbers', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.countryCode&quot; with value &quot;+4935&quot; fails to match the required pattern: /^\\+\\d{1,3}$/<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody10,
+          );
+        }, 10000);
+
+        it('for missing phone.number', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.number&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody11,
+          );
+        }, 10000);
+
+        it('for phone.number has less than 9 digits', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.number&quot; length must be at least 9 characters long<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody12,
+          );
+        }, 10000);
+
+        it('for phone.number has more than 11 digits', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.number&quot; length must be less than or equal to 11 characters long<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody13,
+          );
+        }, 10000);
+
+        it('for phone.number is a number', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.number&quot; must be a string<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody14,
+          );
+        }, 10000);
+
+        it('for phone.number does contain other string values than digits', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.phone.number&quot; with value &quot;17298a086213&quot; fails to match the required pattern: /^\\d*$/<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody15,
+          );
+        }, 10000);
+
+        it('for missing address', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.address&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody16,
+          );
+        }, 10000);
+
+        it('for missing address.street', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.address.street&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody17,
+          );
+        }, 10000);
+
+        it('for missing address.plz', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.address.plz&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody18,
+          );
+        }, 10000);
+
+        it('for address.plz has less than 5 digits', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.address.plz&quot; with value &quot;795&quot; fails to match the required pattern: /^\\d{5}$/<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody18a,
+          );
+        }, 10000);
+
+        it('for address.plz has more than 5 digits', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            '>Error: &quot;newUserData.address.plz&quot; with value &quot;7954563&quot; fails to match the required pattern: /^\\d{5}$/<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody18b,
+          );
+        }, 10000);
+
+        it(' for address.plz containing other value than number', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            '>Error: &quot;newUserData.address.plz&quot; with value &quot;123m5&quot; fails to match the required pattern: /^\\d{5}$/<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody18c,
+          );
+        }, 10000);
+
+        it('for missing address.city', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.address.city&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody19,
+          );
+        }, 10000);
+      });
+    });
+  });
 
   // describe('xxx', () => {
   //   describe('when xxx given', () => {

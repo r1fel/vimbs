@@ -43,7 +43,7 @@ const UserSchema: Schema = new Schema({
       type: String,
       default: '+49',
     },
-    number: Number,
+    number: String,
   },
   address: {
     street: String,
