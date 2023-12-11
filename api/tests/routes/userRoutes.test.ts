@@ -11,7 +11,6 @@ import {
   logoutRoute,
   authRoute,
   itemRoute,
-  itemIdRoute,
   userIdMyItemsRoute,
   userIdChangePasswordRoute,
   userIdSettingsRoute,
@@ -616,31 +615,50 @@ describe('user Routes', () => {
     // define valid input
     describe('when valid settings body is given', () => {
       describe('should respond successful with a statusCode200 and user data ', () => {
-        // expect valids
-        // for lastName is empty string
-        // for phone.countryCode has + and 2 numbers
-        // for phone.number is empty string
-        // for phone.number has 9 digits
-        // for phone.number has 10 digits
-        // for phone.number has 11 digits
-        // for address.street is empty string
-        // for address.plz is empty string
-        // for address.city is empty string
+        // expect statements for all tests in this block
+        const expectsForValidBody = (
+          settingsBody: { newUserData: ChangeSettingsRequest },
+          changeSettingsResponse: request.Response,
+        ) => {
+          // expects
 
-        it('for input including a newUserData Object', async () => {
-          // define Body to be used in this test
-          const validSettingsBody: { newUserData: ChangeSettingsRequest } = {
-            newUserData: {
-              firstName: 'bodo4',
-              lastName: 'The Big',
-              phone: { countryCode: '+49', number: '17298086213' },
-              address: {
-                street: 'Hans-Meyer-Str',
-                plz: '79543',
-                city: 'Down Town',
+          expect(changeSettingsResponse.statusCode).toBe(200);
+
+          // expect the body[0] to resemble the data inputs from validUpdateBody
+          const updatedUserSettings = changeSettingsResponse.body;
+          expect(updatedUserSettings).toEqual(
+            // checkUserDataToBeCorrectlyProcessedItemForClient(settingsBody),
+            {
+              phone: {
+                countryCode: settingsBody.newUserData.phone?.countryCode,
+                number: settingsBody.newUserData.phone?.number,
               },
+              address: {
+                street: settingsBody.newUserData.address?.street,
+                plz: settingsBody.newUserData.address?.plz,
+                city: settingsBody.newUserData.address?.city,
+              },
+              _id: '6553b5bfa70b16a991b89001',
+              email: 'bodo4@gmail.com',
+              __v: expect.any(Number),
+              creationDate: '2023-11-16T11:42:55.615Z',
+              lastName: settingsBody.newUserData.lastName,
+              firstName: settingsBody.newUserData.firstName,
+              getHistory: expect.any(Array),
+              getItems: expect.any(Array),
+              searchHistory: expect.any(Array),
+              myItems: expect.any(Array),
             },
-          };
+          );
+
+          // log for checking that all validation test ran completely
+          // console.log('expectsForValidBody ran with', updatedUserSettings.email);
+        };
+
+        const testForValidBody = async (validSettingsBody: {
+          newUserData: ChangeSettingsRequest;
+        }) => {
+          const settingsBody = validSettingsBody;
 
           // login Bodo4, let him change his settings with passed in Body
           const connectSidValue = await loginBodo4();
@@ -652,34 +670,185 @@ describe('user Routes', () => {
                 userIdSettingsRoute.split(':userId/').slice(-1)[0]
               }`,
             )
-            .send(validSettingsBody)
+            .send(settingsBody)
             .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
           // logout
           await logout(connectSidValue);
 
-          // console.log(changeSettingsResponse.body);
+          // console.log(changeSettingsResponse.text);
 
-          // successful change PW back
-          expect(changeSettingsResponse.statusCode).toBe(200);
-          expect(changeSettingsResponse.body).toEqual({
+          expectsForValidBody(settingsBody, changeSettingsResponse);
+        };
+
+        // for input including a fully filled newUserData Object
+        const validSettingsBody1: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
               plz: '79543',
               city: 'Down Town',
             },
-            _id: '6553b5bfa70b16a991b89001',
-            email: 'bodo4@gmail.com',
-            __v: expect.any(Number),
-            creationDate: '2023-11-16T11:42:55.615Z',
-            lastName: 'The Big',
+          },
+        };
+        it('for input including a fully filled newUserData Object', async () => {
+          await testForValidBody(validSettingsBody1);
+        });
+
+        // for lastName is empty string
+        const validSettingsBody2: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
             firstName: 'bodo4',
-            getHistory: expect.any(Array),
-            getItems: expect.any(Array),
-            searchHistory: expect.any(Array),
-            myItems: expect.any(Array),
-          });
+            lastName: '',
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for lastName is empty string', async () => {
+          await testForValidBody(validSettingsBody2);
+        });
+
+        // for phone.countryCode has + and 2 numbers
+        const validSettingsBody3: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+12', number: '3456789012' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for phone.countryCode has + and 2 numbers', async () => {
+          await testForValidBody(validSettingsBody3);
+        });
+
+        // for phone.number is empty string
+        const validSettingsBody4: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for phone.number is empty string', async () => {
+          await testForValidBody(validSettingsBody4);
+        });
+
+        // for phone.number has 9 digits
+        const validSettingsBody5: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '123456789' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for phone.number has 9 digits', async () => {
+          await testForValidBody(validSettingsBody5);
+        });
+
+        // for phone.number has 10 digits
+        const validSettingsBody6: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '1234567890' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for phone.number has 10 digits', async () => {
+          await testForValidBody(validSettingsBody6);
+        });
+
+        // for phone.number has 11 digits
+        const validSettingsBody7: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '12345678901' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for phone.number has 11 digits', async () => {
+          await testForValidBody(validSettingsBody7);
+        });
+
+        // for address.street is empty string
+        const validSettingsBody8: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: '',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for address.street is empty string', async () => {
+          await testForValidBody(validSettingsBody8);
+        });
+
+        // for address.plz is empty string
+        const validSettingsBody9: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '',
+              city: 'Down Town',
+            },
+          },
+        };
+        it('for address.plz is empty string', async () => {
+          await testForValidBody(validSettingsBody9);
+        });
+
+        // for address.city is empty string
+        const validSettingsBody10: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: '',
+            },
+          },
+        };
+        it('for address.city is empty string', async () => {
+          await testForValidBody(validSettingsBody10);
         });
       });
     });

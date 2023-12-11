@@ -5,20 +5,20 @@ import Joi from 'joi';
 const userDataSchema = Joi.object({
   newUserData: Joi.object({
     firstName: Joi.string().required(),
-    lastName: Joi.string().empty('').required(),
+    lastName: Joi.string().allow('').required(),
     phone: Joi.object({
       countryCode: Joi.string()
         .pattern(/^\+\d{1,3}$/)
         .required(),
-      number: Joi.string().pattern(/^\d*$/).min(9).max(11).empty('').required(),
+      number: Joi.string().pattern(/^\d*$/).min(9).max(11).allow('').required(),
     }).required(),
     address: Joi.object({
-      street: Joi.string().empty('').required(),
+      street: Joi.string().allow('').required(),
       plz: Joi.string()
         .pattern(/^\d{5}$/)
-        .empty('')
+        .allow('')
         .required(),
-      city: Joi.string().empty('').required(),
+      city: Joi.string().allow('').required(),
     }).required(),
   }).required(),
 });
