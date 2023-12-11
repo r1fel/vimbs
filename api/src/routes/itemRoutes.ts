@@ -15,6 +15,7 @@ import {
   itemSearch,
   showItem,
   updateItem,
+  suggestItems,
   deleteItem,
   deleteAllOfUsersItems,
 } from '../controllers/itemControllers';
@@ -46,6 +47,12 @@ itemRoutes.route('/search').get(
   isLoggedIn,
   //
   itemSearch,
+);
+
+itemRoutes.route('/suggest').get(
+  isLoggedIn,
+  //
+  suggestItems,
 );
 
 itemRoutes

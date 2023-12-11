@@ -10,7 +10,7 @@ import ItemList from './components/ItemList/ItemList';
 import AuthCheck from './features/authentication/components/AuthCheck';
 import CreateItemPage from './pages/CreateItemPage/CreateItemPage';
 import NotificationsPage from './pages/NotificationsPage/NotificationsPage';
-import MyItemsPage from './pages/MyItemsPage/MyItemsPAge';
+import MyItemsPage from './pages/MyItemsPage/MyItemsPage';
 
 function App() {
   return (
