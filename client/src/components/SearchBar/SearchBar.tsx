@@ -17,10 +17,10 @@ function SearchBar({
 }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [placeholder, setPlaceholder] = useState<string>('Was suchst du?');
   const navigate = useNavigate();
 
+  // only enabled when there is a searchterm
   const searchQuery = useQuery({
     queryKey: ['item', 'search'],
     queryFn: () => searchItems(searchTerm),
@@ -29,19 +29,10 @@ function SearchBar({
 
   useEffect(() => {
     // Trigger a refetch when searchTerm changes
-    const debouncedRefetch = debounce(searchQuery.refetch, 300);
+    const debouncedRefetch = debounce(searchQuery.refetch, 200);
     debouncedRefetch();
     return () => clearTimeout(debouncedRefetch);
   }, [searchTerm]);
-
-  // if (searchQuery.status === 'success') {
-  //   logger.log(
-  //     'searchQuery results are:',
-  //     searchQuery,
-  //     'search term was:',
-  //     searchTerm,
-  //   );
-  // }
 
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -57,7 +48,7 @@ function SearchBar({
     console.log('the active index of suggestions was: ', activeIndex);
     if (e.key === 'ArrowDown') {
       setActiveIndex((prev) =>
-        Math.min(prev + 1, searchSuggestions.length - 1),
+        Math.min(prev + 1, searchQuery.data.data.length - 1),
       );
     } else if (e.key === 'ArrowUp') {
       setActiveIndex((prev) => Math.max(prev - 1, 0));
@@ -112,7 +103,7 @@ function SearchBar({
                 <li
                   onClick={() => handleSuggestionClick(suggestion)}
                   className={`suggestion-item ${
-                    index === activeIndex ? 'background-grey' : ''
+                    index === activeIndex ? 'suggestion-item--focus' : null
                   }`}
                 >
                   <span className="font-semibold">{suggestion.name}</span>
