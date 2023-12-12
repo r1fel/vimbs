@@ -104,7 +104,7 @@ export const updateItem = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // console.log('new put request', req.body);
     if (req.user === undefined)
-      return new ExpressError('user is undefined', 500);
+      return next(new ExpressError('Unauthorized', 401));
     const currentUser = req.user._id;
 
     // define the item details that is supposed to be updated.
@@ -201,6 +201,28 @@ export const deleteAllOfUsersItems = catchAsync(
     }
 
     return res.send('You had no items to delete.');
+  },
+);
+
+// have owner toggle availability of item
+export const toggleItemAvailability = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.user === undefined)
+      return next(new ExpressError('Unauthorized', 401));
+    const currentUser = req.user._id;
+    const item: PopulatedItemsFromDB = await Item.findById(req.params.itemId)
+      .populate<{ owner: UserInDB }>('owner')
+      .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
+    if (item === null)
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
+    item.available = !item.available;
+    await item.save();
+    // process for client
+    const response: ResponseItemForClient[] = [];
+    processItemForClient(item, currentUser, response);
+    return res.send(response);
   },
 );
 

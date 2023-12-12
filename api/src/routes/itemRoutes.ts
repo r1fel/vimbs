@@ -18,6 +18,7 @@ import {
   suggestItems,
   deleteItem,
   deleteAllOfUsersItems,
+  toggleItemAvailability,
 } from '../controllers/itemControllers';
 
 const itemRoutes = Router();
@@ -76,3 +77,10 @@ itemRoutes
     //
     deleteItem,
   );
+
+itemRoutes.route('/:itemId/toggleAvailability').get(
+  isLoggedIn,
+  isOwner,
+  //
+  toggleItemAvailability,
+);
