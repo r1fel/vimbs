@@ -1,3 +1,5 @@
+@import '../../styles/variables.scss';
+
 .search-container-wrapper {
   display: flex;
   justify-content: center;
@@ -79,10 +81,6 @@
   cursor: pointer;
 }
 
-.suggestion-item:hover {
-  background-color: var(--grey-70);
-}
-
-.background-grey {
-  background-color: var(--grey-100);
+.suggestion-item--focus {
+  background-color: $col-prim2-100;
 }
