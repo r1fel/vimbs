@@ -1,4 +1,4 @@
-// Middleware that checks weather the the requesting user is the owner of the item
+// Middleware that checks weather the item is currently available
 
 import { Request, Response, NextFunction } from 'express';
 import Item from '../../models/item';
@@ -6,26 +6,24 @@ import ExpressError from '../ExpressError';
 import catchAsync from '../catchAsync';
 import { ItemInDB } from '../../typeDefinitions';
 
-const isOwner = catchAsync(
+const isItemAvailable = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) return next(new ExpressError('Unauthorized', 401));
-    const currentUser = req.user._id;
     const item: ItemInDB | null = await Item.findById(req.params.itemId);
     if (item === null)
       return next(
         new ExpressError('Bad Request: This item does not exist', 400),
       );
-    if (!item.owner.equals(currentUser)) {
+    if (item.available === false)
       return next(
         new ExpressError(
-          'Forbidden: You do not have permission to do that!',
-          403,
+          'Bad Request: This item is currently not available',
+          400,
         ),
       );
-    }
 
+    res.locals.item = item;
     return next();
   },
 );
 
-export default isOwner;
+export default isItemAvailable;

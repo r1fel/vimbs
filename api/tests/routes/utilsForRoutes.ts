@@ -10,6 +10,8 @@ export const authRoute = '/auth';
 
 export const itemRoute = '/item';
 export const itemIdRoute = '/item/:itemId';
+export const itemIdInteractionRoute = '/item/:itemId/itemInteraction';
+export const itemIdToggleAvailabilityRoute = '/item/:itemId/toggleAvailability';
 
 // user routes
 export const userRoute = '/user';

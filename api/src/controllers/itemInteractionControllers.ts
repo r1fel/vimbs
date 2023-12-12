@@ -28,8 +28,8 @@ export const createItemInteraction = catchAsync(
       return next(
         new ExpressError(
           'you cant create an interaction with this request',
-          500
-        )
+          500,
+        ),
       );
     const item: PopulatedItemsFromDB = await Item.findById(req.params.itemId)
       .populate<{ owner: UserInDB }>('owner')
@@ -77,7 +77,7 @@ export const createItemInteraction = catchAsync(
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(itemForClientProcessing, currentUser, response);
     res.send(response);
-  }
+  },
 );
 
 // development function to delete all itemInteractions off one item
@@ -102,5 +102,12 @@ export const deleteAllItemInteractions = catchAsync(
     let response: Array<ResponseItemForClient> = [];
     processItemForClient(item, currentUser, response);
     res.send(response);
-  }
+  },
+);
+
+// test function only needed for the scope of coding the itemInteractions
+export const dummyController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.send('you passed dummy controller');
+  },
 );
