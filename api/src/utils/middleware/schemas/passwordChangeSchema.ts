@@ -2,9 +2,9 @@
 
 import Joi from 'joi';
 
-const itemSchema = Joi.object({
+const passwordChangeSchema = Joi.object({
   oldPassword: Joi.string().required(),
   newPassword: Joi.string().required(),
 });
 
-export default itemSchema;
+export default passwordChangeSchema;

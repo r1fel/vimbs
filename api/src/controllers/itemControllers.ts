@@ -205,6 +205,8 @@ export const deleteAllOfUsersItems = catchAsync(
 );
 
 // have owner toggle availability of item
+// TODO ER: currently it just toggles, in the future toggle shall only be allowed if there is no ongoing interaction.
+// -> check by status of the last interaction
 export const toggleItemAvailability = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.user === undefined)

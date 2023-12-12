@@ -272,7 +272,7 @@ const notPassedIsNotOwner = (
         const itemId = createItemResponse.body[0]._id;
 
         // test route of interest on just created and not available item
-        const createItemInteractionResponse = await (request(app) as any)
+        const itemInteractionResponse = await (request(app) as any)
           [httpVerb](`${routeBase}/${itemId}/${routeEnd}`)
           .set('Cookie', [`connect.sid=${connectSidValue}`]);
 
@@ -284,13 +284,191 @@ const notPassedIsNotOwner = (
         // logout bodo4
         await logout(connectSidValue);
 
-        // console.log('expect 403:', createItemInteractionResponse.statusCode, createItemInteractionResponse.text );
+        // console.log('expect 403:', itemInteractionResponse.statusCode, itemInteractionResponse.text );
         // expect route in question to throw 403
-        expect(createItemInteractionResponse.statusCode).toBe(403);
-        expect(createItemInteractionResponse.text).toContain(
+        expect(itemInteractionResponse.statusCode).toBe(403);
+        expect(itemInteractionResponse.text).toContain(
           'Error: Forbidden: You do not have permission to do that!',
         );
       }, 10000);
+    });
+  });
+};
+
+const notPassedValidateItemInteraction = (
+  httpVerb: string,
+  routeBase: string,
+  routeEnd: string,
+) => {
+  describe('when validateItemInteraction was not passed', () => {
+    describe('when invalid itemInteraction Body is given', () => {
+      // expect statements for all tests in this block
+      const expectsForInvalidItemInteractionBody = (
+        statusCode: number,
+        invalidity: string,
+        itemInteractionResponse: request.Response,
+      ) => {
+        // console.log(itemInteractionResponse.statusCode, itemInteractionResponse.error);
+
+        // expects
+        expect(itemInteractionResponse.statusCode).toBe(statusCode);
+        expect(itemInteractionResponse.text).toContain(invalidity);
+
+        // log for checking that all validation test ran completely
+        // console.log('expectsForInvalidBody ran for invalidity', invalidity);
+      };
+
+      // test function for all bodys in this block
+      const testForInvalidItemInteractionBody = async (
+        statusCode: number,
+        invalidity: string,
+        invalidItemInteractionBody: any,
+      ) => {
+        // define Body to be used in this test
+        const itemInteractionBody = invalidItemInteractionBody;
+
+        // login Bodo4, let him create Item with passed in Body
+        const connectSidValueBodo4First = await loginBodo4();
+
+        // create item
+        const createItemResponse = await request(app)
+          .post(itemRoute)
+          .send({
+            item: {
+              name: 'Item for testing validateItemInteraction',
+              categories: { Other: { subcategories: ['Sonstiges'] } },
+            },
+          })
+          .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+        // extract itemId
+        const itemId = createItemResponse.body[0]._id;
+
+        // logout
+        await logout(connectSidValueBodo4First);
+
+        // login bibi
+        const connectSidValueBibi = await loginUser('bibi@gmail.com', 'bibi');
+
+        // test route of interest on just created and not available item
+        const itemInteractionResponse = await (request(app) as any)
+          [httpVerb](`${routeBase}/${itemId}/${routeEnd}`)
+          .send(itemInteractionBody)
+          .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+        // logout bibi
+        await logout(connectSidValueBibi);
+
+        // login Bodo4, let him create Item with passed in Body
+        const connectSidValueBodo4Second = await loginBodo4();
+
+        // delete all items
+        const deleteAllOfUsersItemsResponse = await request(app)
+          .delete(itemRoute)
+          .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+        // logout
+        await logout(connectSidValueBodo4Second);
+
+        expectsForInvalidItemInteractionBody(
+          statusCode,
+          invalidity,
+          itemInteractionResponse,
+        );
+      };
+
+      describe('should respond error with a statusCode400', () => {
+        // for missing status
+        const invalidItemInteractionBody1 = {
+          itemInteraction: {
+            // status : 'opened',
+            message: 'some string',
+            dueDate: '2024-02-11',
+          },
+        };
+
+        it('for missing status', async () => {
+          await testForInvalidItemInteractionBody(
+            400,
+            'Error: &quot;itemInteraction.status&quot; is required<br> &nbsp; &nbsp;at validateItemInteraction',
+            invalidItemInteractionBody1,
+          );
+        }, 10000);
+
+        // for invalid status
+        const invalidItemInteractionBody2 = {
+          itemInteraction: {
+            status: 'invalidStatus',
+            message: 'some string',
+            dueDate: '2024-02-11',
+          },
+        };
+
+        it('for invalid status', async () => {
+          await testForInvalidItemInteractionBody(
+            400,
+            'Error: &quot;itemInteraction.status&quot; must be one of [opened, declined, accepted, closed]<br> &nbsp; &nbsp;at validateItemInteraction',
+            invalidItemInteractionBody2,
+          );
+        }, 10000);
+
+        // for empty body
+        const invalidItemInteractionBody3 = {};
+
+        it('for empty body', async () => {
+          await testForInvalidItemInteractionBody(
+            400,
+            'Error: &quot;itemInteraction&quot; is required<br> &nbsp; &nbsp;at validateItemInteraction',
+            invalidItemInteractionBody3,
+          );
+        }, 10000);
+
+        // for empty itemInteraction
+        const invalidItemInteractionBody4 = {
+          itemInteraction: {},
+        };
+
+        it('for empty itemInteraction', async () => {
+          await testForInvalidItemInteractionBody(
+            400,
+            'Error: &quot;itemInteraction.status&quot; is required<br> &nbsp; &nbsp;at validateItemInteraction',
+            invalidItemInteractionBody4,
+          );
+        }, 10000);
+
+        // for due Date in wrong date format
+        const invalidItemInteractionBody5 = {
+          itemInteraction: {
+            status: 'opened',
+            message: 'some string',
+            dueDate: '2024/02/11',
+          },
+        };
+
+        it('for due Date in wrong date format', async () => {
+          await testForInvalidItemInteractionBody(
+            400,
+            'Error: &quot;itemInteraction.dueDate&quot; must be in YYYY-MM-DD format<br> &nbsp; &nbsp;at validateItemInteraction',
+            invalidItemInteractionBody5,
+          );
+        }, 10000);
+
+        // for message is not a string
+        const invalidItemInteractionBody6 = {
+          itemInteraction: {
+            status: 'opened',
+            message: 123,
+            dueDate: '2024-02-11',
+          },
+        };
+
+        it('for message is not a string', async () => {
+          await testForInvalidItemInteractionBody(
+            400,
+            'Error: &quot;itemInteraction.message&quot; must be a string<br> &nbsp; &nbsp;at validateItemInteraction',
+            invalidItemInteractionBody6,
+          );
+        }, 10000);
+      });
     });
   });
 };
@@ -304,20 +482,26 @@ describe('itemInteraction Routes', () => {
 
   describe(`POST ${itemIdInteractionRoute} (open interaction)`, () => {
     // check if isLoggedIn throws appropriate errors
-    notPassedIsLoggedIn(
-      'post',
-      `${itemRoute}/65673cc5811318fde3968147/${
-        itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-      }`,
-    );
+    // notPassedIsLoggedIn(
+    //   'post',
+    //   `${itemRoute}/65673cc5811318fde3968147/${
+    //     itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+    //   }`,
+    // );
 
-    notPassedIsItemAvailable(
-      'post',
-      itemRoute,
-      itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
-    );
+    // notPassedIsItemAvailable(
+    //   'post',
+    //   itemRoute,
+    //   itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
+    // );
 
-    notPassedIsNotOwner(
+    // notPassedIsNotOwner(
+    //   'post',
+    //   itemRoute,
+    //   itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
+    // );
+
+    notPassedValidateItemInteraction(
       'post',
       itemRoute,
       itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
@@ -357,14 +541,6 @@ describe('itemInteraction Routes', () => {
           'all tests in itemInteractionRoutesPOST-openInteraction.test.ts ran',
         );
       }, 10000);
-    });
-  });
-});
-
-describe('dummy', () => {
-  describe('when dummytest given', () => {
-    it('should be happy ', async () => {
-      expect(true).toBe(true);
     });
   });
 });

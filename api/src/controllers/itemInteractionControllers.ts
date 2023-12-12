@@ -108,6 +108,8 @@ export const deleteAllItemInteractions = catchAsync(
 // test function only needed for the scope of coding the itemInteractions
 export const dummyController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const status: InteractionStatuses = req.body.itemInteraction.status;
+    console.log(status);
     res.send('you passed dummy controller');
   },
 );

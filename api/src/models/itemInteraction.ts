@@ -2,6 +2,10 @@
 
 import mongoose, { Schema } from 'mongoose';
 import { ItemInteractionInDB } from '../typeDefinitions';
+import {
+  itemInteractionStatuses,
+  itemInteractionPartakers,
+} from '../utils/itemInteractionStringDefinitons';
 
 const itemInteractionSchema: Schema = new Schema({
   creationDate: {
@@ -21,16 +25,16 @@ const itemInteractionSchema: Schema = new Schema({
   },
   interactionStatus: {
     type: String,
-    enum: ['opened', 'declined', 'accepted', 'closed'],
+    enum: itemInteractionStatuses,
     required: true,
   },
   statusChangesLog: [
     {
       newStatus: {
         type: String,
-        enum: ['opened', 'declined', 'accepted', 'closed'],
+        enum: itemInteractionStatuses,
       },
-      changeInitiator: { type: String, enum: ['getter', 'giver'] },
+      changeInitiator: { type: String, enum: itemInteractionPartakers },
       entryTimestamp: Date,
     },
   ],
@@ -38,7 +42,7 @@ const itemInteractionSchema: Schema = new Schema({
   messagelog: [
     {
       messageText: String,
-      messageWriter: { type: String, enum: ['getter', 'giver'] },
+      messageWriter: { type: String, enum: itemInteractionPartakers },
       messageTimestamp: Date,
     },
   ],
@@ -46,7 +50,7 @@ const itemInteractionSchema: Schema = new Schema({
 
 const ItemInteraction = mongoose.model<ItemInteractionInDB>(
   'ItemInteraction',
-  itemInteractionSchema
+  itemInteractionSchema,
 );
 
 export default ItemInteraction;

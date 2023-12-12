@@ -6,6 +6,7 @@ import { Router } from 'express';
 import isLoggedIn from '../utils/middleware/isLoggedIn';
 import isNotOwner from '../utils/middleware/isNotOwner';
 import isItemAvailable from '../utils/middleware/isItemAvaliable';
+import validateItemInteraction from '../utils/middleware/validateItemInteraction';
 
 // controllers
 import {
@@ -24,7 +25,7 @@ itemInteractionRoutes
     isLoggedIn,
     isItemAvailable,
     isNotOwner,
-    // validateItemInteraction,
+    validateItemInteraction,
     //
     // createItemInteraction,
     dummyController,
