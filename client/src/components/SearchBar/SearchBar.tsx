@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import './SearchBar.scss';
+import { IoStar, IoSearch } from 'react-icons/io5';
 import { searchItems } from '../../services/ItemServices';
 import Button from '../Button/Button';
 import { logger } from '../../util/logger';
@@ -78,9 +79,13 @@ function SearchBar({
   };
 
   return (
-    <form onSubmit={handleSearchSubmit}>
+    <form
+      onSubmit={handleSearchSubmit}
+      className="search-container search-bar-and-suggestions-wrapper"
+    >
       <input
         type="text"
+        className="search-bar__input"
         placeholder={placeholder}
         value={searchTerm}
         onChange={handleInputChange}
@@ -89,11 +94,11 @@ function SearchBar({
           handleEnterPress(e);
         }}
       />
-      <Button type="submit">Search!</Button>
+      <IoSearch onClick={handleSearchSubmit} className="search-btn" />
       {searchQuery.status === 'success' &&
         searchQuery.data.data.length > 0 &&
         searchTerm && (
-          <ul className="search-bar-suggestion-list">
+          <ul className="search-bar__suggestion-list">
             {searchQuery.data.data.map((suggestion, index) => (
               <Link
                 id={suggestion._id}
