@@ -1,7 +1,9 @@
 import request from 'supertest';
 import makeApp from '../../src/app';
 import * as database from '../../src/database';
-import { ItemRequest } from '../../src/typeDefinitions';
+import { ItemInteractionRequest } from '../../src/typeDefinitions';
+
+import getFutureDate from '../../src/utils/getFutureDate';
 
 const app = makeApp(database);
 
@@ -13,6 +15,7 @@ import {
   itemRoute,
   itemIdInteractionRoute,
   itemIdToggleAvailabilityRoute,
+  bibisUserId,
 } from './utilsForRoutes';
 
 // frequently used functions
@@ -80,58 +83,85 @@ const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
 };
 
 const checkResponseToBeCorrectlyProcessedItemForClient = (validBody: {
-  item: ItemRequest;
+  itemInteraction: ItemInteractionRequest;
 }) => {
-  const correctlyProcessedItemForClient = {
+  const correctlyProcessedItemInteractionForClient = {
     _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
-    name: validBody.item.name,
-    available: true,
-    picture: validBody.item.picture || null,
-    description: validBody.item.description || null,
+    name: 'Item for testing valid itemInteraction',
+    available: false,
+    picture: null,
+    description: null,
     categories: {
       AdultClothing: {
         name: 'Mode',
-        subcategories:
-          validBody.item.categories.AdultClothing?.subcategories ?? [],
+        subcategories: [],
       },
       ChildAndBaby: {
         name: 'Kind und Baby',
-        subcategories:
-          validBody.item.categories.ChildAndBaby?.subcategories ?? [],
+        subcategories: [],
       },
       HouseAndGarden: {
         name: 'Haus und Garten',
-        subcategories:
-          validBody.item.categories.HouseAndGarden?.subcategories ?? [],
+        subcategories: [],
       },
       MediaAndGames: {
         name: 'Medien und Spiele',
-        subcategories:
-          validBody.item.categories.MediaAndGames?.subcategories ?? [],
+        subcategories: [],
       },
       Other: {
         name: 'Sonstiges',
-        subcategories: validBody.item.categories.Other?.subcategories ?? [],
+        subcategories: ['Sonstiges'],
       },
       SportAndCamping: {
         name: 'Sport und Camping',
-        subcategories:
-          validBody.item.categories.SportAndCamping?.subcategories ?? [],
+        subcategories: [],
       },
       Technology: {
         name: 'Technik und Zubehör',
-        subcategories:
-          validBody.item.categories.Technology?.subcategories ?? [],
+        subcategories: [],
       },
     },
-    dueDate: null,
-    owner: true,
-    interactions: [],
+    dueDate: expect.any(String),
+    owner: false,
+    interactions: [
+      {
+        revealOwnerIdentity: false,
+        _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+        creationDate: expect.any(String),
+        statusChangesLog: [
+          {
+            newStatus: validBody.itemInteraction.status,
+            changeInitiator: 'getter',
+            entryTimestamp: expect.any(String),
+            _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+          },
+        ],
+        messagelog: validBody.itemInteraction.message
+          ? [
+              {
+                messageText: validBody.itemInteraction.message,
+                messageWriter: 'getter',
+                messageTimestamp: expect.any(String),
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+              },
+            ]
+          : [],
+        interestedParty: bibisUserId,
+        interactionStatus: validBody.itemInteraction.status,
+        dueDate: expect.any(String),
+        __v: 0,
+      },
+    ],
+    commonCommunity: {
+      _id: '6544be0f04b3ecd121538985',
+      picture:
+        'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
+      name: 'our common community',
+    },
     ownerData: null,
-    commonCommunity: null,
   };
 
-  return correctlyProcessedItemForClient;
+  return correctlyProcessedItemInteractionForClient;
 };
 
 const notPassedIsItemAvailable = (
@@ -473,6 +503,17 @@ const notPassedValidateItemInteraction = (
   });
 };
 
+const getFutureDateForBody = (weeks = 2): string => {
+  const futureDate = getFutureDate(weeks);
+
+  // Formatting the date to 'YYYY-MM-DD'
+  const year = futureDate.getFullYear();
+  const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+  const day = String(futureDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 // TESTS
 describe('itemInteraction Routes', () => {
   // close DB after tests ran - to get rid of db related error
@@ -482,41 +523,435 @@ describe('itemInteraction Routes', () => {
 
   describe(`POST ${itemIdInteractionRoute} (open interaction)`, () => {
     // check if isLoggedIn throws appropriate errors
-    // notPassedIsLoggedIn(
-    //   'post',
-    //   `${itemRoute}/65673cc5811318fde3968147/${
-    //     itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-    //   }`,
-    // );
+    notPassedIsLoggedIn(
+      'post',
+      `${itemRoute}/65673cc5811318fde3968147/${
+        itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+      }`,
+    );
 
-    // notPassedIsItemAvailable(
-    //   'post',
-    //   itemRoute,
-    //   itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
-    // );
+    // check if isItemAvailable throws appropriate errors
+    notPassedIsItemAvailable(
+      'post',
+      itemRoute,
+      itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
+    );
 
-    // notPassedIsNotOwner(
-    //   'post',
-    //   itemRoute,
-    //   itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
-    // );
+    // check if isNotOwner throws appropriate errors
+    notPassedIsNotOwner(
+      'post',
+      itemRoute,
+      itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
+    );
 
+    // check if validateItemInteraction throws appropriate errors
     notPassedValidateItemInteraction(
       'post',
       itemRoute,
       itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
     );
 
-    describe('when valid itemInteraction body is given', () => {
-      // it('xxx', async () => {
-      //   await testForValidBody(validBody5);
-      // });
-    });
+    describe('when itemInteraction body is dealt with at controller', () => {
+      // setting up the valid dueDate that lies 4 weeks in the future - so that the test might pass any time in the future as well
 
-    describe('when invalid itemInteraction body is given', () => {
-      // it('xxx', async () => {
-      //    await testForInvalidBody(validBody5);
-      // });
+      const validDueDate = getFutureDateForBody(4);
+
+      describe('should respond successful with a statusCode200 and item data', () => {
+        // expect statements for all tests in this block
+        const expectsForValidItemInteractionBody = (
+          itemInteractionBody: { itemInteraction: ItemInteractionRequest },
+          itemInteractionResponse: request.Response,
+        ) => {
+          // console.log(itemInteractionResponse.statusCode, itemInteractionResponse.error);
+
+          // expects
+          expect(itemInteractionResponse.statusCode).toBe(200);
+          // expect the body array to only have one object inside
+          expect(itemInteractionResponse.body).toHaveLength(1);
+
+          // expect the body[0] to resemble the data inputs from validUpdateBody
+          const updatedItem = itemInteractionResponse.body[0];
+          expect(updatedItem).toEqual(
+            checkResponseToBeCorrectlyProcessedItemForClient(
+              itemInteractionBody,
+            ),
+          );
+          // this does not yet check the Dates sufficiently, thus:
+          // expect creation date of interaction to equal timestamp used in statusChangeLog
+          expect(
+            new Date(updatedItem.interactions[0].creationDate)
+              .toISOString()
+              .split('T')[0],
+          ).toEqual(
+            new Date(
+              updatedItem.interactions[0].statusChangesLog[0].entryTimestamp,
+            )
+              .toISOString()
+              .split('T')[0],
+          );
+
+          // expect the dueDate on the item to be the same as in the interaction
+          expect(updatedItem.dueDate).toBe(updatedItem.interactions[0].dueDate);
+          //  for the dueDate on the response there are 2 options, either it is the set one from the Body or today in 2 weeks
+          // definitions for all 3 values
+          const todaysDate = new Date().toISOString().split('T')[0];
+          const responseDueDate = new Date(updatedItem.dueDate)
+            .toISOString()
+            .split('T')[0];
+          // console.log('respDD', responseDueDate);
+          const twoWeeksFromNowDueDate = getFutureDateForBody(2);
+          // console.log('2wDD', twoWeeksFromNowDueDate);
+          const requestDueDate = itemInteractionBody.itemInteraction.dueDate;
+          // console.log('reqDD', requestDueDate);
+
+          if (!requestDueDate) {
+            expect(responseDueDate).toBe(twoWeeksFromNowDueDate);
+            // console.log('no due date was given');
+          } else if (requestDueDate <= todaysDate) {
+            expect(responseDueDate).toBe(twoWeeksFromNowDueDate);
+            // console.log('due date was given as before today');
+          } else {
+            expect(responseDueDate).toBe(requestDueDate);
+            // console.log('good due date was given');
+          }
+
+          // log for checking that all validation test ran completely
+          // console.log('expectsForValidBody ran with', updatedItem);
+        };
+
+        // test function for all bodys in this block
+        const testForValidItemInteractionBody =
+          async (validItemInteractionBody: {
+            itemInteraction: ItemInteractionRequest;
+          }) => {
+            // define Body to be used in this test
+            const itemInteractionBody = validItemInteractionBody;
+
+            // login Bodo4, let him create Item with passed in Body
+            const connectSidValueBodo4First = await loginBodo4();
+
+            // create item
+            const createItemResponse = await request(app)
+              .post(itemRoute)
+              .send({
+                item: {
+                  name: 'Item for testing valid itemInteraction',
+                  categories: { Other: { subcategories: ['Sonstiges'] } },
+                },
+              })
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+            // extract itemId
+            const itemId = createItemResponse.body[0]._id;
+
+            // logout
+            await logout(connectSidValueBodo4First);
+
+            // login bibi
+            const connectSidValueBibi = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            // test route of interest on just created and not available item
+            const itemInteractionResponse = await request(app)
+              .post(
+                `${itemRoute}/${itemId}/${
+                  itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                }`,
+              )
+              .send(itemInteractionBody)
+              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+            // logout bibi
+            await logout(connectSidValueBibi);
+
+            // login Bodo4, let him create Item with passed in Body
+            const connectSidValueBodo4Second = await loginBodo4();
+
+            // delete all items
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+            // logout
+            await logout(connectSidValueBodo4Second);
+
+            expectsForValidItemInteractionBody(
+              itemInteractionBody,
+              itemInteractionResponse,
+            );
+          };
+
+        describe('for status opened ', () => {
+          // with message text and future dueDate
+          const validItemInteractionBody1: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              message: 'opening interaction',
+              dueDate: validDueDate,
+            },
+          };
+          it('with message text and future dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody1);
+          }, 10000);
+
+          // with message text is empty string and a future dueDate
+          const validItemInteractionBody2: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              message: '',
+              dueDate: validDueDate,
+            },
+          };
+          it('with message text is empty string and a future dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody2);
+          }, 10000);
+
+          // with no message but a future dueDate
+          const validItemInteractionBody3: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              // no message
+              dueDate: validDueDate,
+            },
+          };
+          it('with no message but a future dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody3);
+          }, 10000);
+
+          // with message text and a past dueDate
+          const validItemInteractionBody4: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              message: 'opening interaction',
+              dueDate: '2023-05-10',
+            },
+          };
+          it('with message text and a past dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody4);
+          }, 10000);
+
+          // with message text and a no dueDate
+          const validItemInteractionBody5: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              message: 'opening interaction',
+              // no dueDate
+            },
+          };
+          it('with message text and a no dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody5);
+          }, 10000);
+
+          // with message text and empty sting for dueDate
+          const validItemInteractionBody6: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              message: 'opening interaction',
+              dueDate: '2023-05-10',
+            },
+          };
+          it('with message text and empty sting for dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody6);
+          }, 10000);
+
+          // with message text and today for dueDate
+          const validItemInteractionBody7: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'opened',
+              message: 'opening interaction',
+              dueDate: new Date().toISOString().split('T')[0],
+            },
+          };
+          it('with message text and today for dueDate', async () => {
+            await testForValidItemInteractionBody(validItemInteractionBody7);
+          }, 10000);
+
+          it('and push itemId to user.getItems', async () => {
+            // login Bodo4, let him create Item with passed in Body
+            const connectSidValueBodo4First = await loginBodo4();
+
+            // create item
+            const createItemResponse = await request(app)
+              .post(itemRoute)
+              .send({
+                item: {
+                  name: 'Item for testing valid itemInteraction',
+                  categories: { Other: { subcategories: ['Sonstiges'] } },
+                },
+              })
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+            // extract itemId
+            const itemId = createItemResponse.body[0]._id;
+
+            // logout
+            await logout(connectSidValueBodo4First);
+
+            // login bibi
+            const connectSidValueBibi = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            // test route of interest on just created and not available item
+            const itemInteractionResponse = await request(app)
+              .post(
+                `${itemRoute}/${itemId}/${
+                  itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                }`,
+              )
+              .send({
+                itemInteraction: {
+                  status: 'opened',
+                  message:
+                    'opening interaction for test of pushing item to user.getItems',
+                  dueDate: validDueDate,
+                },
+              })
+              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+            // get users detail to extract getItems
+            const authResponse = await request(app)
+              .get(authRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+            // extract getItems array
+            // console.log('Bibis getItems', authResponse.body.getItems);
+
+            // logout bibi
+            await logout(connectSidValueBibi);
+
+            // login Bodo4, let him create Item with passed in Body
+            const connectSidValueBodo4Second = await loginBodo4();
+
+            // delete all items
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+            // logout
+            await logout(connectSidValueBodo4Second);
+
+            // expects
+            expect(itemInteractionResponse.statusCode).toBe(200);
+            // expect the itemId to be the last id in the users getItems array
+            expect(itemId).toBe(
+              authResponse.body.getItems[authResponse.body.getItems.length - 1],
+            );
+          }, 10000);
+        });
+      });
+      describe('should respond error with a statusCode400', () => {
+        // expect statements for all tests in this block
+        const expectsForInvalidItemInteractionBody = (
+          statusCode: number,
+          invalidity: string,
+          itemInteractionResponse: request.Response,
+        ) => {
+          // console.log(itemInteractionResponse.statusCode, itemInteractionResponse.error);
+
+          // expects
+          expect(itemInteractionResponse.statusCode).toBe(statusCode);
+          expect(itemInteractionResponse.text).toContain(invalidity);
+
+          // log for checking that all validation test ran completely
+          // console.log('expectsForInvalidBody ran for invalidity', invalidity);
+        };
+
+        // test function for all bodys in this block
+        const testForInvalidItemInteractionBody = async (
+          statusCode: number,
+          invalidity: string,
+          invalidItemInteractionBody: any,
+        ) => {
+          // define Body to be used in this test
+          const itemInteractionBody = invalidItemInteractionBody;
+
+          // login Bodo4, let him create Item with passed in Body
+          const connectSidValueBodo4First = await loginBodo4();
+
+          // create item
+          const createItemResponse = await request(app)
+            .post(itemRoute)
+            .send({
+              item: {
+                name: 'Item for testing invalidity handling in controller',
+                categories: { Other: { subcategories: ['Sonstiges'] } },
+              },
+            })
+            .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+          // extract itemId
+          const itemId = createItemResponse.body[0]._id;
+
+          // logout
+          await logout(connectSidValueBodo4First);
+
+          // login bibi
+          const connectSidValueBibi = await loginUser('bibi@gmail.com', 'bibi');
+
+          // test route of interest on just created and not available item
+          const itemInteractionResponse = await request(app)
+            .post(
+              `${itemRoute}/${itemId}/${
+                itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+              }`,
+            )
+            .send(itemInteractionBody)
+            .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+          // logout bibi
+          await logout(connectSidValueBibi);
+
+          // login Bodo4, let him create Item with passed in Body
+          const connectSidValueBodo4Second = await loginBodo4();
+
+          // delete all items
+          const deleteAllOfUsersItemsResponse = await request(app)
+            .delete(itemRoute)
+            .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+          // logout
+          await logout(connectSidValueBodo4Second);
+
+          expectsForInvalidItemInteractionBody(
+            statusCode,
+            invalidity,
+            itemInteractionResponse,
+          );
+        };
+        describe('for status NOT opened', () => {
+          // but in accepted values array included value, with message text and future dueDate
+          const invalidItemInteractionBody1: {
+            itemInteraction: ItemInteractionRequest;
+          } = {
+            itemInteraction: {
+              status: 'closed',
+              message: 'opening interaction',
+              dueDate: validDueDate,
+            },
+          };
+          it('but in accepted values array included value', async () => {
+            await testForInvalidItemInteractionBody(
+              400,
+              'Error: Bad Request: You cant create an interaction with this request',
+              invalidItemInteractionBody1,
+            );
+          }, 10000);
+        });
+      });
     });
 
     describe('DELETE all items', () => {

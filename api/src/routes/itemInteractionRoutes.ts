@@ -27,7 +27,6 @@ itemInteractionRoutes
     isNotOwner,
     validateItemInteraction,
     //
-    // createItemInteraction,
-    dummyController,
+    createItemInteraction,
   )
   .delete(deleteAllItemInteractions);

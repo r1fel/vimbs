@@ -12,6 +12,7 @@ const itemInteractionSchema = Joi.object({
       .valid(...itemInteractionStatuses)
       .required(),
     message: Joi.string().allow('').optional(),
+    // TODO ER: change schema to only allow dates that lie in the future
     dueDate: Joi.date().format('YYYY-MM-DD').allow('').optional(),
   }).required(),
 });

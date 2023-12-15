@@ -9,6 +9,11 @@ import {
   Other,
 } from './utils/categoryStringDefinitions';
 
+import {
+  itemInteractionStatuses,
+  itemInteractionPartakers,
+} from './utils/itemInteractionStringDefinitons';
+
 // Extension of Express.User, so that req.user._id can be used
 declare global {
   namespace Express {
@@ -135,8 +140,8 @@ export type PopulatedItemsFromDB =
   | Array<ItemInDBPopulated>
   | null;
 
-export type InteractionStatuses = 'opened' | 'declined' | 'accepted' | 'closed';
-export type InteractingParties = 'getter' | 'giver';
+export type InteractionStatuses = (typeof itemInteractionStatuses)[number];
+export type InteractingParties = (typeof itemInteractionPartakers)[number];
 
 export interface ItemInteractionInDB extends Document {
   creationDate: Date;
@@ -203,4 +208,10 @@ export type ItemRequest = {
   name: string;
   description?: string;
   categories: CategoriesForInput;
+};
+
+export type ItemInteractionRequest = {
+  status: InteractionStatuses;
+  message?: string;
+  dueDate?: string;
 };
