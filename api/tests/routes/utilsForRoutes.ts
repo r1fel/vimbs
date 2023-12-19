@@ -11,6 +11,8 @@ export const authRoute = '/auth';
 export const itemRoute = '/item';
 export const itemIdRoute = '/item/:itemId';
 export const itemIdInteractionRoute = '/item/:itemId/itemInteraction';
+export const itemIdInteractionIdRoute =
+  '/item/:itemId/itemInteraction/:interactionId';
 export const itemIdToggleAvailabilityRoute = '/item/:itemId/toggleAvailability';
 
 // user routes

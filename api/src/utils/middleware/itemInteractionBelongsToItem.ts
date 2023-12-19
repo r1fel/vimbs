@@ -23,9 +23,8 @@ const itemInteractionBelongsToItem = catchAsync(
     const item: ItemInDB = res.locals.item;
 
     // get interaction or throw error if interaction does not exist
-    const interactionId = new mongoose.Types.ObjectId(req.params.interactionId);
     const interaction: ItemInteractionInDB | null =
-      await ItemInteraction.findById(interactionId);
+      await ItemInteraction.findById(req.params.interactionId);
     if (interaction === null)
       return next(
         new ExpressError('Bad Request: This interaction does not exist', 400),
@@ -33,7 +32,7 @@ const itemInteractionBelongsToItem = catchAsync(
     res.locals.interaction = interaction;
 
     // check if the given interactionId matches the interactions on the item
-    if (!item.interactions.includes(interactionId)) {
+    if (!item.interactions.includes(interaction._id)) {
       return next(
         new ExpressError(
           'Bad Request: The requested item and interaction do not match!',

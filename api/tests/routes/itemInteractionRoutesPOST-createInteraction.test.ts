@@ -284,7 +284,7 @@ const notPassedIsNotOwner = (
   describe('when isNotOwner was not passed', () => {
     describe('when valid itemId is given', () => {
       it('should respond error with a statusCode403 if user is the item.owner', async () => {
-        // login bodo4, create an item, get itemId, set item to not available, do request of interest, delete item, logout bodo4
+        // login bodo4, create an item, get itemId, do request of interest, delete item, logout bodo4
         // login bodo4
         const connectSidValue = await loginBodo4();
 
@@ -301,7 +301,7 @@ const notPassedIsNotOwner = (
         // extract itemId
         const itemId = createItemResponse.body[0]._id;
 
-        // test route of interest on just created and not available item
+        // test route of interest on just created item
         const itemInteractionResponse = await (request(app) as any)
           [httpVerb](`${routeBase}/${itemId}/${routeEnd}`)
           .set('Cookie', [`connect.sid=${connectSidValue}`]);
@@ -379,7 +379,7 @@ const notPassedValidateItemInteraction = (
         // login bibi
         const connectSidValueBibi = await loginUser('bibi@gmail.com', 'bibi');
 
-        // test route of interest on just created and not available item
+        // test route of interest on just created item
         const itemInteractionResponse = await (request(app) as any)
           [httpVerb](`${routeBase}/${itemId}/${routeEnd}`)
           .send(itemInteractionBody)
@@ -652,7 +652,7 @@ describe('itemInteraction Routes', () => {
               'bibi',
             );
 
-            // test route of interest on just created and not available item
+            // test route of interest on just created item
             const itemInteractionResponse = await request(app)
               .post(
                 `${itemRoute}/${itemId}/${
@@ -807,7 +807,7 @@ describe('itemInteraction Routes', () => {
               'bibi',
             );
 
-            // test route of interest on just created and not available item
+            // test route of interest on just created item
             const itemInteractionResponse = await request(app)
               .post(
                 `${itemRoute}/${itemId}/${
@@ -902,7 +902,7 @@ describe('itemInteraction Routes', () => {
           // login bibi
           const connectSidValueBibi = await loginUser('bibi@gmail.com', 'bibi');
 
-          // test route of interest on just created and not available item
+          // test route of interest on just created item
           const itemInteractionResponse = await request(app)
             .post(
               `${itemRoute}/${itemId}/${
