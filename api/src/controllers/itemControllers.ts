@@ -191,8 +191,11 @@ export const deleteAllOfUsersItems = catchAsync(
       return next(new ExpressError('this user doesnt exist', 500));
 
     if (user.myItems.length > 0) {
-      // Delete all items owned by the user
-      await Item.deleteMany({ owner: currentUser });
+      // use findByIdAndDelete to trigger findOneAndDelete middleware on ItemSchema
+      // deletes the interactions that are on the item
+      for (const itemId of user.myItems) {
+        await Item.findByIdAndDelete(itemId);
+      }
 
       // Empty out myItems array
       user.myItems = [];

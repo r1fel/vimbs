@@ -2,7 +2,7 @@
 
 import mongoose, { Schema } from 'mongoose';
 import { ItemInDB } from '../typeDefinitions';
-// import {ItemInteraction} from './itemInteraction';
+import ItemInteraction from './itemInteraction';
 import {
   HouseAndGarden,
   ChildAndBaby,
@@ -130,6 +130,17 @@ const ItemSchema: Schema = new Schema({
     },
   ],
   available: { type: Boolean, default: true },
+});
+
+// delete the itemInteractaions in the itemInteractaions database when a item is deleted
+ItemSchema.post('findOneAndDelete', async function (doc) {
+  if (doc) {
+    await ItemInteraction.deleteMany({
+      _id: {
+        $in: doc.interactions,
+      },
+    });
+  }
 });
 
 const Item = mongoose.model<ItemInDB>('Item', ItemSchema);
