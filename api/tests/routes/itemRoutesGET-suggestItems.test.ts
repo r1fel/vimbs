@@ -320,14 +320,23 @@ describe('item Routes', () => {
             const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
     
             let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
+            const itemIds = [];
             for (let i = 0; i < itemsArray.length && i < 5; i++) {
               itemsArray[i].interactions = new Array(i + 1).fill(itemId);
+              itemIds.push(itemsArray[i]._id);
             }
     
-            const mostBorrowedItems = await getMostBorrowedItems(itemsArray, 6);
+            const mostBorrowedItems = await getMostBorrowedItems(itemsArray);
             expect(mostBorrowedItems).toBeInstanceOf(Array);
             for (const item of mostBorrowedItems) {
-                checkHelpferFunctionResponse(item);
+              checkHelpferFunctionResponse(item);
+              expect(item.interactions).not.toEqual([]);
+              
+            }
+
+            // check if first five items are the ones with most interactions
+            for (let i = 0; i < mostBorrowedItems.length && i < 5; i++) {
+              expect(mostBorrowedItems[i]._id).toEqual(itemIds[4-i]);
             }
 
             await logout(connectSidValue);
@@ -337,7 +346,7 @@ describe('item Routes', () => {
         describe('getMostBorrowedItems for invalid input', () => {
           it('should return an empty array', async () => {
             const connectSidValue = await loginBodo4();
-            const mostBorrowedItems = await getMostBorrowedItems([], 6);
+            const mostBorrowedItems = await getMostBorrowedItems([]);
             expect(mostBorrowedItems).toBeInstanceOf(Array);
             expect(mostBorrowedItems).toEqual([]);
             await logout(connectSidValue);
@@ -357,6 +366,7 @@ describe('item Routes', () => {
             if (Array.isArray(searchHistoryItems)) {
                 for (const item of searchHistoryItems) {
                     checkHelpferFunctionResponse(item);
+                    expect(item.name).toEqual('Fahrrad');
                 }
             }
           }, 10000);
@@ -526,7 +536,48 @@ describe('item Routes', () => {
               expect(emptyInputResponse).toEqual([]);
             });
         }); 
+
+        describe('test cookie', () => {
+          it('test', async () => {
+            
+            // get current session cookie
+            const connectSidValue = await loginBodo4();
+            
+            // call suggest items
+            const suggestItemsResponse = await request(app)
+              .get(itemSuggestRoute)
+              .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+            // call suggest items
+            const news = await request(app)
+              .get(itemSuggestRoute)
+              .set('Cookie', [`connect.sid=${connectSidValue}`]);
+
+
+            
+            
+          });
       }); 
+        });
+      
+        describe('suggestItems', () => {
+          it('should return an array of 20 items', async () => {
+            const connectSidValue = await loginBodo4();
+            const items = await getPopulatItems('6553b5bfa70b16a991b89001');
+            let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
+            const suggestItemsResponse = await request(app)
+              .get(itemSuggestRoute)
+              .set('Cookie', [`connect.sid=${connectSidValue}`]);
+            expect(suggestItemsResponse.status).toBe(200);
+            expect(suggestItemsResponse.body.length).toEqual(10);
+            if (Array.isArray(suggestItemsResponse)) {
+              for (const item of suggestItemsResponse) {
+                  checkHelpferFunctionResponse(item);
+                  expect(item.name).toEqual('Fahrrad');
+              }
+          }
+        });
+      });
     });
 });
 
