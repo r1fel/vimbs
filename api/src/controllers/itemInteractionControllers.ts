@@ -154,7 +154,8 @@ export const deleteItemInteraction = catchAsync(
     // delete interaction
     await ItemInteraction.findByIdAndDelete(req.params.interactionId);
 
-    // TODO change availablility if the open request was deleted
+    // TODO remove isItemAvailable middleware and allow deletion of opened interactions
+    // TODO remove item from getItems of interestedParty and change available bools
     // item.available = true;
     // await item.save();
     if (req.user === undefined)

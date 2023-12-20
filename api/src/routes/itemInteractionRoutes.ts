@@ -45,9 +45,9 @@ itemInteractionRoutes
     //
     dummyController,
   )
-  //TODO ER: if Item was not available before, its not automatically set back to available
   .delete(
     isLoggedIn,
+    isItemAvailable,
     itemInteractionBelongsToItem,
     isOwner,
     //
