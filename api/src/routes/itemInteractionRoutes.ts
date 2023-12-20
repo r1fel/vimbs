@@ -5,6 +5,7 @@ import { Router } from 'express';
 // middleware
 import isLoggedIn from '../utils/middleware/isLoggedIn';
 import isNotOwner from '../utils/middleware/isNotOwner';
+import isOwner from '../utils/middleware/isOwner';
 import isItemAvailable from '../utils/middleware/isItemAvaliable';
 import validateItemInteraction from '../utils/middleware/validateItemInteraction';
 import itemInteractionBelongsToItem from '../utils/middleware/itemInteractionBelongsToItem';
@@ -44,4 +45,11 @@ itemInteractionRoutes
     //
     dummyController,
   )
-  .delete(deleteItemInteraction);
+  //TODO ER: if Item was not available before, its not automatically set back to available
+  .delete(
+    isLoggedIn,
+    itemInteractionBelongsToItem,
+    isOwner,
+    //
+    deleteItemInteraction,
+  );

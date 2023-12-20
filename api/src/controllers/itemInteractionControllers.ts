@@ -119,13 +119,44 @@ export const deleteAllItemInteractions = catchAsync(
         new ExpressError('Bad Request: This item does not exist', 400),
       );
     if (item.interactions) {
-      for (const itemInteractionId of item.interactions) {
-        await ItemInteraction.findByIdAndDelete(itemInteractionId);
+      for (const itemInteraction of item.interactions) {
+        await ItemInteraction.findByIdAndDelete(itemInteraction._id);
       }
     }
     item.interactions = [];
     item.available = true;
     await item.save();
+    if (req.user === undefined)
+      return next(new ExpressError('Unauthorized', 401));
+    const currentUser = req.user._id;
+    let response: Array<ResponseItemForClient> = [];
+    processItemForClient(item, currentUser, response);
+    res.send(response);
+  },
+);
+
+// development function to delete one itemInteraction
+export const deleteItemInteraction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // get item and pull interaction from interactions array
+    const item: PopulatedItemsFromDB = await Item.findByIdAndUpdate(
+      req.params.itemId,
+      { $pull: { interactions: req.params.interactionId } },
+      { new: true },
+    )
+      .populate<{ owner: UserInDB }>('owner')
+      .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
+    if (item === null)
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
+    console.log(item);
+    // delete interaction
+    await ItemInteraction.findByIdAndDelete(req.params.interactionId);
+
+    // TODO change availablility if the open request was deleted
+    // item.available = true;
+    // await item.save();
     if (req.user === undefined)
       return next(new ExpressError('Unauthorized', 401));
     const currentUser = req.user._id;
