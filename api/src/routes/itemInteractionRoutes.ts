@@ -16,6 +16,7 @@ import {
   createItemInteraction,
   deleteAllItemInteractions,
   deleteItemInteraction,
+  handlePostInteraction,
   dummyController, //! ER: remove when itemInteractions are set up
 } from '../controllers/itemInteractionControllers';
 
@@ -43,7 +44,7 @@ itemInteractionRoutes
     isInteractionPartaker,
     validateItemInteraction,
     //
-    dummyController,
+    handlePostInteraction,
   )
   .delete(
     isLoggedIn,

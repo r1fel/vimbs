@@ -388,7 +388,7 @@ const notPassedValidateItemInteraction = (
         // logout bibi
         await logout(connectSidValueBibi);
 
-        // login Bodo4, let him create Item with passed in Body
+        // login Bodo4
         const connectSidValueBodo4Second = await loginBodo4();
 
         // delete all items
@@ -665,7 +665,7 @@ describe('itemInteraction Routes', () => {
             // logout bibi
             await logout(connectSidValueBibi);
 
-            // login Bodo4, let him create Item with passed in Body
+            // login Bodo4
             const connectSidValueBodo4Second = await loginBodo4();
 
             // delete all items
@@ -834,7 +834,7 @@ describe('itemInteraction Routes', () => {
             // logout bibi
             await logout(connectSidValueBibi);
 
-            // login Bodo4, let him create Item with passed in Body
+            // login Bodo4
             const connectSidValueBodo4Second = await loginBodo4();
 
             // delete all items
@@ -915,7 +915,7 @@ describe('itemInteraction Routes', () => {
           // logout bibi
           await logout(connectSidValueBibi);
 
-          // login Bodo4, let him create Item with passed in Body
+          // login Bodo4
           const connectSidValueBodo4Second = await loginBodo4();
 
           // delete all items

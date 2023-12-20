@@ -508,6 +508,21 @@ const notPassedIsInteractionPartaker = (
   });
 };
 
+const expectsForError = (
+  statusCode: number,
+  invalidity: string,
+  response: request.Response,
+) => {
+  // console.log(response.statusCode, response.error);
+
+  // expects
+  expect(response.statusCode).toBe(statusCode);
+  expect(response.text).toContain(invalidity);
+
+  // log for checking that all validation test ran completely
+  // console.log('expectsForError ran for invalidity', invalidity);
+};
+
 const notPassedValidateItemInteraction = (
   httpVerb: string,
   routeBase: string,
@@ -515,22 +530,6 @@ const notPassedValidateItemInteraction = (
 ) => {
   describe('when validateItemInteraction was not passed', () => {
     describe('when invalid itemInteraction Body is given', () => {
-      // expect statements for all tests in this block
-      const expectsForInvalidItemInteractionBody = (
-        statusCode: number,
-        invalidity: string,
-        itemInteractionResponse: request.Response,
-      ) => {
-        // console.log(itemInteractionResponse.statusCode, itemInteractionResponse.error);
-
-        // expects
-        expect(itemInteractionResponse.statusCode).toBe(statusCode);
-        expect(itemInteractionResponse.text).toContain(invalidity);
-
-        // log for checking that all validation test ran completely
-        // console.log('expectsForInvalidBody ran for invalidity', invalidity);
-      };
-
       // test function for all bodys in this block
       const testForInvalidItemInteractionBody = async (
         statusCode: number,
@@ -602,11 +601,7 @@ const notPassedValidateItemInteraction = (
         // logout
         await logout(connectSidValueBodo4Second);
 
-        expectsForInvalidItemInteractionBody(
-          statusCode,
-          invalidity,
-          handleItemInteractionResponse,
-        );
+        expectsForError(statusCode, invalidity, handleItemInteractionResponse);
       };
 
       describe('should respond error with a statusCode400', () => {
@@ -706,6 +701,17 @@ const notPassedValidateItemInteraction = (
   });
 };
 
+const getFutureDateForBody = (weeks = 2): string => {
+  const futureDate = getFutureDate(weeks);
+
+  // Formatting the date to 'YYYY-MM-DD'
+  const year = futureDate.getFullYear();
+  const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+  const day = String(futureDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 // TESTS
 describe('itemInteraction Routes', () => {
   // close DB after tests ran - to get rid of db related error
@@ -739,6 +745,282 @@ describe('itemInteraction Routes', () => {
     //   itemRoute,
     //   itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
     // );
+
+    describe('when itemInteraction body is dealt with at controller', () => {
+      describe('for current interactionStatus is opened', () => {
+        describe('should respond error with a statusCode400', () => {
+          // check for the interaction to be exactly the same as before the request
+          describe('when owner', () => {
+            // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, logout bibi,
+            // login bodo4, get showItem, have bodo4 do the request of interest, get showItem, delete all of bodo4's items, logout bodo4
+            const testForOwnerRequestingWrongStatus = async (
+              statusCode: number,
+              invalidity: string,
+              validItemInteractionBody: {
+                itemInteraction: ItemInteractionRequest;
+              },
+            ) => {
+              // define Body to be used in this test
+              const itemInteractionBody = validItemInteractionBody;
+
+              // login Bodo4, let him create Item with passed in Body
+              const connectSidValueBodo4First = await loginBodo4();
+
+              // create item
+              const createItemResponse = await request(app)
+                .post(itemRoute)
+                .send({
+                  item: {
+                    name: 'Item for testForOwnerRequestingWrongStatus',
+                    categories: { Other: { subcategories: ['Sonstiges'] } },
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+              // extract itemId
+              const itemId = createItemResponse.body[0]._id;
+
+              // logout
+              await logout(connectSidValueBodo4First);
+
+              // login bibi
+              const connectSidValueBibi = await loginUser(
+                'bibi@gmail.com',
+                'bibi',
+              );
+
+              // bibi opens an interaction
+              const openItemInteractionResponse = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteraction: {
+                    status: 'opened',
+                    message:
+                      'opening interaction for testForOwnerRequestingWrongStatus',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              // extract interactionId
+              const interactionIdOnItem =
+                openItemInteractionResponse.body[0].interactions[0]._id;
+
+              // logout bibi
+              await logout(connectSidValueBibi);
+
+              // login Bodo4
+              const connectSidValueBodo4Second = await loginBodo4();
+
+              //getShowItem before request of interest
+              const getShowItemResponseBefore = await request(app)
+                .get(`${itemRoute}/${itemId}`)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              // do request of interst
+              const handleItemInteractionResponse = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }/${interactionIdOnItem}`,
+                )
+                .send(itemInteractionBody)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              //getShowItem after request of interest
+              const getShowItemResponseAfter = await request(app)
+                .get(`${itemRoute}/${itemId}`)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              // delete all items
+              const deleteAllOfUsersItemsResponse = await request(app)
+                .delete(itemRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              // logout
+              await logout(connectSidValueBodo4Second);
+
+              expect(getShowItemResponseBefore.body[0]).not.toBe(undefined);
+              expect(getShowItemResponseBefore.body[0]).toEqual(
+                getShowItemResponseAfter.body[0],
+              );
+
+              expectsForError(
+                statusCode,
+                invalidity,
+                handleItemInteractionResponse,
+              );
+            };
+
+            // one could now test all sorts of valid bodies, but the test already checks,
+            //  if the showItem before and after the tested route are equal.
+            // If any of the changes suggested by the request were done, this should lead to failing the test
+            const validItemInteractionBody = {
+              itemInteraction: {
+                status: 'closed',
+                message: 'some string',
+                dueDate: getFutureDateForBody(4),
+              },
+            };
+            it('requests status closed', async () => {
+              await testForOwnerRequestingWrongStatus(
+                400,
+                'Error: Bad Request: The requested change on the interaction is not allowed',
+                validItemInteractionBody,
+              );
+            }, 10000);
+          });
+          describe('when interestedParty', () => {
+            // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, get showItem, have bibi do the request of interest, get showItem, logout bibi,
+            // login bodo4, delete all of bodo4's items, logout bodo4
+
+            const testForInterestedPartyRequestingWrongStatus = async (
+              statusCode: number,
+              invalidity: string,
+              validItemInteractionBody: {
+                itemInteraction: ItemInteractionRequest;
+              },
+            ) => {
+              // define Body to be used in this test
+              const itemInteractionBody = validItemInteractionBody;
+
+              // login Bodo4, let him create Item with passed in Body
+              const connectSidValueBodo4First = await loginBodo4();
+
+              // create item
+              const createItemResponse = await request(app)
+                .post(itemRoute)
+                .send({
+                  item: {
+                    name: 'Item for testForInterestedPartyRequestingWrongStatus',
+                    categories: { Other: { subcategories: ['Sonstiges'] } },
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+              // extract itemId
+              const itemId = createItemResponse.body[0]._id;
+
+              // logout
+              await logout(connectSidValueBodo4First);
+
+              // login bibi
+              const connectSidValueBibi = await loginUser(
+                'bibi@gmail.com',
+                'bibi',
+              );
+
+              // bibi opens an interaction
+              const openItemInteractionResponse = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteraction: {
+                    status: 'opened',
+                    message:
+                      'opening interaction for testForInterestedPartyRequestingWrongStatus',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              // extract interactionId
+              const interactionIdOnItem =
+                openItemInteractionResponse.body[0].interactions[0]._id;
+
+              //getShowItem before request of interest
+              const getShowItemResponseBefore = await request(app)
+                .get(`${itemRoute}/${itemId}`)
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+              // do request of interst
+              const handleItemInteractionResponse = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }/${interactionIdOnItem}`,
+                )
+                .send(itemInteractionBody)
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+              //getShowItem after request of interest
+              const getShowItemResponseAfter = await request(app)
+                .get(`${itemRoute}/${itemId}`)
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+              // logout bibi
+              await logout(connectSidValueBibi);
+
+              // login Bodo4
+              const connectSidValueBodo4Second = await loginBodo4();
+
+              // delete all items
+              const deleteAllOfUsersItemsResponse = await request(app)
+                .delete(itemRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              // logout
+              await logout(connectSidValueBodo4Second);
+
+              expect(getShowItemResponseBefore.body[0]).toEqual(
+                getShowItemResponseAfter.body[0],
+              );
+
+              expectsForError(
+                statusCode,
+                invalidity,
+                handleItemInteractionResponse,
+              );
+            };
+
+            // one could now test all sorts of valid bodies, but the test already checks,
+            //  if the showItem before and after the tested route are equal.
+            // If any of the changes suggested by the request were done, this should lead to failing the test
+            const validItemInteractionBodyClosed = {
+              itemInteraction: {
+                status: 'closed',
+                message: 'some string',
+                dueDate: getFutureDateForBody(4),
+              },
+            };
+            it('requests status closed', async () => {
+              await testForInterestedPartyRequestingWrongStatus(
+                400,
+                'Error: Bad Request: The requested change on the interaction is not allowed',
+                validItemInteractionBodyClosed,
+              );
+            }, 10000);
+
+            const validItemInteractionBodyAccepted = {
+              itemInteraction: {
+                status: 'accepted',
+                message: 'some string',
+                dueDate: getFutureDateForBody(4),
+              },
+            };
+            it('requests status accepted', async () => {
+              await testForInterestedPartyRequestingWrongStatus(
+                400,
+                'Error: Bad Request: The requested change on the interaction is not allowed',
+                validItemInteractionBodyAccepted,
+              );
+            }, 10000);
+          });
+        });
+        // describe('should respond successful with a statusCode200 and item data', () => {
+        //   describe('for status opened', () => {
+        //     it('', async () => {});
+        //   });
+        //   describe('for status declined', () => {
+        //     it('', async () => {});
+        //   });
+        //   describe('for status accepted', () => {
+        //     it('', async () => {});
+        //   });
+        // });
+      });
+    });
   });
 
   describe('DELETE all items', () => {

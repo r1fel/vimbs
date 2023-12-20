@@ -16,12 +16,19 @@ import ItemInteraction from '../models/itemInteraction';
 // Type-Definitions
 import {
   UserInDB,
+  ItemInDB,
   ItemInteractionInDB,
   ResponseItemForClient,
   InteractionStatuses,
   PopulatedItemsFromDB,
   ItemInteractionRequest,
 } from '../typeDefinitions';
+
+// string definitions
+import {
+  itemInteractionPartakers,
+  itemInteractionStatuses,
+} from '../utils/itemInteractionStringDefinitons';
 
 // create ItemInteraction
 export const createItemInteraction = catchAsync(
@@ -65,7 +72,7 @@ export const createItemInteraction = catchAsync(
     // if (dueDate <= reqTimestamp) return next(new ExpressError('Bad Request: The dueDate must lie in the future', 400));
     //   // dueDate = getFutureDate(2); // sets dueDate to be in 2 weeks in case the due Date was set in the past by the req.user
 
-    const interactingParty = 'getter';
+    const interactingParty = itemInteractionPartakers[0];
 
     // open new interaction and set req body on interaction
     const interaction: ItemInteractionInDB = new ItemInteraction();
@@ -150,7 +157,6 @@ export const deleteItemInteraction = catchAsync(
       return next(
         new ExpressError('Bad Request: This item does not exist', 400),
       );
-    console.log(item);
     // delete interaction
     await ItemInteraction.findByIdAndDelete(req.params.interactionId);
 
@@ -173,5 +179,145 @@ export const dummyController = catchAsync(
     const status: InteractionStatuses = req.body.itemInteraction.status;
     console.log(status);
     res.send('you passed dummy controller');
+  },
+);
+
+// controller, that handles the core logic arround itemInteractions
+//! in progress
+export const handlePostInteraction = catchAsync(
+  //constant definitions
+  async (req: Request, res: Response, next: NextFunction) => {
+    const reqTimestamp = new Date();
+    const { itemId, interactionId } = req.params;
+    const itemInteractionBody: ItemInteractionRequest =
+      req.body.itemInteraction;
+
+    const giver = itemInteractionPartakers[1];
+    const getter = itemInteractionPartakers[0];
+    const opened = itemInteractionStatuses[0];
+    const declined = itemInteractionStatuses[1];
+    const accepted = itemInteractionStatuses[2];
+    const closed = itemInteractionStatuses[3];
+    if (req.user === undefined)
+      return next(new ExpressError('Unauthorized', 401));
+    const currentUser = req.user._id;
+
+    const item: ItemInDB | null = await Item.findById(itemId);
+    if (item === null)
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
+
+    const interaction: ItemInteractionInDB | null =
+      await ItemInteraction.findById(interactionId);
+    if (interaction === null)
+      return next(
+        new ExpressError('Bad Request: This interaction does not exist', 400),
+      );
+
+    const pushMessage = () => {
+      if (itemInteractionBody.message) {
+        interaction.messagelog.push({
+          messageText: itemInteractionBody.message,
+          messageWriter: item.owner.equals(currentUser) ? giver : getter,
+          messageTimestamp: reqTimestamp,
+        });
+      }
+    };
+    const changeInteractionStatus = () => {
+      interaction.interactionStatus = itemInteractionBody.status;
+      interaction.statusChangesLog.push({
+        newStatus: itemInteractionBody.status,
+        changeInitiator: item.owner.equals(currentUser) ? giver : getter,
+        entryTimestamp: reqTimestamp,
+      });
+    };
+
+    const setDueDate = (time?: number) => {
+      let dueDate: Date;
+      // if in setDueDate a time is supplied, the dueDate is set to the time supplied
+      if (time !== undefined) {
+        dueDate = getFutureDate(time);
+        return (interaction.dueDate = dueDate);
+      }
+
+      // if setDueDate is called without argument, the given dueDate is used
+      // if no dueDate was given, the dueDate stays the same as already saved on the interaction
+      dueDate =
+        itemInteractionBody.dueDate &&
+        new Date(itemInteractionBody.dueDate) >= reqTimestamp
+          ? new Date(itemInteractionBody.dueDate)
+          : interaction.dueDate;
+      return (interaction.dueDate = dueDate);
+    };
+
+    const setAvailability = (time?: number) => {
+      item.available = true;
+    };
+
+    // the if cascade logic:
+    // users are messaging
+    if (interaction.interactionStatus === itemInteractionBody.status) {
+      console.log('people are messaging');
+    }
+
+    // declining the opened interaction
+    else if (
+      interaction.interactionStatus === opened &&
+      itemInteractionBody.status === declined
+    ) {
+      // console.log('opened to declined');
+      changeInteractionStatus();
+      setDueDate(0); //to now
+      setAvailability();
+      pushMessage();
+    }
+
+    // owner accepts interaction
+    else if (
+      interaction.interactionStatus === opened &&
+      itemInteractionBody.status === accepted &&
+      currentUser === item.owner
+    ) {
+      console.log('owner accepted');
+    }
+
+    // owner closes interaction
+    else if (
+      interaction.interactionStatus === accepted &&
+      itemInteractionBody.status === closed &&
+      currentUser === item.owner
+    ) {
+      console.log('owner accepted');
+    }
+
+    // for all other combinations
+    else {
+      return next(
+        new ExpressError(
+          'Bad Request: The requested change on the interaction is not allowed',
+          400,
+        ),
+      );
+    }
+
+    // save the changes made in the if cascade
+    await interaction.save();
+    await item.save();
+
+    const updatedItem: PopulatedItemsFromDB = await Item.findById(
+      req.params.itemId,
+    )
+      .populate<{ owner: UserInDB }>('owner')
+      .populate<{ interactions: ItemInteractionInDB[] }>('interactions');
+    if (updatedItem === null)
+      return next(
+        new ExpressError('Bad Request: This item does not exist', 400),
+      );
+
+    let response: Array<ResponseItemForClient> = [];
+    processItemForClient(updatedItem, currentUser, response);
+    res.send(response);
+    // res.send(`Item: ${item} Interaction: ${interaction}`);
   },
 );
