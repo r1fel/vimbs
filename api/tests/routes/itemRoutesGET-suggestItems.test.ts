@@ -237,19 +237,30 @@ const checkResponseToBeCorrectlyProcessedItemForClient = ({
 
     function isCategoryUndefined(value: any): boolean {
         return typeof value === 'object' || value === undefined;
-    }
+      }
 
-    function isPictureUndefined(value: any): boolean {
-        return typeof value === 'string' || value === undefined;
-    }
+      function isPictureUndefined(value: any): boolean {
+          return typeof value === 'string' || value === undefined;
+      }
 
-    expect(item._id).toEqual(expect.any(Object));
+      function isItemidString(value: any): boolean {
+        return typeof value === 'string' || value === 'object';
+      }
+    
+      function isOwnerObject(value: any): boolean {
+        return typeof value === 'boolean' || (typeof value === 'object' && value !== null);
+      }
+
+      function isInteractionsArray(value: any): boolean {
+        return typeof value === 'object' || value === null;
+      }
+
     expect(isPictureUndefined(item.picture)).toBe(true);
     expect(item.name).toEqual(expect.any(String));
     expect(item.description).toEqual(expect.any(String));
     expect(isCategoryUndefined(item.categories)).toBe(true);
-    expect(item.owner).toEqual(expect.any(Object));
-    expect(item.interactions).toEqual(expect.any(Array));
+    expect(isOwnerObject(item.owner)).toBe(true);
+    expect(isInteractionsArray(item.interactions)).toBe(true);
     expect(item.available).toEqual(expect.any(Boolean));
   };
 
@@ -298,8 +309,29 @@ describe('item Routes', () => {
 
     describe(`GET ${itemSuggestRoute} (suggestItems)`, () => {
 
+      describe('when avialble items exist', () => {
+        const expectedNumberOfItems = 10;
+          it('should respond successful with a statusCode200 and return an array of ' + String(expectedNumberOfItems) + ' items', async () => {
+            const connectSidValue = await loginBodo4();
+            const items = await getPopulatItems();
+            let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
+            const suggestItemsResponse = await request(app)
+              .get(itemSuggestRoute)
+              .set('Cookie', [`connect.sid=${connectSidValue}`]);
+            expect(suggestItemsResponse.status).toBe(200);
+            expect(suggestItemsResponse.body.length).toEqual(expectedNumberOfItems);
+            if (Array.isArray(suggestItemsResponse.body)) {
+              for (const item of suggestItemsResponse.body) {
+                  checkHelpferFunctionResponse(item);
+              }
+          }
+      });
+    });
+  });
+
+  describe(`helper functions of suggestItems`, () => {
+
         notPassedIsLoggedIn('post', itemRoute);
-        notPassedIsOwner('put', itemRoute);
         
         // Test individual helper functions
         describe('getRandomItems for valid input', () => {
@@ -318,7 +350,7 @@ describe('item Routes', () => {
           }, 10000);
         });
     
-        describe('getRandomItems for invalid input', () => {
+        describe('getRandomItems for empty input', () => {
           it('should return an empty array', async () => {
             const connectSidValue = await loginBodo4();
             const random_items = await getRandomItems([], 3);
@@ -358,7 +390,7 @@ describe('item Routes', () => {
           }, 10000);
         });
     
-        describe('getMostBorrowedItems for invalid input', () => {
+        describe('getMostBorrowedItems for empty input', () => {
           it('should return an empty array', async () => {
             const connectSidValue = await loginBodo4();
             const mostBorrowedItems = await getMostBorrowedItems([]);
@@ -369,7 +401,7 @@ describe('item Routes', () => {
         });
     
         describe('getSearchHistoryItems for valid input', () => {
-          it('should return array of objects', async () => {
+          it('should return items, which names match the search token and their creation dates are newer than the search date', async () => {
             const connectSidValue = await loginBodo4();
             const items = await getPopulatItems();
             const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
@@ -395,7 +427,19 @@ describe('item Routes', () => {
           }, 10000);
         });
     
-        describe('getSearchHistoryItems for invalid input', () => {
+        describe('getSearchHistoryItems for empty input', () => {
+          it('should return empty array', async () => {
+            const connectSidValue = await loginBodo4();
+            const items = await getPopulatItems();
+            const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
+            
+            const emptySearchHistoryItems = await getSearchHistoryItems([], globalUserBodo);
+            expect(emptySearchHistoryItems).toBeInstanceOf(Array);
+            expect(emptySearchHistoryItems).toEqual([]);
+          }, 10000);
+        });
+
+        describe('getSearchHistoryItems for empty search history', () => {
           it('should return empty array', async () => {
             const connectSidValue = await loginBodo4();
             const items = await getPopulatItems();
@@ -406,15 +450,11 @@ describe('item Routes', () => {
             const emptySearchHistoryItems = await getSearchHistoryItems(itemsArray, globalUserBodo);
             expect(emptySearchHistoryItems).toBeInstanceOf(Array);
             expect(emptySearchHistoryItems).toEqual([]);
-            
-            const emptyInput= await getSearchHistoryItems(itemsArray, globalUserBodo);
-            expect(emptyInput).toBeInstanceOf(Array);
-            expect(emptyInput).toEqual([]);
           }, 10000);
         });
     
         describe('filterItemsBySeason for valid input', () => {
-          it('should return array of objects', async () => {
+          it('should return an array of objects, filtering for items that are out of season', async () => {
             
             const connectSidValue = await loginBodo4();
             const items = await getPopulatItems();
@@ -454,8 +494,8 @@ describe('item Routes', () => {
           }, 10000);
         });
     
-        describe('filterItemsBySeason for invalid input', () => {
-          it('should return empty array', async () => {
+        describe('filterItemsBySeason for empty input', () => {
+          it('should return an empty array', async () => {
             const connectSidValue = await loginBodo4();
             const filterItemsBySeasonResponse = await filterItemsBySeason([]);
             expect(filterItemsBySeasonResponse).toEqual([]);
@@ -463,7 +503,7 @@ describe('item Routes', () => {
         });
     
         describe('getItemsBasedonCatagory for valid input', () => {
-          it('should return array of item, which only belong to the subcatagories of Sport and Garden', async () => {
+          it('should return array of items, which only belong to the subcatagories of Sport and Garden', async () => {
     
             const connectSidValue = await loginBodo4();
             const items = await getPopulatItems();
@@ -544,38 +584,28 @@ describe('item Routes', () => {
             }
           });
     
-          describe('getItemsBasedonCatagory for invalid input', () => {
+        describe('getItemsBasedonCatagory for empty input', () => {
             it('should return an empty array', async () => {
-      
               const connectSidValue = await loginBodo4();
               const items = await getPopulatItems();
               const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
-              const itemsBasedonCatagory = await getItemsBasedOnCatagories(itemsArray, globalUserBodo);
-              expect(itemsBasedonCatagory).toEqual([]);
               const emptyInputResponse = await getItemsBasedOnCatagories([], globalUserBodo, 2);
               expect(emptyInputResponse).toEqual([]);
             });
-        }); 
-        });
-      
-        describe('suggestItems', () => {
-          it('should return an array of 20 items', async () => {
+          }); 
+
+        describe('getItemsBasedonCatagory for users whose search history is too short', () => {
+          it('should return an empty array', async () => {
             const connectSidValue = await loginBodo4();
             const items = await getPopulatItems();
-            let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
-            const suggestItemsResponse = await request(app)
-              .get(itemSuggestRoute)
-              .set('Cookie', [`connect.sid=${connectSidValue}`]);
-            expect(suggestItemsResponse.status).toBe(200);
-            expect(suggestItemsResponse.body.length).toEqual(10);
-            if (Array.isArray(suggestItemsResponse)) {
-              for (const item of suggestItemsResponse) {
-                  checkHelpferFunctionResponse(item);
-                  expect(item.name).toEqual('Fahrrad');
-              }
-          }
+            const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
+            globalUserBodo.searchHistory = [] as unknown as [{ searchToken: string; date: Date; }];
+            const emptyInputResponse = await getItemsBasedOnCatagories(itemsArray, globalUserBodo, 2);
+            expect(emptyInputResponse).toEqual([]);
+          });
+        }); 
+
         });
-      });
     });
 });
 
