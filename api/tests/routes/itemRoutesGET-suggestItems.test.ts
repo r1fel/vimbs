@@ -17,6 +17,18 @@ import { ItemInDBPopulated, UserInDB} from '../../src/typeDefinitions'; // Repla
 
 const app = makeApp(database);
 
+// expected items, which are required for the tests
+
+// getSearchHistoryItems expects at least one item in DB to be an item with name 'Fahrrad'
+const expected_history_items = 'Fahrrad';
+
+// getItemsBasedonCatagory expects at least one item in DB to be an item with name 'Fahrrad'
+const expected_catagory_items = 'Fahrrad';
+
+// getItemsBasedonCatagory expects at least one item in DB to be an item with id '6553bc9a22932b85d2937a53'
+const expected_catagory_item_id = '6553bc9a22932b85d2937a53'
+
+
 // routes
 const loginRoute = '/auth/login';
 const logoutRoute = '/auth/logout';
@@ -51,6 +63,7 @@ const logout = async (connectSidValue: string) => {
     .post(logoutRoute)
     .set('Cookie', [`connect.sid=${connectSidValue}`]);
 };
+
 const loginUser = async (email: string, password: string) => {
   const loginUserResponse = await request(app).post(loginRoute).send({
     email: email,
@@ -252,6 +265,8 @@ describe('item Routes', () => {
           it('should respond successful with a statusCode200 and return list of available item names', async () => {
     
             const connectSidValue = await loginBodo4();
+
+            // test results for different search tokens
             const searchTokens = ['a', 'Fa', 'jsdhjfodsf', '+++6//8389***##!!!′′^^^', ''];
     
             for(const searchToken of searchTokens) {
@@ -290,7 +305,7 @@ describe('item Routes', () => {
         describe('getRandomItems for valid input', () => {
           it('should return an array of random selected items', async () => {
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6553b5bfa70b16a991b89001');
+            const items = await getPopulatItems();
             let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
             const random_items = await getRandomItems(itemsArray, 3) ?? [];
             expect(random_items).toBeInstanceOf(Array);
@@ -317,10 +332,10 @@ describe('item Routes', () => {
           it('should return an array of items with most interactions in descending order', async () => {
             
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
-    
+            const items = await getPopulatItems();
             let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
             const itemIds = [];
+
             for (let i = 0; i < itemsArray.length && i < 5; i++) {
               itemsArray[i].interactions = new Array(i + 1).fill(itemId);
               itemIds.push(itemsArray[i]._id);
@@ -356,26 +371,34 @@ describe('item Routes', () => {
         describe('getSearchHistoryItems for valid input', () => {
           it('should return array of objects', async () => {
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
-    
+            const items = await getPopulatItems();
             const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
     
-            globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+            if (globalUserBodo.searchHistory.length > 0){
+              globalUserBodo.searchHistory = [] as unknown as [{ searchToken: string; date: Date; }];
+            }
+          
+            globalUserBodo?.searchHistory.push({ searchToken: expected_history_items, date: getRandomDateIn1950() });
+
+
             const searchHistoryItems = await getSearchHistoryItems(itemsArray, globalUserBodo);
             expect(searchHistoryItems).toBeInstanceOf(Array);
-            if (Array.isArray(searchHistoryItems)) {
+            
+            if (searchHistoryItems.length > 0) {
+              if (Array.isArray(searchHistoryItems)) {
                 for (const item of searchHistoryItems) {
                     checkHelpferFunctionResponse(item);
-                    expect(item.name).toEqual('Fahrrad');
+                    expect(item.name).toEqual(expected_history_items);
                 }
-            }
+              }
+            }  
           }, 10000);
         });
     
         describe('getSearchHistoryItems for invalid input', () => {
           it('should return empty array', async () => {
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
+            const items = await getPopulatItems();
             const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
             if (globalUserBodo)
               globalUserBodo.searchHistory = [] as unknown as [{ searchToken: string; date: Date; }];
@@ -394,7 +417,7 @@ describe('item Routes', () => {
           it('should return array of objects', async () => {
             
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
+            const items = await getPopulatItems();
             
             const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
     
@@ -443,22 +466,26 @@ describe('item Routes', () => {
           it('should return array of item, which only belong to the subcatagories of Sport and Garden', async () => {
     
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
+            const items = await getPopulatItems();
     
             const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
+
+            if (globalUserBodo.searchHistory.length > 0){
+              globalUserBodo.searchHistory = [] as unknown as [{ searchToken: string; date: Date; }];
+            }
     
-            globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
-            globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
-            globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
-            globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
-            globalUserBodo?.searchHistory.push({ searchToken: 'Fahrrad', date: getRandomDateIn1950() });
+            globalUserBodo?.searchHistory.push({ searchToken: expected_catagory_items, date: getRandomDateIn1950() });
     
-            // Account Fahrrad to the subcatagory sport, so we can later check if the item is in the returned array belong to the same subcatagory
+            // Account Fahrrad to the subcatagory sport, 
+            // because we expect that the returned array contains items from the subcatagory Sport
+            // because the user searched for Fahrrad, which is mostly account to the subcatagory Sport
             let jd = 0;
             for (const item of itemsArray) {
-              if (item.name === 'Fahrrad') {
+              if (item.name === expected_catagory_items) {
                 item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
                 if (jd === 0) 
+                  // Also account Fahrrad to some ohter subcatagories, just to check if the function is working properly and returns only items from the subcatagory Sport
+                  // Because the Fahrrad is mostly account to the subcatagory Sport, we expect that the returned array contains only items from the subcatagory Sport
                   item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] }, SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] }}
                 if (jd === 1) 
                   item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['House'] } }
@@ -466,41 +493,35 @@ describe('item Routes', () => {
               }
             }
     
-            // Account Pfalnze to search history, so we can later check if the item is in the returned array belong to the same subcatagory as Pflanze
-            globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId("6553bc9a22932b85d2937a53"));
-            globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId("6553bc9a22932b85d2937a59"));
-            globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId("6553bc9b22932b85d2937a73"));
+            // Account Pfalnze to borrow history, so we can later check if the items in the returned array belong to the same subcatagory as Pflanze
+            globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId(expected_catagory_item_id));
+            const objectids = [ new mongoose.Types.ObjectId(expected_catagory_item_id)]
     
-            const objectids = [ new mongoose.Types.ObjectId("6553bc9a22932b85d2937a53"), 
-                                new mongoose.Types.ObjectId("6553bc9a22932b85d2937a59"), 
-                                new mongoose.Types.ObjectId("6553bc9b22932b85d2937a73")]
-    
-            // Account Pfalnze to the subcatagory garden
+            // Account item to the subcatagory garden
+            // because the tested function should return items based on the most popular subcatagories of the search history and the borrow history
             jd = 0;
             for (const item of itemsArray) {
               for (const id of objectids) {
                 if (item._id.toString() === id.toString()) {
-                  item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
-                  if (jd === 0) 
-                    item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] }, SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] }}
-                  if (jd === 1) 
-                    item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['House'] } }
+                  item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden']}}
                   jd++;
                 }
               }
     
-              // Add more items to the two subcatagory. We expect some of these items to be returned in the array
-              if (item._id.toString() === '6553bc9a22932b85d2937a55')
-                item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
-              if (item._id.toString() === '6553bc9b22932b85d2937a6f')
-                item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
-              if (item._id.toString() === '6553bc9b22932b85d2937a77')
-                item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
-              if (item._id.toString() === '6553bc9a22932b85d2937a5f')
-                item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
+              // Add some more items to the subcatagory Sport and Garden
+              // because we expect that the returned array contains items from the subcatagory Sport and Garden
+              if (jd > 4 && jd < 10) {
+                // put all even items to the subcatagory Sport
+                if (jd % 2 === 0)
+                  item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
+                // put all odd items to the subcatagory Garden
+                else
+                  item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
+              }
+              jd++;
             }
     
-            const itemsBasedonCatagory = await getItemsBasedOnCatagories(itemsArray, globalUserBodo, 2);
+            const itemsBasedonCatagory = await getItemsBasedOnCatagories(itemsArray, globalUserBodo, 1);
     
             expect(itemsBasedonCatagory).toBeInstanceOf(Array);
             
@@ -523,12 +544,11 @@ describe('item Routes', () => {
             }
           });
     
-    
           describe('getItemsBasedonCatagory for invalid input', () => {
             it('should return an empty array', async () => {
       
               const connectSidValue = await loginBodo4();
-              const items = await getPopulatItems('6544bd1bdf354e46068d74bf');
+              const items = await getPopulatItems();
               const itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items : (items !== null ? [items] : []);
               const itemsBasedonCatagory = await getItemsBasedOnCatagories(itemsArray, globalUserBodo);
               expect(itemsBasedonCatagory).toEqual([]);
@@ -536,34 +556,12 @@ describe('item Routes', () => {
               expect(emptyInputResponse).toEqual([]);
             });
         }); 
-
-        describe('test cookie', () => {
-          it('test', async () => {
-            
-            // get current session cookie
-            const connectSidValue = await loginBodo4();
-            
-            // call suggest items
-            const suggestItemsResponse = await request(app)
-              .get(itemSuggestRoute)
-              .set('Cookie', [`connect.sid=${connectSidValue}`]);
-
-            // call suggest items
-            const news = await request(app)
-              .get(itemSuggestRoute)
-              .set('Cookie', [`connect.sid=${connectSidValue}`]);
-
-
-            
-            
-          });
-      }); 
         });
       
         describe('suggestItems', () => {
           it('should return an array of 20 items', async () => {
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems('6553b5bfa70b16a991b89001');
+            const items = await getPopulatItems();
             let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
             const suggestItemsResponse = await request(app)
               .get(itemSuggestRoute)

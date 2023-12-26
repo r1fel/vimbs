@@ -206,7 +206,7 @@ export const deleteAllOfUsersItems = catchAsync(
 
 // suggest items for user
 export const suggestItems = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction, numberOfRequestedItems: number = 10) => {
     
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
@@ -223,8 +223,7 @@ export const suggestItems = catchAsync(
     if (items === null)
       return next(new ExpressError('this item doesnt exist', 500));
       
-    // calculate number of items to be suggested for each category
-    const numberOfRequestedItems = 10;
+
     const randomItemsCount = Math.floor(numberOfRequestedItems * 0.5);
     const borrowedItemsCount = Math.floor(numberOfRequestedItems * 0.25);
     const remainingCount = numberOfRequestedItems - randomItemsCount - borrowedItemsCount;
@@ -318,7 +317,6 @@ export const getRandomItems = (
   // return random items
   const randomItems = items.sort(() => Math.random() - Math.random()).slice(0, numberOfItems);
   return Promise.resolve(randomItems);
-
 };
 
 // get most borrowed items
@@ -376,7 +374,8 @@ export const getItemsBasedOnCatagories = (
   if (
     !items ||
     user.searchHistory.length < min_length_user_history ||
-    user.getHistory.length < min_length_user_history
+    user.getHistory.length < min_length_user_history ||
+    min_length_user_history < 1
   )
     return Promise.resolve([]);
 
@@ -391,7 +390,9 @@ export const getItemsBasedOnCatagories = (
   for (const searchToken of searchTokens) {
     const filteredItems = items.filter((item) => item.name === searchToken);
     for (const item of filteredItems) {
-      const categories = item.categories; // Get all category names
+      const categories = item.categories; // Get all category 
+      
+      //filter subcategory terms from DB object 
       const keys = Object.keys(categories);
       for (const key of keys) {
         if (typeof categories[key].name === 'string') {
@@ -428,6 +429,8 @@ export const getItemsBasedOnCatagories = (
       (item) => item._id.toString() === objectId.toString(),
     );
     const categories = item.categories; // Get all category names
+
+    //filter subcategory terms from DB object 
     const keys = Object.keys(categories);
     for (const key of keys) {
       const subcategories = categories[key].subcategories;
@@ -461,6 +464,8 @@ export const getItemsBasedOnCatagories = (
   const borrowSuggestedItems: any[] = Object.values(topBorrowCategories)
     .filter(([_, count]) => count > 1)
     .flatMap(([subcategory]) =>
+
+      //match subcategory terms from DB object 
       Object.keys(items[0].categories).flatMap((key) =>
         items.filter(
           (item) =>
@@ -477,6 +482,8 @@ export const getItemsBasedOnCatagories = (
   )
     .filter(([_, count]) => count > 1)
     .flatMap(([subcategory]) =>
+
+      //match subcategory terms from DB object 
       Object.keys(items[0].categories).flatMap((key) =>
         items.filter(
           (item) =>
@@ -493,6 +500,7 @@ export const getItemsBasedOnCatagories = (
   );
 };
 
+//TODO: Update catagory names
 export const WinterSubcategories = ['Winter Sports', 'Wintersport'];
 export const SummerSubcategories = [
   'Baustellengeräte',
@@ -501,8 +509,9 @@ export const SummerSubcategories = [
   'Construction equipment',
   'Gardening tools',
   'Camping gear',
-];
+]; 
 
+// TODO: Use this function if needed
 export const filterItemsBySeason = (
   accessibleItems: any[],
 ): Promise<PopulatedItemsFromDB> => {
@@ -539,10 +548,7 @@ export const filterItemsBySeason = (
 
 // Don't remove
 // this function is only used for testing the helper functions above
-export const getPopulatItems = async (
-  _id: any,
-): Promise<PopulatedItemsFromDB> => {
-  const currentUser = _id;
+export const getPopulatItems = async (): Promise<PopulatedItemsFromDB> => {
   const items: PopulatedItemsFromDB = await Item.find();
   return items;
 };
