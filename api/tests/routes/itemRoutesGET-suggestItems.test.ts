@@ -516,16 +516,16 @@ describe('item Routes', () => {
     
             globalUserBodo?.searchHistory.push({ searchToken: expected_catagory_items, date: getRandomDateIn1950() });
     
-            // Account Fahrrad to the subcatagory sport, 
-            // because we expect that the returned array contains items from the subcatagory Sport
-            // because the user searched for Fahrrad, which is mostly account to the subcatagory Sport
+            // Account Fahrrad to the subcategory sport, 
+            // because we expect that the returned array contains items from the subcategory Sport
+            // because the user searched for Fahrrad, which is mostly account to the subcategory Sport
             let jd = 0;
             for (const item of itemsArray) {
               if (item.name === expected_catagory_items) {
                 item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
                 if (jd === 0) 
-                  // Also account Fahrrad to some ohter subcatagories, just to check if the function is working properly and returns only items from the subcatagory Sport
-                  // Because the Fahrrad is mostly account to the subcatagory Sport, we expect that the returned array contains only items from the subcatagory Sport
+                  // Also account Fahrrad to some ohter subcatagories, just to check if the function is working properly and returns only items from the subcategory Sport
+                  // Because the Fahrrad is mostly account to the subcategory Sport, we expect that the returned array contains only items from the subcategory Sport
                   item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] }, SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] }}
                 if (jd === 1) 
                   item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['House'] } }
@@ -533,11 +533,11 @@ describe('item Routes', () => {
               }
             }
     
-            // Account Pfalnze to borrow history, so we can later check if the items in the returned array belong to the same subcatagory as Pflanze
+            // Account Pfalnze to borrow history, so we can later check if the items in the returned array belong to the same subcategory as Pflanze
             globalUserBodo?.getHistory.push(new mongoose.Types.ObjectId(expected_catagory_item_id));
             const objectids = [ new mongoose.Types.ObjectId(expected_catagory_item_id)]
     
-            // Account item to the subcatagory garden
+            // Account item to the subcategory garden
             // because the tested function should return items based on the most popular subcatagories of the search history and the borrow history
             jd = 0;
             for (const item of itemsArray) {
@@ -548,13 +548,13 @@ describe('item Routes', () => {
                 }
               }
     
-              // Add some more items to the subcatagory Sport and Garden
-              // because we expect that the returned array contains items from the subcatagory Sport and Garden
+              // Add some more items to the subcategory Sport and Garden
+              // because we expect that the returned array contains items from the subcategory Sport and Garden
               if (jd > 4 && jd < 10) {
-                // put all even items to the subcatagory Sport
+                // put all even items to the subcategory Sport
                 if (jd % 2 === 0)
                   item.categories = { SportAndCamping: { name: 'SportAndCamping', subcategories: ['Sport'] } }
-                // put all odd items to the subcatagory Garden
+                // put all odd items to the subcategory Garden
                 else
                   item.categories = { HouseAndGarden: { name: 'HouseAndGarden', subcategories: ['Garden'] } }
               }
@@ -567,9 +567,9 @@ describe('item Routes', () => {
             
             const arrayItemsBased: ItemInDBPopulated[] = Array.isArray(itemsBasedonCatagory) ? itemsBasedonCatagory : (itemsBasedonCatagory !== null ? [itemsBasedonCatagory] : []);
     
-            // the returned items should only belong to the Sport or Garden Subcatagory
+            // the returned items should only belong to the Sport or Garden Subcategory
             for (const item of arrayItemsBased) {
-              // print subcatagory of item
+              // print subcategory of item
               const sport_sub = item.categories.SportAndCamping?.subcategories;
               const garden_sub = item.categories?.HouseAndGarden?.subcategories;
               if (sport_sub !== undefined) {
