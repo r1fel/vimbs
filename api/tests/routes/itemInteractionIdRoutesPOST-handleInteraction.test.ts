@@ -1260,7 +1260,7 @@ describe('itemInteraction Routes', () => {
                 );
               }, 10000);
 
-              it.only('if interaction is not interactions[0]', async () => {
+              it('if interaction is not interactions[0]', async () => {
                 // expect statements for all tests in this block
                 const expectsForDeclinedOnOpenedSecondInteractionInArray = (
                   interactingParty: 'giver' | 'getter',
@@ -1737,6 +1737,290 @@ describe('itemInteraction Routes', () => {
                   validItemInteractionBody7,
                 );
               }, 10000);
+
+              it('if interaction is not interactions[0]', async () => {
+                // expect statements for all tests in this block
+                const expectsForDeclinedOnOpenedSecondInteractionInArray = (
+                  interactingParty: 'giver' | 'getter',
+                  validBody: { itemInteraction: ItemInteractionRequest },
+                  itemInteractionResponse: request.Response,
+                ) => {
+                  // expects
+                  expect(itemInteractionResponse.statusCode).toBe(200);
+                  // expect the body array to only have one object inside
+                  expect(itemInteractionResponse.body).toHaveLength(1);
+
+                  // expect the body[0] to resemble the data inputs from validUpdateBody
+                  const updatedItem = itemInteractionResponse.body[0];
+                  expect(updatedItem.interactions.length).toBe(1); // for owner it's 2 here only the current interaction should be sent
+                  expect(updatedItem).toEqual({
+                    _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                    name: 'Item for testForRequestingDeclinedOnOpenedStatus',
+                    available: true,
+                    picture: null,
+                    description: null,
+                    categories: {
+                      AdultClothing: {
+                        name: 'Mode',
+                        subcategories: [],
+                      },
+                      ChildAndBaby: {
+                        name: 'Kind und Baby',
+                        subcategories: [],
+                      },
+                      HouseAndGarden: {
+                        name: 'Haus und Garten',
+                        subcategories: [],
+                      },
+                      MediaAndGames: {
+                        name: 'Medien und Spiele',
+                        subcategories: [],
+                      },
+                      Other: {
+                        name: 'Sonstiges',
+                        subcategories: ['Sonstiges'],
+                      },
+                      SportAndCamping: {
+                        name: 'Sport und Camping',
+                        subcategories: [],
+                      },
+                      Technology: {
+                        name: 'Technik und Zubehör',
+                        subcategories: [],
+                      },
+                    },
+                    dueDate: null,
+                    owner: interactingParty === 'getter' ? false : true,
+                    interactions: [
+                      {
+                        revealOwnerIdentity: false,
+                        _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                        creationDate: expect.any(String),
+                        statusChangesLog: [
+                          {
+                            newStatus: 'opened',
+                            changeInitiator: 'getter',
+                            entryTimestamp: expect.any(String),
+                            _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                          },
+                          {
+                            newStatus: validBody.itemInteraction.status,
+                            changeInitiator: interactingParty,
+                            entryTimestamp: expect.any(String),
+                            _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                          },
+                        ],
+                        messagelog: [
+                          {
+                            messageText:
+                              'opening interaction 2 for testForRequestingDeclinedOnOpenedStatus',
+                            messageWriter: 'getter',
+                            messageTimestamp: expect.any(String),
+                            _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                          },
+                          validBody.itemInteraction.message
+                            ? {
+                                messageText: validBody.itemInteraction.message,
+                                messageWriter: interactingParty,
+                                messageTimestamp: expect.any(String),
+                                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                              }
+                            : undefined,
+                        ],
+                        interestedParty: bobsUserId,
+                        interactionStatus: validBody.itemInteraction.status,
+                        dueDate: expect.any(String),
+                        __v: expect.any(Number),
+                      },
+                    ],
+                    commonCommunity:
+                      interactingParty === 'getter'
+                        ? {
+                            _id: '6544be0f04b3ecd121538985',
+                            picture:
+                              'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
+                            name: 'our common community',
+                          }
+                        : null,
+                    ownerData: null,
+                  }); // checks: availble: true, revealOwnerIdentity: false, ownerData: null,
+                  //  statusChangeLog with new entry, interactionStatus: 'declined',
+                  //  messagelog includes new message, item.dueDate: null
+
+                  // this does not yet check the dates sufficiently, thus
+                  // the interactionDueDate is checked to be today by
+                  expect(
+                    new Date(updatedItem.interactions[0].dueDate)
+                      .toISOString()
+                      .split('T')[0],
+                  ).toEqual(new Date().toISOString().split('T')[0]);
+                  // further dates are set in other requests, which are tested elsewhere
+                };
+
+                // test: login bodo4, create item, logout bodo4,
+                //  login bibi, open an interaction, decline an interaction, logout bibi,
+                // login bob, open an interaction, have bob do the request of interest, logout bob
+                // login bodo4, delete all of bodo4's items, logout bodo4
+                const testForInterestedPartyRequestingDeclinedOnOpenedStatusForSecondInteractionInArray =
+                  async (
+                    interactingParty: 'giver' | 'getter',
+                    validItemInteractionBody: {
+                      itemInteraction: ItemInteractionRequest;
+                    },
+                  ) => {
+                    // define Body to be used in this test
+                    const itemInteractionBody = validItemInteractionBody;
+
+                    // login Bodo4, let him create Item with passed in Body
+                    const connectSidValueBodo4First = await loginBodo4();
+
+                    // create item
+                    const createItemResponse = await request(app)
+                      .post(itemRoute)
+                      .send({
+                        item: {
+                          name: 'Item for testForRequestingDeclinedOnOpenedStatus',
+                          categories: {
+                            Other: { subcategories: ['Sonstiges'] },
+                          },
+                        },
+                      })
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4First}`,
+                      ]);
+                    // extract itemId
+                    const itemId = createItemResponse.body[0]._id;
+
+                    // logout
+                    await logout(connectSidValueBodo4First);
+
+                    // login bibi
+                    const connectSidValueBibi = await loginUser(
+                      'bibi@gmail.com',
+                      'bibi',
+                    );
+
+                    // bibi opens an interaction
+                    const openItemInteractionResponseForFirstInArray =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'opened',
+                            message:
+                              'opening interaction 1 for testForRequestingDeclinedOnOpenedStatus',
+                          },
+                        })
+                        .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+                    // extract interactionId
+                    const interactionIdOnItemForFirstInArray =
+                      openItemInteractionResponseForFirstInArray.body[0]
+                        .interactions[0]._id;
+
+                    // bibi declines the interaction
+                    const handleItemInteractionResponseForFirstInArray =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }/${interactionIdOnItemForFirstInArray}`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'declined',
+                            message:
+                              'declining interaction 1 for testForRequestingDeclinedOnOpenedStatus',
+                          },
+                        })
+                        .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+                    // logout bibi
+                    await logout(connectSidValueBibi);
+
+                    // login bob
+                    const connectSidValueBob = await loginUser(
+                      'bob@gmail.com',
+                      'bob',
+                    );
+
+                    // bob opens an interaction
+                    const openItemInteractionResponseForSecondInArray =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'opened',
+                            message:
+                              'opening interaction 2 for testForRequestingDeclinedOnOpenedStatus',
+                          },
+                        })
+                        .set('Cookie', [`connect.sid=${connectSidValueBob}`]);
+                    // extract interactionId
+                    const interactionIdOnItemForSecondInArray =
+                      openItemInteractionResponseForSecondInArray.body[0]
+                        .interactions[0]._id;
+
+                    // do request of interst
+                    const handleItemInteractionResponse = await request(app)
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }/${interactionIdOnItemForSecondInArray}`,
+                      )
+                      .send(itemInteractionBody)
+                      .set('Cookie', [`connect.sid=${connectSidValueBob}`]);
+
+                    // logout bob
+                    await logout(connectSidValueBob);
+
+                    // login Bodo4
+                    const connectSidValueBodo4Second = await loginBodo4();
+
+                    // delete all items
+                    const deleteAllOfUsersItemsResponse = await request(app)
+                      .delete(itemRoute)
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4Second}`,
+                      ]);
+
+                    // logout
+                    await logout(connectSidValueBodo4Second);
+
+                    // console.log(
+                    //   'openItemInteractionResponse',
+                    //   openItemInteractionResponse.body[0].interactions[0]
+                    //     .messagelog,
+                    // );
+                    console.log(
+                      'handleItemInteractionResponse',
+                      handleItemInteractionResponse.body[0],
+                    );
+                    expectsForDeclinedOnOpenedSecondInteractionInArray(
+                      interactingParty,
+                      validItemInteractionBody,
+                      handleItemInteractionResponse,
+                    );
+                  };
+
+                await testForInterestedPartyRequestingDeclinedOnOpenedStatusForSecondInteractionInArray(
+                  'getter',
+                  validItemInteractionBody1,
+                );
+              }, 20000);
             });
           });
           // describe('for status accepted', () => {

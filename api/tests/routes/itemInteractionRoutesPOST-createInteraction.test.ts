@@ -562,8 +562,6 @@ describe('itemInteraction Routes', () => {
           itemInteractionBody: { itemInteraction: ItemInteractionRequest },
           itemInteractionResponse: request.Response,
         ) => {
-          // console.log(itemInteractionResponse.statusCode, itemInteractionResponse.error);
-
           // expects
           expect(itemInteractionResponse.statusCode).toBe(200);
           // expect the body array to only have one object inside
