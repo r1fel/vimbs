@@ -258,7 +258,13 @@ export const handlePostInteraction = catchAsync(
     // the if cascade logic:
     // users are messaging
     if (interaction.interactionStatus === itemInteractionBody.status) {
-      console.log('people are messaging');
+      pushMessage();
+      // owner can also adjust the due Date in accepted state
+      if (
+        interaction.interactionStatus === accepted &&
+        currentUser === item.owner
+      )
+        setDueDate();
     }
 
     // declining the opened interaction

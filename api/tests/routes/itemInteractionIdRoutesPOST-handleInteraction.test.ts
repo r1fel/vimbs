@@ -84,6 +84,7 @@ const notPassedIsLoggedIn = (httpVerb: string, route: string) => {
   });
 };
 
+// for DeclinedOnOpened
 const checkResponseToBeCorrectlyProcessedItemForClient = (
   interactingParty: 'giver' | 'getter',
   validBody: {
@@ -166,6 +167,102 @@ const checkResponseToBeCorrectlyProcessedItemForClient = (
         ],
         interestedParty: bibisUserId,
         interactionStatus: validBody.itemInteraction.status,
+        dueDate: expect.any(String),
+        __v: expect.any(Number),
+      },
+    ],
+    commonCommunity:
+      interactingParty === 'getter'
+        ? {
+            _id: '6544be0f04b3ecd121538985',
+            picture:
+              'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
+            name: 'our common community',
+          }
+        : null,
+    ownerData: null,
+  };
+
+  return correctlyProcessedItemInteractionForClient;
+};
+
+// for OpenedOnOpened
+const checkResponseToBeCorrectlyProcessedItemForClientOpenedOnOpened = (
+  interactingParty: 'giver' | 'getter',
+  validBody: {
+    itemInteraction: ItemInteractionRequest;
+  },
+) => {
+  const correctlyProcessedItemInteractionForClient = {
+    _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+    name: 'Item for testForRequestingOpenedOnOpenedStatus',
+    available: false,
+    picture: null,
+    description: null,
+    categories: {
+      AdultClothing: {
+        name: 'Mode',
+        subcategories: [],
+      },
+      ChildAndBaby: {
+        name: 'Kind und Baby',
+        subcategories: [],
+      },
+      HouseAndGarden: {
+        name: 'Haus und Garten',
+        subcategories: [],
+      },
+      MediaAndGames: {
+        name: 'Medien und Spiele',
+        subcategories: [],
+      },
+      Other: {
+        name: 'Sonstiges',
+        subcategories: ['Sonstiges'],
+      },
+      SportAndCamping: {
+        name: 'Sport und Camping',
+        subcategories: [],
+      },
+      Technology: {
+        name: 'Technik und Zubehör',
+        subcategories: [],
+      },
+    },
+    dueDate: expect.any(String),
+    owner: interactingParty === 'getter' ? false : true,
+    interactions: [
+      {
+        revealOwnerIdentity: false,
+        _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+        creationDate: expect.any(String),
+        statusChangesLog: [
+          {
+            newStatus: 'opened',
+            changeInitiator: 'getter',
+            entryTimestamp: expect.any(String),
+            _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+          },
+        ],
+        messagelog: [
+          {
+            messageText:
+              'opening interaction for testForRequestingOpenedOnOpenedStatus',
+            messageWriter: 'getter',
+            messageTimestamp: expect.any(String),
+            _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+          },
+          validBody.itemInteraction.message
+            ? {
+                messageText: validBody.itemInteraction.message,
+                messageWriter: interactingParty,
+                messageTimestamp: expect.any(String),
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+              }
+            : undefined,
+        ],
+        interestedParty: bibisUserId,
+        interactionStatus: 'opened',
         dueDate: expect.any(String),
         __v: expect.any(Number),
       },
@@ -1029,9 +1126,306 @@ describe('itemInteraction Routes', () => {
           });
         });
         describe('should respond successful with a statusCode200 and item data', () => {
-          // describe('for status opened', () => {
-          //   it('', async () => {});
-          // });
+          describe('for status opened', () => {
+            // expect statements for all tests in this block
+            const expectsForOpenedOnOpened = (
+              interactingParty: 'giver' | 'getter',
+              itemInteractionBody: { itemInteraction: ItemInteractionRequest },
+              itemInteractionResponse: request.Response,
+            ) => {
+              // expects
+              expect(itemInteractionResponse.statusCode).toBe(200);
+              // expect the body array to only have one object inside
+              expect(itemInteractionResponse.body).toHaveLength(1);
+
+              // expect the body[0] to resemble the data inputs from validUpdateBody
+              const updatedItem = itemInteractionResponse.body[0];
+              expect(updatedItem).toEqual(
+                checkResponseToBeCorrectlyProcessedItemForClientOpenedOnOpened(
+                  interactingParty,
+                  itemInteractionBody,
+                ),
+              ); // checks: availble: false, revealOwnerIdentity: false, ownerData: null,
+              //  statusChangeLog no new entry, interactionStatus: 'opened',
+              //  messagelog includes new message, item.dueDate: same as before
+
+              // this does not yet check the dates sufficiently, thus
+              // the interactionDueDate is checked to be the date set by bibi when opening the interaction by
+              const dueDateSetByBibiUponOpeningInteraction =
+                getFutureDateForBody(2);
+              expect(
+                new Date(updatedItem.interactions[0].dueDate)
+                  .toISOString()
+                  .split('T')[0],
+              ).toEqual(dueDateSetByBibiUponOpeningInteraction);
+              expect(
+                new Date(updatedItem.dueDate).toISOString().split('T')[0],
+              ).toEqual(dueDateSetByBibiUponOpeningInteraction);
+            };
+
+            // valid to be tested bodies:
+            // with message text and future dueDate
+            const validItemInteractionBody1 = {
+              itemInteraction: {
+                status: 'opened',
+                message: 'some string',
+                dueDate: getFutureDateForBody(4),
+              },
+            };
+            // with empty message text and a future dueDate
+            const validItemInteractionBody2 = {
+              itemInteraction: {
+                status: 'opened',
+                message: '', // empty string
+                dueDate: getFutureDateForBody(4),
+              },
+            };
+            // with no message but a future dueDate
+            const validItemInteractionBody3 = {
+              itemInteraction: {
+                status: 'opened',
+                // message: 'some string',
+                dueDate: getFutureDateForBody(4),
+              },
+            };
+            // with message text and a past dueDate
+            const validItemInteractionBody4 = {
+              itemInteraction: {
+                status: 'opened',
+                message: 'some string',
+                dueDate: '2022-10-12',
+              },
+            };
+            // with message text and no dueDate
+            const validItemInteractionBody5 = {
+              itemInteraction: {
+                status: 'opened',
+                message: 'some string',
+                // dueDate: getFutureDateForBody(4),
+              },
+            };
+            // with message text and empty string for dueDate
+            const validItemInteractionBody6 = {
+              itemInteraction: {
+                status: 'opened',
+                message: 'some string',
+                dueDate: '', // empty string
+              },
+            };
+            // with message text and today for dueDate
+            const validItemInteractionBody7 = {
+              itemInteraction: {
+                status: 'opened',
+                message: 'some string',
+                dueDate: new Date().toISOString().split('T')[0],
+              },
+            };
+
+            // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, if interactingParty=getter - have bibi do request of interest, logout bibi,
+            // login bodo4, if interactingParty=giver - have bodo4 do request of interest, delete all of bodo4's items, logout bodo4
+            const testForRequestingOpenedOnOpenedStatus = async (
+              interactingParty: 'giver' | 'getter',
+              validItemInteractionBody: {
+                itemInteraction: ItemInteractionRequest;
+              },
+            ) => {
+              // define Body to be used in this test
+              const itemInteractionBody = validItemInteractionBody;
+
+              // login Bodo4, let him create Item with passed in Body
+              const connectSidValueBodo4First = await loginBodo4();
+
+              // create item
+              const createItemResponse = await request(app)
+                .post(itemRoute)
+                .send({
+                  item: {
+                    name: 'Item for testForRequestingOpenedOnOpenedStatus',
+                    categories: { Other: { subcategories: ['Sonstiges'] } },
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+              // extract itemId
+              const itemId = createItemResponse.body[0]._id;
+
+              // logout
+              await logout(connectSidValueBodo4First);
+
+              // login bibi
+              const connectSidValueBibi = await loginUser(
+                'bibi@gmail.com',
+                'bibi',
+              );
+
+              // bibi opens an interaction
+              const openItemInteractionResponse = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteraction: {
+                    status: 'opened',
+                    message:
+                      'opening interaction for testForRequestingOpenedOnOpenedStatus',
+                    dueDate: getFutureDateForBody(2),
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              // extract interactionId
+              const interactionIdOnItem =
+                openItemInteractionResponse.body[0].interactions[0]._id;
+
+              let handleItemInteractionResponse: any = undefined;
+              if (interactingParty === 'getter') {
+                // do request of interst
+                handleItemInteractionResponse = await request(app)
+                  .post(
+                    `${itemRoute}/${itemId}/${
+                      itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                    }/${interactionIdOnItem}`,
+                  )
+                  .send(itemInteractionBody)
+                  .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              }
+
+              // logout bibi
+              await logout(connectSidValueBibi);
+
+              // login Bodo4
+              const connectSidValueBodo4Second = await loginBodo4();
+
+              if (interactingParty === 'giver') {
+                // do request of interst
+                handleItemInteractionResponse = await request(app)
+                  .post(
+                    `${itemRoute}/${itemId}/${
+                      itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                    }/${interactionIdOnItem}`,
+                  )
+                  .send(itemInteractionBody)
+                  .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+              }
+
+              // delete all items
+              const deleteAllOfUsersItemsResponse = await request(app)
+                .delete(itemRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              // logout
+              await logout(connectSidValueBodo4Second);
+
+              expectsForOpenedOnOpened(
+                interactingParty,
+                validItemInteractionBody,
+                handleItemInteractionResponse,
+              );
+            };
+
+            describe('requested by owner', () => {
+              it('with message text and future dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody1,
+                );
+              }, 10000);
+
+              it('with empty message text and a future dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody2,
+                );
+              }, 10000);
+
+              it('with no message but a future dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody3,
+                );
+              }, 10000);
+
+              it('with message text and a past dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody4,
+                );
+              }, 10000);
+
+              it('with message text and no dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody5,
+                );
+              }, 10000);
+
+              it('with message text and empty string for dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody6,
+                );
+              }, 10000);
+
+              it('with message text and today for dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'giver',
+                  validItemInteractionBody7,
+                );
+              }, 10000);
+            });
+
+            describe('requested by interestedParty', () => {
+              it('with message text and future dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody1,
+                );
+              }, 10000);
+
+              it('with empty message text and a future dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody2,
+                );
+              }, 10000);
+
+              it('with no message but a future dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody3,
+                );
+              }, 10000);
+
+              it('with message text and a past dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody4,
+                );
+              }, 10000);
+
+              it('with message text and no dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody5,
+                );
+              }, 10000);
+
+              it('with message text and empty string for dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody6,
+                );
+              }, 10000);
+
+              it('with message text and today for dueDate', async () => {
+                await testForRequestingOpenedOnOpenedStatus(
+                  'getter',
+                  validItemInteractionBody7,
+                );
+              }, 10000);
+            });
+          });
+
           describe('for status declined', () => {
             // expect statements for all tests in this block
             const expectsForDeclinedOnOpened = (
@@ -1123,71 +1517,83 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            describe('requested by owner', () => {
-              // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, logout bibi,
-              // login bodo4, have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4
+            // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, if interactingParty=getter - have bibi do request of interest, logout bibi,
+            // login bodo4, if interactingParty=giver - have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4
+            const testForDeclinedOnOpenedStatus = async (
+              interactingParty: 'giver' | 'getter',
+              validItemInteractionBody: {
+                itemInteraction: ItemInteractionRequest;
+              },
+            ) => {
+              // define Body to be used in this test
+              const itemInteractionBody = validItemInteractionBody;
 
-              const testForOwnerRequestingDeclinedOnOpenedStatus = async (
-                interactingParty: 'giver' | 'getter',
-                validItemInteractionBody: {
-                  itemInteraction: ItemInteractionRequest;
-                },
-              ) => {
-                // define Body to be used in this test
-                const itemInteractionBody = validItemInteractionBody;
+              // login Bodo4, let him create Item with passed in Body
+              const connectSidValueBodo4First = await loginBodo4();
 
-                // login Bodo4, let him create Item with passed in Body
-                const connectSidValueBodo4First = await loginBodo4();
+              // create item
+              const createItemResponse = await request(app)
+                .post(itemRoute)
+                .send({
+                  item: {
+                    name: 'Item for testForRequestingDeclinedOnOpenedStatus',
+                    categories: { Other: { subcategories: ['Sonstiges'] } },
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+              // extract itemId
+              const itemId = createItemResponse.body[0]._id;
 
-                // create item
-                const createItemResponse = await request(app)
-                  .post(itemRoute)
-                  .send({
-                    item: {
-                      name: 'Item for testForRequestingDeclinedOnOpenedStatus',
-                      categories: { Other: { subcategories: ['Sonstiges'] } },
-                    },
-                  })
-                  .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-                // extract itemId
-                const itemId = createItemResponse.body[0]._id;
+              // logout
+              await logout(connectSidValueBodo4First);
 
-                // logout
-                await logout(connectSidValueBodo4First);
+              // login bibi
+              const connectSidValueBibi = await loginUser(
+                'bibi@gmail.com',
+                'bibi',
+              );
 
-                // login bibi
-                const connectSidValueBibi = await loginUser(
-                  'bibi@gmail.com',
-                  'bibi',
-                );
+              // bibi opens an interaction
+              const openItemInteractionResponse = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteraction: {
+                    status: 'opened',
+                    message:
+                      'opening interaction for testForRequestingDeclinedOnOpenedStatus',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              // extract interactionId
+              const interactionIdOnItem =
+                openItemInteractionResponse.body[0].interactions[0]._id;
 
-                // bibi opens an interaction
-                const openItemInteractionResponse = await request(app)
+              let handleItemInteractionResponse: any = undefined;
+              if (interactingParty === 'getter') {
+                // do request of interst
+                handleItemInteractionResponse = await request(app)
                   .post(
                     `${itemRoute}/${itemId}/${
                       itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                    }`,
+                    }/${interactionIdOnItem}`,
                   )
-                  .send({
-                    itemInteraction: {
-                      status: 'opened',
-                      message:
-                        'opening interaction for testForRequestingDeclinedOnOpenedStatus',
-                    },
-                  })
+                  .send(itemInteractionBody)
                   .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-                // extract interactionId
-                const interactionIdOnItem =
-                  openItemInteractionResponse.body[0].interactions[0]._id;
+              }
 
-                // logout bibi
-                await logout(connectSidValueBibi);
+              // logout bibi
+              await logout(connectSidValueBibi);
 
-                // login Bodo4
-                const connectSidValueBodo4Second = await loginBodo4();
+              // login Bodo4
+              const connectSidValueBodo4Second = await loginBodo4();
 
+              if (interactingParty === 'giver') {
                 // do request of interst
-                const handleItemInteractionResponse = await request(app)
+                handleItemInteractionResponse = await request(app)
                   .post(
                     `${itemRoute}/${itemId}/${
                       itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
@@ -1195,66 +1601,71 @@ describe('itemInteraction Routes', () => {
                   )
                   .send(itemInteractionBody)
                   .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+              }
 
-                // delete all items
-                const deleteAllOfUsersItemsResponse = await request(app)
-                  .delete(itemRoute)
-                  .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+              // delete all items
+              const deleteAllOfUsersItemsResponse = await request(app)
+                .delete(itemRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
 
-                // logout
-                await logout(connectSidValueBodo4Second);
+              // logout
+              await logout(connectSidValueBodo4Second);
 
-                expectsForDeclinedOnOpened(
-                  interactingParty,
-                  validItemInteractionBody,
-                  handleItemInteractionResponse,
-                );
-              };
+              expectsForDeclinedOnOpened(
+                interactingParty,
+                validItemInteractionBody,
+                handleItemInteractionResponse,
+              );
+            };
+
+            describe('requested by owner', () => {
+              // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, logout bibi,
+              // login bodo4, have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4
 
               it('with message text and future dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody1,
                 );
               }, 10000);
 
               it('with empty message text and a future dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody2,
                 );
               }, 10000);
 
               it('with no message but a future dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody3,
                 );
               }, 10000);
 
               it('with message text and a past dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody4,
                 );
               }, 10000);
 
               it('with message text and no dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody5,
                 );
               }, 10000);
 
               it('with message text and empty string for dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody6,
                 );
               }, 10000);
 
               it('with message text and today for dueDate', async () => {
-                await testForOwnerRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'giver',
                   validItemInteractionBody7,
                 );
@@ -1537,16 +1948,6 @@ describe('itemInteraction Routes', () => {
                       openItemInteractionResponseForSecondInArray.body[0]
                         .interactions[0]._id;
 
-                    //   // bob declines the interaction
-                    // const handleItemInteractionResponseForSecondInArray = await request(app)
-                    // .post(
-                    //   `${itemRoute}/${itemId}/${
-                    //     itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                    //   }/${interactionIdOnItemForSecondInArray}`,
-                    // )
-                    // .send(itemInteractionBody)
-                    // .set('Cookie', [`connect.sid=${connectSidValueBob}`]);
-
                     // logout bob
                     await logout(connectSidValueBob);
 
@@ -1592,138 +1993,50 @@ describe('itemInteraction Routes', () => {
               // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, have bibi do the request of interest, logout bibi,
               // login bodo4, delete all of bodo4's items, logout bodo4
 
-              const testForInterestedPartyRequestingDeclinedOnOpenedStatus =
-                async (
-                  interactingParty: 'giver' | 'getter',
-                  validItemInteractionBody: {
-                    itemInteraction: ItemInteractionRequest;
-                  },
-                ) => {
-                  // define Body to be used in this test
-                  const itemInteractionBody = validItemInteractionBody;
-
-                  // login Bodo4, let him create Item with passed in Body
-                  const connectSidValueBodo4First = await loginBodo4();
-
-                  // create item
-                  const createItemResponse = await request(app)
-                    .post(itemRoute)
-                    .send({
-                      item: {
-                        name: 'Item for testForRequestingDeclinedOnOpenedStatus',
-                        categories: { Other: { subcategories: ['Sonstiges'] } },
-                      },
-                    })
-                    .set('Cookie', [
-                      `connect.sid=${connectSidValueBodo4First}`,
-                    ]);
-                  // extract itemId
-                  const itemId = createItemResponse.body[0]._id;
-
-                  // logout
-                  await logout(connectSidValueBodo4First);
-
-                  // login bibi
-                  const connectSidValueBibi = await loginUser(
-                    'bibi@gmail.com',
-                    'bibi',
-                  );
-
-                  // bibi opens an interaction
-                  const openItemInteractionResponse = await request(app)
-                    .post(
-                      `${itemRoute}/${itemId}/${
-                        itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                      }`,
-                    )
-                    .send({
-                      itemInteraction: {
-                        status: 'opened',
-                        message:
-                          'opening interaction for testForRequestingDeclinedOnOpenedStatus',
-                      },
-                    })
-                    .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-                  // extract interactionId
-                  const interactionIdOnItem =
-                    openItemInteractionResponse.body[0].interactions[0]._id;
-
-                  // do request of interst
-                  const handleItemInteractionResponse = await request(app)
-                    .post(
-                      `${itemRoute}/${itemId}/${
-                        itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                      }/${interactionIdOnItem}`,
-                    )
-                    .send(itemInteractionBody)
-                    .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-
-                  // logout bibi
-                  await logout(connectSidValueBibi);
-
-                  // login Bodo4
-                  const connectSidValueBodo4Second = await loginBodo4();
-
-                  // delete all items
-                  const deleteAllOfUsersItemsResponse = await request(app)
-                    .delete(itemRoute)
-                    .set('Cookie', [
-                      `connect.sid=${connectSidValueBodo4Second}`,
-                    ]);
-
-                  // logout
-                  await logout(connectSidValueBodo4Second);
-
-                  expectsForDeclinedOnOpened(
-                    interactingParty,
-                    validItemInteractionBody,
-                    handleItemInteractionResponse,
-                  );
-                };
               it('with message text and future dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody1,
                 );
               }, 10000);
 
               it('with empty message text and a future dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody2,
                 );
               }, 10000);
 
               it('with no message but a future dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody3,
                 );
               }, 10000);
 
               it('with message text and a past dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody4,
                 );
               }, 10000);
 
               it('with message text and no dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody5,
                 );
               }, 10000);
 
               it('with message text and empty string for dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody6,
                 );
               }, 10000);
 
               it('with message text and today for dueDate', async () => {
-                await testForInterestedPartyRequestingDeclinedOnOpenedStatus(
+                await testForDeclinedOnOpenedStatus(
                   'getter',
                   validItemInteractionBody7,
                 );
