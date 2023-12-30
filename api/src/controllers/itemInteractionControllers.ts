@@ -273,7 +273,7 @@ export const handlePostInteraction = catchAsync(
       pushMessage();
       await User.updateOne(
         { _id: interaction.interestedParty },
-        { $pull: { getItems: itemId } },
+        { $pull: { getItems: itemId }, $push: { getHistory: itemId } },
       );
     }
 

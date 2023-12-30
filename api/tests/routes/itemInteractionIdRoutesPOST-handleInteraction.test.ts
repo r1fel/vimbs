@@ -1575,15 +1575,6 @@ describe('itemInteraction Routes', () => {
                     // logout
                     await logout(connectSidValueBodo4Second);
 
-                    // console.log(
-                    //   'openItemInteractionResponse',
-                    //   openItemInteractionResponse.body[0].interactions[0]
-                    //     .messagelog,
-                    // );
-                    console.log(
-                      'handleItemInteractionResponse',
-                      handleItemInteractionResponse.body[0],
-                    );
                     expectsForDeclinedOnOpenedSecondInteractionInArray(
                       interactingParty,
                       validItemInteractionBody,
@@ -2000,15 +1991,6 @@ describe('itemInteraction Routes', () => {
                     // logout
                     await logout(connectSidValueBodo4Second);
 
-                    // console.log(
-                    //   'openItemInteractionResponse',
-                    //   openItemInteractionResponse.body[0].interactions[0]
-                    //     .messagelog,
-                    // );
-                    console.log(
-                      'handleItemInteractionResponse',
-                      handleItemInteractionResponse.body[0],
-                    );
                     expectsForDeclinedOnOpenedSecondInteractionInArray(
                       interactingParty,
                       validItemInteractionBody,
@@ -2022,6 +2004,124 @@ describe('itemInteraction Routes', () => {
                 );
               }, 20000);
             });
+
+            it('and remove itemId from interestedParty.getItems and add it to interestedParty.getHistory', async () => {
+              // expect statements for all tests in this block
+              const expectsForDeclinedOnOpenedConcerningArraysOnUser = (
+                itemId: string,
+                authResponse: request.Response,
+              ) => {
+                // expects
+                expect(authResponse.statusCode).toBe(200);
+
+                //  itemId is only supposed to be in getHistory and none of the other arrays
+                expect(authResponse.body.myItems).not.toContain(itemId);
+                expect(authResponse.body.getItems).not.toContain(itemId);
+                expect(authResponse.body.getHistory).toContain(itemId);
+              };
+
+              // test: login bodo4, create item, logout bodo4,
+              //  login bibi, open an interaction, decline an interaction, get auth, logout bibi,
+              // login bodo4, delete all of bodo4's items, logout bodo4
+              const testForDeclinedOnOpenedConcerningArraysOnUser =
+                async () => {
+                  // login Bodo4, let him create Item with passed in Body
+                  const connectSidValueBodo4First = await loginBodo4();
+
+                  // create item
+                  const createItemResponse = await request(app)
+                    .post(itemRoute)
+                    .send({
+                      item: {
+                        name: 'Item for testForRequestingDeclinedOnOpenedStatus',
+                        categories: {
+                          Other: { subcategories: ['Sonstiges'] },
+                        },
+                      },
+                    })
+                    .set('Cookie', [
+                      `connect.sid=${connectSidValueBodo4First}`,
+                    ]);
+                  // extract itemId
+                  const itemId = createItemResponse.body[0]._id;
+
+                  // logout
+                  await logout(connectSidValueBodo4First);
+
+                  // login bibi
+                  const connectSidValueBibi = await loginUser(
+                    'bibi@gmail.com',
+                    'bibi',
+                  );
+
+                  // bibi opens an interaction
+                  const openItemInteractionResponseForFirstInArray =
+                    await request(app)
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }`,
+                      )
+                      .send({
+                        itemInteraction: {
+                          status: 'opened',
+                          message:
+                            'opening interaction 1 for testForRequestingDeclinedOnOpenedStatus',
+                        },
+                      })
+                      .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+                  // extract interactionId
+                  const interactionIdOnItemForFirstInArray =
+                    openItemInteractionResponseForFirstInArray.body[0]
+                      .interactions[0]._id;
+
+                  // bibi declines the interaction
+                  const handleItemInteractionResponseForFirstInArray =
+                    await request(app)
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }/${interactionIdOnItemForFirstInArray}`,
+                      )
+                      .send({
+                        itemInteraction: {
+                          status: 'declined',
+                          message:
+                            'declining interaction 1 for testForRequestingDeclinedOnOpenedStatus',
+                        },
+                      })
+                      .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+                  // bibi calles auth
+                  const authResponse = await request(app)
+                    .get(authRoute)
+                    .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+                  // logout bibi
+                  await logout(connectSidValueBibi);
+
+                  // login Bodo4
+                  const connectSidValueBodo4Second = await loginBodo4();
+
+                  // delete all items
+                  const deleteAllOfUsersItemsResponse = await request(app)
+                    .delete(itemRoute)
+                    .set('Cookie', [
+                      `connect.sid=${connectSidValueBodo4Second}`,
+                    ]);
+
+                  // logout
+                  await logout(connectSidValueBodo4Second);
+
+                  // console.log('authResponse', authResponse.body);
+                  expectsForDeclinedOnOpenedConcerningArraysOnUser(
+                    itemId,
+                    authResponse,
+                  );
+                };
+
+              await testForDeclinedOnOpenedConcerningArraysOnUser();
+            }, 20000);
           });
           // describe('for status accepted', () => {
           //   it('', async () => {});
