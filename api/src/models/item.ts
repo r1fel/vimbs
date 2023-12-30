@@ -1,8 +1,10 @@
 // Item Model for working with MongoDB
 
 import mongoose, { Schema } from 'mongoose';
-import { ItemInDB } from '../typeDefinitions';
+import { ItemInDB, UserInDB } from '../typeDefinitions';
 import ItemInteraction from './itemInteraction';
+import User from './user';
+import ExpressError from '../utils/ExpressError';
 import {
   HouseAndGarden,
   ChildAndBaby,
@@ -132,9 +134,66 @@ const ItemSchema: Schema = new Schema({
   available: { type: Boolean, default: true },
 });
 
-// delete the itemInteractaions in the itemInteractaions database when a item is deleted
+// clean up after item was deleted
 ItemSchema.post('findOneAndDelete', async function (doc) {
   if (doc) {
+    // console.log(doc);
+    const item: ItemInDB = doc;
+    const itemId = doc._id;
+
+    // make an array of all users that have been involved with the item
+    const users = [item.owner];
+
+    // Loop through interactions array on the item
+    for (const interactionId of item.interactions) {
+      // Retrieve the interaction from MongoDB
+      const interaction = await ItemInteraction.findById(interactionId);
+
+      if (interaction === null) return;
+      new ExpressError('Bad Request: This interaction does not exist', 400);
+
+      // Check if the interestedPartyId is not in the users array
+      if (!users.includes(interaction.interestedParty)) {
+        // Push the interestedPartyId to the users array
+        users.push(interaction.interestedParty);
+      }
+    }
+
+    // pull id from myItems, getItems, getHistory of all users, if id is in there
+
+    // Loop through the users array
+    for (const userId of users) {
+      // Retrieve the user from MongoDB
+      const user: UserInDB | null = await User.findById(userId);
+
+      if (user) {
+        // Check if itemId is in myItems array
+        if (user.myItems.includes(itemId)) {
+          // Use $pull to remove itemId from myItems array
+          await User.updateOne({ _id: userId }, { $pull: { myItems: itemId } });
+        }
+
+        // Check if itemId is in getItems array
+        if (user.getItems.includes(itemId)) {
+          // Use $pull to remove itemId from getItems array
+          await User.updateOne(
+            { _id: userId },
+            { $pull: { getItems: itemId } },
+          );
+        }
+
+        // Check if itemId is in getHistory array
+        if (user.getHistory.includes(itemId)) {
+          // Use $pull to remove itemId from getHistory array
+          await User.updateOne(
+            { _id: userId },
+            { $pull: { getHistory: itemId } },
+          );
+        }
+      }
+    }
+
+    // delete all itemInteractions from DB that happened on the item
     await ItemInteraction.deleteMany({
       _id: {
         $in: doc.interactions,

@@ -271,6 +271,10 @@ export const handlePostInteraction = catchAsync(
       setDueDate(0); //to now
       setAvailability();
       pushMessage();
+      await User.updateOne(
+        { _id: interaction.interestedParty },
+        { $pull: { getItems: itemId } },
+      );
     }
 
     // owner accepts interaction

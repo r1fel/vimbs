@@ -61,29 +61,26 @@ export const login = catchAsync(
     // Update the user's myItems array with the valid item IDs
     user.myItems = validMyItemIds;
 
-    // ! only intermediate function while setup of interactions
-    user.getItems = [];
+    // get rid of ItemIds in usersGetItems array, that were deleted since last login and possibly not pulled from the array
+    const validGetItemIds: mongoose.Types.ObjectId[] = [];
 
-    // // get rid of ItemIds in usersGetItems array, that were deleted since last login and possibly not pulled from the array
-    // const validGetItemIds: mongoose.Types.ObjectId[] = [];
+    for (const itemId of user.getItems) {
+      try {
+        // Check if the item with the given ID exists in the database
+        const itemExists = await Item.exists({ _id: itemId });
 
-    // for (const itemId of user.getItems) {
-    //   try {
-    //     // Check if the item with the given ID exists in the database
-    //     const itemExists = await Item.exists({ _id: itemId });
+        if (itemExists) {
+          validGetItemIds.push(itemId);
+        }
+      } catch (error) {
+        console.error(
+          `Error checking existence of item with ID ${itemId}: ${error}`,
+        );
+      }
+    }
 
-    //     if (itemExists) {
-    //       validGetItemIds.push(itemId);
-    //     }
-    //   } catch (error) {
-    //     console.error(
-    //       `Error checking existence of item with ID ${itemId}: ${error}`,
-    //     );
-    //   }
-    // }
-
-    // // Update the user's getItems array with the valid item IDs
-    // user.getItems = validGetItemIds;
+    // Update the user's getItems array with the valid item IDs
+    user.getItems = validGetItemIds;
     await user.save();
 
     // console.log('usersItems after:', user.myItems);
