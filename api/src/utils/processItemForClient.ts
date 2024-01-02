@@ -1,12 +1,20 @@
 // Function that takes the items from the DB and processes them to be sent to the client
 
+import User from '../models/user';
 import {
   PopulatedItemsFromDB,
   ResponseItemForClient,
   ItemInteractionInDB,
   ItemInDBPopulated,
+  UserInDB,
 } from '../typeDefinitions';
 import mongoose from 'mongoose';
+
+import {
+  noFirstName,
+  noPhoneNumber,
+  noProfilePicture,
+} from './processItemForClientStringDefinitions';
 
 // function to process an array of items for the client
 const processItemForClient = async (
@@ -37,7 +45,7 @@ const processItemForClient = async (
       picture: !item.picture ? null : item.picture,
       description: !item.description ? null : item.description,
       categories: item.categories,
-      dueDate: null,
+      dueDate: null, //changed by condition below
       owner: ownerBool,
       interactions: ownerBool ? item.interactions : null,
       commonCommunity: ownerBool
@@ -48,7 +56,7 @@ const processItemForClient = async (
               'https://tse1.mm.bing.net/th?id=OIP.UUUdgz2gcp7-oBfIHsrEMQHaIn&pid=Api',
             name: 'our common community',
           },
-      ownerData: null,
+      ownerData: null, //changed by condition below
     };
 
     if (item.interactions.length !== 0) {
@@ -64,9 +72,28 @@ const processItemForClient = async (
 
       if (lastInteraction.interestedParty.equals(currentUser)) {
         sendItem.interactions = [lastInteraction];
-        lastInteraction.revealOwnerIdentity === true
-          ? { _id: item.owner._id, firstName: 'Hans' }
-          : null;
+        if (lastInteraction.revealOwnerIdentity === true) {
+          let owner: UserInDB | null;
+          if (item.owner instanceof mongoose.Types.ObjectId) {
+            owner = await User.findById(item.owner._id);
+          } else {
+            owner = item.owner;
+          }
+          if (owner === null) continue;
+          sendItem.ownerData = {
+            _id: owner._id,
+            name: `${owner.firstName ? owner.firstName : noFirstName} ${
+              owner.lastName ? owner.lastName : ''
+            }`,
+            picture: owner.profilePicture
+              ? owner.profilePicture
+              : noProfilePicture,
+            email: owner.email, // adjust by user settings - showEmail bool false -> don't show email
+            phone: owner.phone?.number // adjust by user settings - showPhone bool false -> don't show phone
+              ? `${owner.phone?.countryCode}${owner.phone?.number}`
+              : noPhoneNumber,
+          };
+        }
       }
     }
     response.push(sendItem);

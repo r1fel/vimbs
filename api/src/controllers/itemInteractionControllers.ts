@@ -251,8 +251,12 @@ export const handlePostInteraction = catchAsync(
       return (interaction.dueDate = dueDate);
     };
 
-    const setAvailability = (time?: number) => {
+    const setAvailability = () => {
       item.available = true;
+    };
+
+    const revealOwnerIdentity = () => {
+      interaction.revealOwnerIdentity = true;
     };
 
     // the if cascade logic:
@@ -287,18 +291,30 @@ export const handlePostInteraction = catchAsync(
     else if (
       interaction.interactionStatus === opened &&
       itemInteractionBody.status === accepted &&
-      currentUser === item.owner
+      currentUser.equals(item.owner)
     ) {
-      console.log('owner accepted');
+      // console.log('owner accepted');
+      changeInteractionStatus();
+      setDueDate();
+      pushMessage();
+      revealOwnerIdentity();
     }
 
     // owner closes interaction
     else if (
       interaction.interactionStatus === accepted &&
       itemInteractionBody.status === closed &&
-      currentUser === item.owner
+      currentUser.equals(item.owner)
     ) {
-      console.log('owner accepted');
+      console.log('owner closed');
+      // changeInteractionStatus();
+      // setDueDate(0); //to now
+      // setAvailability();
+      // pushMessage();
+      // await User.updateOne(
+      //   { _id: interaction.interestedParty },
+      //   { $pull: { getItems: itemId }, $push: { getHistory: itemId } },
+      // );
     }
 
     // for all other combinations

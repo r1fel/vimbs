@@ -149,8 +149,7 @@ ItemSchema.post('findOneAndDelete', async function (doc) {
       // Retrieve the interaction from MongoDB
       const interaction = await ItemInteraction.findById(interactionId);
 
-      if (interaction === null) return;
-      new ExpressError('Bad Request: This interaction does not exist', 400);
+      if (interaction === null) continue;
 
       // Check if the interestedPartyId is not in the users array
       if (!users.includes(interaction.interestedParty)) {
@@ -166,30 +165,27 @@ ItemSchema.post('findOneAndDelete', async function (doc) {
       // Retrieve the user from MongoDB
       const user: UserInDB | null = await User.findById(userId);
 
-      if (user) {
-        // Check if itemId is in myItems array
-        if (user.myItems.includes(itemId)) {
-          // Use $pull to remove itemId from myItems array
-          await User.updateOne({ _id: userId }, { $pull: { myItems: itemId } });
-        }
+      if (!user) continue;
 
-        // Check if itemId is in getItems array
-        if (user.getItems.includes(itemId)) {
-          // Use $pull to remove itemId from getItems array
-          await User.updateOne(
-            { _id: userId },
-            { $pull: { getItems: itemId } },
-          );
-        }
+      // Check if itemId is in myItems array
+      if (user.myItems.includes(itemId)) {
+        // Use $pull to remove itemId from myItems array
+        await User.updateOne({ _id: userId }, { $pull: { myItems: itemId } });
+      }
 
-        // Check if itemId is in getHistory array
-        if (user.getHistory.includes(itemId)) {
-          // Use $pull to remove itemId from getHistory array
-          await User.updateOne(
-            { _id: userId },
-            { $pull: { getHistory: itemId } },
-          );
-        }
+      // Check if itemId is in getItems array
+      if (user.getItems.includes(itemId)) {
+        // Use $pull to remove itemId from getItems array
+        await User.updateOne({ _id: userId }, { $pull: { getItems: itemId } });
+      }
+
+      // Check if itemId is in getHistory array
+      if (user.getHistory.includes(itemId)) {
+        // Use $pull to remove itemId from getHistory array
+        await User.updateOne(
+          { _id: userId },
+          { $pull: { getHistory: itemId } },
+        );
       }
     }
 

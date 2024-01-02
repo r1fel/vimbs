@@ -179,7 +179,10 @@ export interface ResponseItemForClient {
   } | null;
   ownerData: {
     _id: mongoose.Types.ObjectId;
-    firstName: string;
+    name: string;
+    picture: string;
+    email: string;
+    phone: string;
   } | null;
 }
 
