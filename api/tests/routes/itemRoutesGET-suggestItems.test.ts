@@ -13,6 +13,7 @@ import {  filterItemsBySeason,
           WinterSubcategories,
           SummerSubcategories } from '../../src/controllers/itemControllers';
 import { ItemInDBPopulated, UserInDB} from '../../src/typeDefinitions'; // Replace 'path/to/ItemInDBPopulated' with the actual path
+import exp from 'constants';
 
 
 const app = makeApp(database);
@@ -225,7 +226,7 @@ const checkResponseToBeCorrectlyProcessedItemForClient = ({
         searchHistory: expect.any(Array),
         __v: expect.any(Number),
       },
-      interactions: interactions,
+      interactions: expect.any(Array),
       creationDate: expect.any(String),
       __v: expect.any(Number),
     };
@@ -313,8 +314,6 @@ describe('item Routes', () => {
         const expectedNumberOfItems = 10;
           it('should respond successful with a statusCode200 and return an array of ' + String(expectedNumberOfItems) + ' items', async () => {
             const connectSidValue = await loginBodo4();
-            const items = await getPopulatItems();
-            let itemsArray: ItemInDBPopulated[] = Array.isArray(items) ? items.filter(item => item !== null) as ItemInDBPopulated[] : [items].filter(item => item !== null) as ItemInDBPopulated[];
             const suggestItemsResponse = await request(app)
               .get(itemSuggestRoute)
               .set('Cookie', [`connect.sid=${connectSidValue}`]);

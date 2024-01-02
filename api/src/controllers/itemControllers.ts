@@ -223,7 +223,6 @@ export const suggestItems = catchAsync(
     if (items === null)
       return next(new ExpressError('this item doesnt exist', 500));
       
-
     const randomItemsCount = Math.floor(numberOfRequestedItems * 0.5);
     const borrowedItemsCount = Math.floor(numberOfRequestedItems * 0.25);
     const remainingCount = numberOfRequestedItems - randomItemsCount - borrowedItemsCount;
@@ -299,8 +298,6 @@ export const suggestItems = catchAsync(
     response.push(...response_history_items);
     response.push(...response_catagory_items);
     response.push(...response_random_items);
-
-    console.log('response', response.length);
 
     return res.send(response);
   },
