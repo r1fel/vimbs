@@ -32,6 +32,7 @@ export const setUserData = catchAsync(
     user.lastName = newUserData.lastName;
     user.phone = newUserData.phone;
     user.address = newUserData.address;
+    user.profilePicture = newUserData.profilePicture;
     user.save();
     res.send(user);
   },

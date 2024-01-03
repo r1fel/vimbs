@@ -195,6 +195,7 @@ export type GoogleEmailObject = {
 export type ChangeSettingsRequest = {
   firstName?: string;
   lastName?: string;
+  profilePicture?: string;
   phone?: {
     countryCode: string;
     number: string;

@@ -181,6 +181,7 @@ describe('user Routes', () => {
               creationDate: '2023-11-16T11:42:55.615Z',
               lastName: settingsBody.newUserData.lastName,
               firstName: settingsBody.newUserData.firstName,
+              profilePicture: settingsBody.newUserData.profilePicture,
               getHistory: expect.any(Array),
               getItems: expect.any(Array),
               searchHistory: expect.any(Array),
@@ -223,6 +224,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -233,13 +236,15 @@ describe('user Routes', () => {
         };
         it('for input including a fully filled newUserData Object', async () => {
           await testForValidBody(validSettingsBody1);
-        });
+        }, 10000);
 
         // for lastName is empty string
         const validSettingsBody2: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: '',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -250,13 +255,15 @@ describe('user Routes', () => {
         };
         it('for lastName is empty string', async () => {
           await testForValidBody(validSettingsBody2);
-        });
+        }, 10000);
 
         // for phone.countryCode has + and 2 numbers
         const validSettingsBody3: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+12', number: '3456789012' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -267,13 +274,15 @@ describe('user Routes', () => {
         };
         it('for phone.countryCode has + and 2 numbers', async () => {
           await testForValidBody(validSettingsBody3);
-        });
+        }, 10000);
 
         // for phone.number is empty string
         const validSettingsBody4: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -284,13 +293,15 @@ describe('user Routes', () => {
         };
         it('for phone.number is empty string', async () => {
           await testForValidBody(validSettingsBody4);
-        });
+        }, 10000);
 
         // for phone.number has 9 digits
         const validSettingsBody5: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '123456789' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -301,13 +312,15 @@ describe('user Routes', () => {
         };
         it('for phone.number has 9 digits', async () => {
           await testForValidBody(validSettingsBody5);
-        });
+        }, 10000);
 
         // for phone.number has 10 digits
         const validSettingsBody6: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '1234567890' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -318,13 +331,15 @@ describe('user Routes', () => {
         };
         it('for phone.number has 10 digits', async () => {
           await testForValidBody(validSettingsBody6);
-        });
+        }, 10000);
 
         // for phone.number has 11 digits
         const validSettingsBody7: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '12345678901' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -335,13 +350,15 @@ describe('user Routes', () => {
         };
         it('for phone.number has 11 digits', async () => {
           await testForValidBody(validSettingsBody7);
-        });
+        }, 10000);
 
         // for address.street is empty string
         const validSettingsBody8: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: '',
@@ -352,13 +369,15 @@ describe('user Routes', () => {
         };
         it('for address.street is empty string', async () => {
           await testForValidBody(validSettingsBody8);
-        });
+        }, 10000);
 
         // for address.plz is empty string
         const validSettingsBody9: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -369,13 +388,15 @@ describe('user Routes', () => {
         };
         it('for address.plz is empty string', async () => {
           await testForValidBody(validSettingsBody9);
-        });
+        }, 10000);
 
         // for address.city is empty string
         const validSettingsBody10: { newUserData: ChangeSettingsRequest } = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -386,7 +407,25 @@ describe('user Routes', () => {
         };
         it('for address.city is empty string', async () => {
           await testForValidBody(validSettingsBody10);
-        });
+        }, 10000);
+
+        // for profilePicture is empty string
+        const validSettingsBody11: { newUserData: ChangeSettingsRequest } = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            profilePicture: '',
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: '',
+            },
+          },
+        };
+        it('for profilePicture is empty string', async () => {
+          await testForValidBody(validSettingsBody11);
+        }, 10000);
       });
     });
     describe('when invalid settings body is given', () => {
@@ -494,6 +533,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: '', // fistName empty string
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -516,6 +557,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             // lastName is missing
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -534,11 +577,37 @@ describe('user Routes', () => {
           );
         }, 10000);
 
+        // for missing profilePicture
+        const invalidSettingsBody5a = {
+          newUserData: {
+            firstName: 'bodo4',
+            lastName: 'The Big',
+            // profilePicture missing
+            phone: { countryCode: '+49', number: '17298086213' },
+            address: {
+              street: 'Hans-Meyer-Str',
+              plz: '79543',
+              city: 'Down Town',
+            },
+          },
+        };
+
+        // test
+        it('for missing profilePicture', async () => {
+          await testForInvalidSettingsBody(
+            400,
+            'Error: &quot;newUserData.profilePicture&quot; is required<br> &nbsp; &nbsp;at validateUserData',
+            invalidSettingsBody5a,
+          );
+        }, 10000);
+
         // for missing phone
         const invalidSettingsBody6 = {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             // phone is missing
             address: {
               street: 'Hans-Meyer-Str',
@@ -561,6 +630,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               // countryCode is missing
               number: '17298086213',
@@ -586,6 +657,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '', // empty string
               number: '17298086213',
@@ -611,6 +684,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '49', // lacks +
               number: '17298086213',
@@ -636,6 +711,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '+4935', // 4 digits
               number: '17298086213',
@@ -661,6 +738,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '+49',
               // number is missing
@@ -686,6 +765,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '+49',
               number: '12345678', // less than 9 digits
@@ -711,6 +792,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '+49',
               number: '123456789012', // more than 11 digits
@@ -736,6 +819,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '+49',
               number: 17298086213, // should be a string
@@ -761,6 +846,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: {
               countryCode: '+49',
               number: '17298a086213', // contains non-digit characters
@@ -786,6 +873,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             // address is missing
           },
@@ -804,6 +893,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               // street is missing
@@ -826,6 +917,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -848,6 +941,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -870,6 +965,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -893,6 +990,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',
@@ -915,6 +1014,8 @@ describe('user Routes', () => {
           newUserData: {
             firstName: 'bodo4',
             lastName: 'The Big',
+            profilePicture:
+              'https://tse4.mm.bing.net/th?id=OIP.-BS8Y2nH1k93GJiitUVBCAHaHa&pid=Api',
             phone: { countryCode: '+49', number: '17298086213' },
             address: {
               street: 'Hans-Meyer-Str',

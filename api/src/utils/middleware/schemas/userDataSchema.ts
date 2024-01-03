@@ -6,6 +6,7 @@ const userDataSchema = Joi.object({
   newUserData: Joi.object({
     firstName: Joi.string().required(),
     lastName: Joi.string().allow('').required(),
+    profilePicture: Joi.string().allow('').required(),
     phone: Joi.object({
       countryCode: Joi.string()
         .pattern(/^\+\d{1,3}$/)
