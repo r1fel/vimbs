@@ -251,8 +251,8 @@ export const handlePostInteraction = catchAsync(
       return (interaction.dueDate = dueDate);
     };
 
-    const setAvailability = () => {
-      item.available = true;
+    const toggleAvailability = () => {
+      item.available = !item.available;
     };
 
     const revealOwnerIdentity = () => {
@@ -279,7 +279,7 @@ export const handlePostInteraction = catchAsync(
       // console.log('opened to declined');
       changeInteractionStatus();
       setDueDate(0); //to now
-      setAvailability();
+      toggleAvailability();
       pushMessage();
       await User.updateOne(
         { _id: interaction.interestedParty },
@@ -306,15 +306,14 @@ export const handlePostInteraction = catchAsync(
       itemInteractionBody.status === closed &&
       currentUser.equals(item.owner)
     ) {
-      console.log('owner closed');
-      // changeInteractionStatus();
-      // setDueDate(0); //to now
-      // setAvailability();
-      // pushMessage();
-      // await User.updateOne(
-      //   { _id: interaction.interestedParty },
-      //   { $pull: { getItems: itemId }, $push: { getHistory: itemId } },
-      // );
+      // console.log('owner closed');
+      changeInteractionStatus();
+      toggleAvailability();
+      pushMessage();
+      await User.updateOne(
+        { _id: interaction.interestedParty },
+        { $pull: { getItems: itemId }, $push: { getHistory: itemId } },
+      );
     }
 
     // for all other combinations
