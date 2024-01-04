@@ -131,6 +131,10 @@ export const updateItem = catchAsync(
   },
 );
 
+// TODO: After the user selects one of those suggestions, the selected searchToken should be added to the user's search history
+// Therefore, we need a updateSearchHistory function in the userController. Thereby you must consider the following:
+// suggestItems uses the searchHistory to suggest items. One Part of this is, that items, which were searched for in the past by the user, but didn't exist back then, 
+// are suggested to the user. This function only makes sens if searchTokens are added to the searchHistory, even if no item with the name exists currently.
 // return items, whose name includes the query (autocompletion)
 export const itemSearch = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
