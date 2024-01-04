@@ -266,7 +266,7 @@ export const handlePostInteraction = catchAsync(
       // owner can also adjust the due Date in accepted state
       if (
         interaction.interactionStatus === accepted &&
-        currentUser === item.owner
+        currentUser.equals(item.owner)
       )
         setDueDate();
     }
