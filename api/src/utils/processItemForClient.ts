@@ -47,7 +47,7 @@ const processItemForClient = async (
       categories: item.categories,
       dueDate: null, //changed by condition below
       owner: ownerBool,
-      interactions: ownerBool ? item.interactions : null,
+      interactions: ownerBool ? item.interactions : null, //changed by condition below for currentUser === interactingParty
       commonCommunity: ownerBool
         ? null
         : {
@@ -60,26 +60,54 @@ const processItemForClient = async (
     };
 
     if (item.interactions.length !== 0) {
-      const lastInteraction: mongoose.Types.ObjectId | ItemInteractionInDB =
-        item.interactions[item.interactions.length - 1];
-      if (lastInteraction instanceof mongoose.Types.ObjectId) {
-        response.push(sendItem);
-        continue;
+      // set dueDate on sent item
+      if (sendItem.available === false) {
+        const lastInteraction: mongoose.Types.ObjectId | ItemInteractionInDB =
+          item.interactions[item.interactions.length - 1];
+        if (lastInteraction instanceof mongoose.Types.ObjectId) {
+          response.push(sendItem);
+          continue;
+        }
+        sendItem.dueDate = lastInteraction.dueDate;
       }
 
-      if (sendItem.available === false)
-        sendItem.dueDate = lastInteraction.dueDate;
+      // set the interactions array the currentUser is supposed to see
+      if (ownerBool === false) {
+        // get an array of all the interactions the currentUser participated in
+        // and if one of these interactions was accepted, allow showing ownerData
+        const interactionsArrayOfCurrentUser: ItemInteractionInDB[] = [];
+        let ownerDataBool = false;
 
-      if (lastInteraction.interestedParty.equals(currentUser)) {
-        sendItem.interactions = [lastInteraction];
-        if (lastInteraction.revealOwnerIdentity === true) {
+        for (const interaction of item.interactions) {
+          if (interaction instanceof mongoose.Types.ObjectId) continue;
+
+          if (interaction.interestedParty.equals(currentUser))
+            interactionsArrayOfCurrentUser.push(interaction);
+          if (interaction.revealOwnerIdentity === true) ownerDataBool = true;
+        }
+
+        // console.log(
+        //   'interactionsArrayOfCurrentUser',
+        //   interactionsArrayOfCurrentUser,
+        // );
+
+        if (interactionsArrayOfCurrentUser.length !== 0) {
+          sendItem.interactions = interactionsArrayOfCurrentUser;
+        }
+
+        if (ownerDataBool === true) {
+          //get owners user data to fill ownerData
           let owner: UserInDB | null;
           if (item.owner instanceof mongoose.Types.ObjectId) {
             owner = await User.findById(item.owner._id);
           } else {
             owner = item.owner;
           }
-          if (owner === null) continue;
+          if (owner === null) {
+            response.push(sendItem);
+            continue;
+          }
+          // set ownerData
           sendItem.ownerData = {
             _id: owner._id,
             name: `${owner.firstName ? owner.firstName : noFirstName} ${
