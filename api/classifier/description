@@ -1,1 +1,59 @@
-s
+Prerequisites:
+
+The network requires tensorflow, which requires cuda and a specific nvidia driver for optimal performance. For installation I recommend using miniconda, which is a virtual enviornment. This allows a simple installation with automatically installing the appropirate versions, avoiding version conflicts. Therefore go to:
+
+https://docs.conda.io/projects/conda/en/latest/user-guide/install
+
+and follow the install instructions for your system. After installing miniconda open a terminal (in windows conda shell) and create a nee virtual conda environment by typing:
+
+conda create -n vimbs
+
+Activate virtual env.:
+
+conda activate vimbs
+
+This needs to be done everytime you open a new terminal and if you want to install new packages inside of the virtual env. Now install the following packages:
+
+1 conda create -n tf tensorflow  
+2 conda install anaconda::pillow  
+3 conda install anaconda::requests  
+4 conda install anaconda::numpy
+
+(If a package is missing just google the name of the package -> "install conda package_name (e.g. tensorflow))
+
+------------------------------------                             ------------------------------------                                ------------------------------------
+
+Validate Setup:
+
+Open a terminal (conda shell in windows), activate your conda enviornment: conda create -n vimbs and navigate to directory of the classifier: */vimbs/api/classifier and type:
+
+python3 test_img_classifier.py
+
+(If you execute the code in visual code you need to select the vimbs env. as the interpreter -> look at the bottom of the right side)
+
+Now you should see the following output on your console:
+
+1/1 [==============================] - 2s 2s/step
+Input Image: laptop.jpeg
+Top 1 prediction : notebook
+Top 2 prediction : laptop
+Top 3 prediction : modem
+Top 4 prediction : space_bar
+Top 5 prediction : computer_keyboard
+
+...
+
+That way you can validate the setup. Later when you setup the server you aldo need to setup and activate this env. to run the classifier.
+
+------------------------------------                             ------------------------------------                                ------------------------------------
+
+Further thoughts:
+
+!!!Important!!!
+If it is not working, it could be attributed to the input size. Depending on your input size the network can only take in a certain image size. Therefore, if it is not working on your system, reduce the image size (line 22 in img_classifier.py)
+
+In the File old_test_setup.py you can see the test setup which I used to test my approach. Instead of directing sending the images to the classifier I fetched thier URL from a server. Because I was told, that this will be the way how it is supposed to work later. So maybe you can use this or maybe not.
+
+Another thing is that I use a buffer to store image urls. Because later it will happen that multiple users at the same time try to classify pictures. But the network can only process one image at a time. Therefore the other requests have to be buffered. But I was not able to test this system, so maybe it works or maybe it is trash.
+
+
