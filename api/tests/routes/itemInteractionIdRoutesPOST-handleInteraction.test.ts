@@ -3880,7 +3880,443 @@ describe('itemInteraction Routes', () => {
                 );
               }, 10000);
 
-              //! continue here with test for getItems and getHistory
+              it('and remove itemId from interestedParty.getItems and add it to interestedParty.getHistory', async () => {
+                // expect statement
+                const expectsForClosedOnAcceptedConcerningArraysOnUser = (
+                  itemId: string,
+                  authResponseAfterOpening: request.Response,
+                  authResponseAfterClosing: request.Response,
+                ) => {
+                  // expects
+                  expect(authResponseAfterOpening.statusCode).toBe(200);
+
+                  //  itemId is only supposed to be in getItems and none of the other arrays after opening
+                  expect(authResponseAfterOpening.body.myItems).not.toContain(
+                    itemId,
+                  );
+                  expect(authResponseAfterOpening.body.getItems).toContain(
+                    itemId,
+                  );
+                  expect(
+                    authResponseAfterOpening.body.getHistory,
+                  ).not.toContain(itemId);
+
+                  // expects
+                  expect(authResponseAfterClosing.statusCode).toBe(200);
+
+                  //  itemId is only supposed to not be in getItems after closing, but be moved to getHistory
+                  expect(authResponseAfterClosing.body.myItems).not.toContain(
+                    itemId,
+                  );
+                  expect(authResponseAfterClosing.body.getItems).not.toContain(
+                    itemId,
+                  );
+                  expect(authResponseAfterClosing.body.getHistory).toContain(
+                    itemId,
+                  );
+                };
+
+                // test: login bodo4, create item, logout bodo4,
+                // login bibi, open an interaction, get auth, logout bibi,
+                // login bodo4, accept interaction, close interaction, logout bodo4,
+                // login bibi, get auth, logout bibi,
+                // login bodo4, delete all of bodo4's items, logout bodo4,
+                const testForClosedOnAcceptedConcerningArraysOnUser =
+                  async () => {
+                    // login Bodo4, let him create Item with passed in Body
+                    const connectSidValueBodo4First = await loginBodo4();
+
+                    // create item
+                    const createItemResponse = await request(app)
+                      .post(itemRoute)
+                      .send({
+                        item: {
+                          name: 'Item for testForClosedOnAcceptedConcerningArraysOnUser',
+                          categories: {
+                            Other: { subcategories: ['Sonstiges'] },
+                          },
+                        },
+                      })
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4First}`,
+                      ]);
+                    // extract itemId
+                    const itemId = createItemResponse.body[0]._id;
+
+                    // logout
+                    await logout(connectSidValueBodo4First);
+
+                    // login bibi
+                    const connectSidValueBibi = await loginUser(
+                      'bibi@gmail.com',
+                      'bibi',
+                    );
+
+                    // bibi opens an interaction
+                    const openItemInteractionResponse = await request(app)
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }`,
+                      )
+                      .send({
+                        itemInteraction: {
+                          status: 'opened',
+                          message:
+                            'opening interaction for testForClosedOnAcceptedConcerningArraysOnUser',
+                        },
+                      })
+                      .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+                    // extract interactionId
+                    const interactionIdOnItem =
+                      openItemInteractionResponse.body[0].interactions[0]._id;
+
+                    // bibi calles auth
+                    const authResponseBibiPastOpening = await request(app)
+                      .get(authRoute)
+                      .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+                    // logout bibi
+                    await logout(connectSidValueBibi);
+
+                    // login Bodo4
+                    const connectSidValueBodo4Second = await loginBodo4();
+
+                    // bodo4 accepts the interaction
+                    const handleItemInteractionResponseAccepting =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }/${interactionIdOnItem}`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'accepted',
+                            message:
+                              'accepting interaction for testForClosedOnAcceptedConcerningArraysOnUser',
+                            dueDate: getFutureDateForBody(4),
+                          },
+                        })
+                        .set('Cookie', [
+                          `connect.sid=${connectSidValueBodo4Second}`,
+                        ]);
+
+                    // bodo4 closes the interaction
+                    const handleItemInteractionResponseClosing = await request(
+                      app,
+                    )
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }/${interactionIdOnItem}`,
+                      )
+                      .send({
+                        itemInteraction: {
+                          status: 'closed',
+                          message:
+                            'closing interaction for testForClosedOnAcceptedConcerningArraysOnUser',
+                          dueDate: getFutureDateForBody(4),
+                        },
+                      })
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4Second}`,
+                      ]);
+
+                    // logout
+                    await logout(connectSidValueBodo4Second);
+
+                    // login bibi
+                    const connectSidValueBibiSesond = await loginUser(
+                      'bibi@gmail.com',
+                      'bibi',
+                    );
+
+                    // bibi calles auth
+                    const authResponseBibiPastClosing = await request(app)
+                      .get(authRoute)
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBibiSesond}`,
+                      ]);
+
+                    // logout bibi
+                    await logout(connectSidValueBibiSesond);
+
+                    // login Bodo4
+                    const connectSidValueBodo4Third = await loginBodo4();
+
+                    // delete all items
+                    const deleteAllOfUsersItemsResponse = await request(app)
+                      .delete(itemRoute)
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4Third}`,
+                      ]);
+
+                    // logout
+                    await logout(connectSidValueBodo4Third);
+
+                    // console.log(
+                    //   'authResponseBibiPastOpening',
+                    //   authResponseBibiPastOpening.body,
+                    // );
+                    // console.log(
+                    //   'authResponseBibiPastClosing',
+                    //   authResponseBibiPastClosing.body,
+                    // );
+                    expectsForClosedOnAcceptedConcerningArraysOnUser(
+                      itemId,
+                      authResponseBibiPastOpening,
+                      authResponseBibiPastClosing,
+                    );
+                  };
+
+                await testForClosedOnAcceptedConcerningArraysOnUser();
+              }, 20000);
+
+              it('and remove itemId from interestedParty.getItems and NOT add it to interestedParty.getHistory if it already is in getHistory', async () => {
+                // expect statement when previous to the accepted interaction, there was another interaction on the item
+                const expectsForClosedOnAcceptedConcerningArraysOnUserSecondInteraction =
+                  (
+                    itemId: string,
+                    authResponseAfterOpening: request.Response,
+                    authResponseAfterClosing: request.Response,
+                  ) => {
+                    // expects
+                    expect(authResponseAfterOpening.statusCode).toBe(200);
+
+                    //  itemId is supposed to be in getItems and get History
+                    expect(authResponseAfterOpening.body.myItems).not.toContain(
+                      itemId,
+                    );
+                    expect(authResponseAfterOpening.body.getItems).toContain(
+                      itemId,
+                    );
+                    expect(authResponseAfterOpening.body.getHistory).toContain(
+                      itemId,
+                    );
+
+                    // expects
+                    expect(authResponseAfterClosing.statusCode).toBe(200);
+
+                    //  itemId is only supposed to not be in getItems after closing, but be moved to getHistory
+                    expect(authResponseAfterClosing.body.myItems).not.toContain(
+                      itemId,
+                    );
+                    expect(
+                      authResponseAfterClosing.body.getItems,
+                    ).not.toContain(itemId);
+                    expect(authResponseAfterClosing.body.getHistory).toContain(
+                      itemId,
+                    );
+                    expect(
+                      authResponseAfterClosing.body.getHistory.filter(
+                        (item: any) => item === itemId,
+                      ),
+                    ).toHaveLength(1);
+                  };
+
+                // test: login bodo4, create item, logout bodo4,
+                // login bibi, open an interaction, decline the interaction, open another interaction, get auth, logout bibi,
+                // login bodo4, accept interaction, close interaction, logout bodo4,
+                // login bibi, get auth, logout bibi,
+                // login bodo4, delete all of bodo4's items, logout bodo4,
+                const testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction =
+                  async () => {
+                    // login Bodo4, let him create Item with passed in Body
+                    const connectSidValueBodo4First = await loginBodo4();
+
+                    // create item
+                    const createItemResponse = await request(app)
+                      .post(itemRoute)
+                      .send({
+                        item: {
+                          name: 'Item for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                          categories: {
+                            Other: { subcategories: ['Sonstiges'] },
+                          },
+                        },
+                      })
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4First}`,
+                      ]);
+                    // extract itemId
+                    const itemId = createItemResponse.body[0]._id;
+
+                    // logout
+                    await logout(connectSidValueBodo4First);
+
+                    // login bibi
+                    const connectSidValueBibi = await loginUser(
+                      'bibi@gmail.com',
+                      'bibi',
+                    );
+
+                    // bibi opens first interaction
+                    const openItemInteractionResponseFirstInteraction =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'opened',
+                            message:
+                              'opening interaction 1 for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                          },
+                        })
+                        .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+                    // extract interactionId
+                    const interactionIdOnItemFirstInteraction =
+                      openItemInteractionResponseFirstInteraction.body[0]
+                        .interactions[0]._id;
+
+                    // bibi declines this first interaction
+                    const handleItemInteractionResponseDeclining =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }/${interactionIdOnItemFirstInteraction}`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'declined',
+                            message:
+                              'declining interaction 1 for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                          },
+                        })
+                        .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+                    // bibi opens another interaction
+                    const openItemInteractionResponse = await request(app)
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }`,
+                      )
+                      .send({
+                        itemInteraction: {
+                          status: 'opened',
+                          message:
+                            'opening interaction 2 for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                        },
+                      })
+                      .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+                    // extract interactionId
+                    const interactionIdOnItem =
+                      openItemInteractionResponse.body[0].interactions[0]._id;
+
+                    // bibi calles auth
+                    const authResponseBibiPastOpening = await request(app)
+                      .get(authRoute)
+                      .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+                    // logout bibi
+                    await logout(connectSidValueBibi);
+
+                    // login Bodo4
+                    const connectSidValueBodo4Second = await loginBodo4();
+
+                    // bodo4 accepts the interaction
+                    const handleItemInteractionResponseAccepting =
+                      await request(app)
+                        .post(
+                          `${itemRoute}/${itemId}/${
+                            itemIdInteractionRoute
+                              .split(':itemId/')
+                              .slice(-1)[0]
+                          }/${interactionIdOnItem}`,
+                        )
+                        .send({
+                          itemInteraction: {
+                            status: 'accepted',
+                            message:
+                              'accepting interaction for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                            dueDate: getFutureDateForBody(4),
+                          },
+                        })
+                        .set('Cookie', [
+                          `connect.sid=${connectSidValueBodo4Second}`,
+                        ]);
+
+                    // bodo4 closes the interaction
+                    const handleItemInteractionResponseClosing = await request(
+                      app,
+                    )
+                      .post(
+                        `${itemRoute}/${itemId}/${
+                          itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                        }/${interactionIdOnItem}`,
+                      )
+                      .send({
+                        itemInteraction: {
+                          status: 'closed',
+                          message:
+                            'closing interaction for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                          dueDate: getFutureDateForBody(4),
+                        },
+                      })
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4Second}`,
+                      ]);
+
+                    // logout
+                    await logout(connectSidValueBodo4Second);
+
+                    // login bibi
+                    const connectSidValueBibiSesond = await loginUser(
+                      'bibi@gmail.com',
+                      'bibi',
+                    );
+
+                    // bibi calles auth
+                    const authResponseBibiPastClosing = await request(app)
+                      .get(authRoute)
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBibiSesond}`,
+                      ]);
+
+                    // logout bibi
+                    await logout(connectSidValueBibiSesond);
+
+                    // login Bodo4
+                    const connectSidValueBodo4Third = await loginBodo4();
+
+                    // delete all items
+                    const deleteAllOfUsersItemsResponse = await request(app)
+                      .delete(itemRoute)
+                      .set('Cookie', [
+                        `connect.sid=${connectSidValueBodo4Third}`,
+                      ]);
+
+                    // logout
+                    await logout(connectSidValueBodo4Third);
+
+                    // console.log(
+                    //   'authResponseBibiPastOpening',
+                    //   authResponseBibiPastOpening.body,
+                    // );
+                    // console.log(
+                    //   'authResponseBibiPastClosing',
+                    //   authResponseBibiPastClosing.body,
+                    // );
+                    expectsForClosedOnAcceptedConcerningArraysOnUserSecondInteraction(
+                      itemId,
+                      authResponseBibiPastOpening,
+                      authResponseBibiPastClosing,
+                    );
+                  };
+
+                await testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction();
+              }, 20000);
             });
           });
         });
