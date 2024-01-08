@@ -1425,6 +1425,57 @@ const getFutureDateForBody = (weeks = 2): string => {
   return `${year}-${month}-${day}`;
 };
 
+const bodo4CreatesItem = async (testName: string) => {
+  // login Bodo4, let him create Item with passed in Body
+  const connectSidValueBodo4First = await loginBodo4();
+
+  // create item
+  const createItemResponse = await request(app)
+    .post(itemRoute)
+    .send({
+      item: {
+        name: `Item for ${testName}`,
+        categories: { Other: { subcategories: ['Sonstiges'] } },
+      },
+    })
+    .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
+  // extract itemId
+  const itemId = createItemResponse.body[0]._id;
+
+  // logout
+  await logout(connectSidValueBodo4First);
+
+  return itemId;
+};
+
+const bibiOpensInteraction = async (itemId: string, testName: string) => {
+  // login bibi
+  const connectSidValueBibi = await loginUser('bibi@gmail.com', 'bibi');
+
+  // bibi opens an interaction
+  const openItemInteractionResponse = await request(app)
+    .post(
+      `${itemRoute}/${itemId}/${
+        itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+      }`,
+    )
+    .send({
+      itemInteraction: {
+        status: 'opened',
+        message: `opening interaction for ${testName}`,
+      },
+    })
+    .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+  // extract interactionId
+  const interactionIdOnItem =
+    openItemInteractionResponse.body[0].interactions[0]._id;
+
+  // logout bibi
+  await logout(connectSidValueBibi);
+
+  return interactionIdOnItem;
+};
+
 // TESTS
 describe('itemInteraction Routes', () => {
   // close DB after tests ran - to get rid of db related error
@@ -1465,7 +1516,7 @@ describe('itemInteraction Routes', () => {
         describe('should respond error with a statusCode400', () => {
           // check for the interaction to be exactly the same as before the request
 
-          // test: login bodo4, create item, logout bodo4,
+          // test: bodo4 creates an item,
           // login bibi, have bibi open an interaction, [if getter: get showItem, have bibi do the request of interest, get showItem,] logout bibi,
           // login bodo4, [if giver: get showItem, have bodo4 do the request of interest, get showItem,] delete all of bodo4's items, logout bodo4
           const testForRequestingWrongStatus = async (
@@ -1479,24 +1530,10 @@ describe('itemInteraction Routes', () => {
             // define Body to be used in this test
             const itemInteractionBody = validItemInteractionBody;
 
-            // login Bodo4, let him create Item with passed in Body
-            const connectSidValueBodo4First = await loginBodo4();
-
-            // create item
-            const createItemResponse = await request(app)
-              .post(itemRoute)
-              .send({
-                item: {
-                  name: 'Item for testForRequestingWrongStatus',
-                  categories: { Other: { subcategories: ['Sonstiges'] } },
-                },
-              })
-              .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-            // extract itemId
-            const itemId = createItemResponse.body[0]._id;
-
-            // logout
-            await logout(connectSidValueBodo4First);
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForRequestingWrongStatus',
+            );
 
             // login bibi
             const connectSidValueBibi = await loginUser(
@@ -1748,7 +1785,7 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, if interactingParty=getter - have bibi do request of interest, logout bibi,
+            // test: bodo4 creates an item, login bibi, have bibi open an interaction, if interactingParty=getter - have bibi do request of interest, logout bibi,
             // login bodo4, if interactingParty=giver - have bodo4 do request of interest, delete all of bodo4's items, logout bodo4
             const testForRequestingOpenedOnOpenedStatus = async (
               interactingParty: 'giver' | 'getter',
@@ -1759,24 +1796,10 @@ describe('itemInteraction Routes', () => {
               // define Body to be used in this test
               const itemInteractionBody = validItemInteractionBody;
 
-              // login Bodo4, let him create Item with passed in Body
-              const connectSidValueBodo4First = await loginBodo4();
-
-              // create item
-              const createItemResponse = await request(app)
-                .post(itemRoute)
-                .send({
-                  item: {
-                    name: 'Item for testForRequestingOpenedOnOpenedStatus',
-                    categories: { Other: { subcategories: ['Sonstiges'] } },
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-              // extract itemId
-              const itemId = createItemResponse.body[0]._id;
-
-              // logout
-              await logout(connectSidValueBodo4First);
+              // bodo4 creates item
+              const itemId = await bodo4CreatesItem(
+                'testForRequestingOpenedOnOpenedStatus',
+              );
 
               // login bibi
               const connectSidValueBibi = await loginUser(
@@ -2044,7 +2067,7 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, if interactingParty=getter - have bibi do request of interest, logout bibi,
+            // test: bodo4 creates an item, login bibi, have bibi open an interaction, if interactingParty=getter - have bibi do request of interest, logout bibi,
             // login bodo4, if interactingParty=giver - have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4
             const testForDeclinedOnOpenedStatus = async (
               interactingParty: 'giver' | 'getter',
@@ -2055,24 +2078,10 @@ describe('itemInteraction Routes', () => {
               // define Body to be used in this test
               const itemInteractionBody = validItemInteractionBody;
 
-              // login Bodo4, let him create Item with passed in Body
-              const connectSidValueBodo4First = await loginBodo4();
-
-              // create item
-              const createItemResponse = await request(app)
-                .post(itemRoute)
-                .send({
-                  item: {
-                    name: 'Item for testForRequestingDeclinedOnOpenedStatus',
-                    categories: { Other: { subcategories: ['Sonstiges'] } },
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-              // extract itemId
-              const itemId = createItemResponse.body[0]._id;
-
-              // logout
-              await logout(connectSidValueBodo4First);
+              // bodo4 creates item
+              const itemId = await bodo4CreatesItem(
+                'testForRequestingDeclinedOnOpenedStatus',
+              );
 
               // login bibi
               const connectSidValueBibi = await loginUser(
@@ -2146,7 +2155,7 @@ describe('itemInteraction Routes', () => {
             };
 
             describe('requested by owner', () => {
-              // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, logout bibi,
+              // test: bodo4 creates an item, bibi opens interaction,
               // login bodo4, have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4
 
               it('with message text and future dueDate', async () => {
@@ -2358,7 +2367,7 @@ describe('itemInteraction Routes', () => {
                   // further dates are set in other requests, which are tested elsewhere
                 };
 
-                // test: login bodo4, create item, logout bodo4,
+                // test: bodo4 creates an item,
                 //  login bibi, open an interaction, decline an interaction, logout bibi,
                 // login bob, open an interaction, logout bob
                 // login bodo4, have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4
@@ -2372,28 +2381,10 @@ describe('itemInteraction Routes', () => {
                     // define Body to be used in this test
                     const itemInteractionBody = validItemInteractionBody;
 
-                    // login Bodo4, let him create Item with passed in Body
-                    const connectSidValueBodo4First = await loginBodo4();
-
-                    // create item
-                    const createItemResponse = await request(app)
-                      .post(itemRoute)
-                      .send({
-                        item: {
-                          name: 'Item for testForRequestingDeclinedOnOpenedStatus',
-                          categories: {
-                            Other: { subcategories: ['Sonstiges'] },
-                          },
-                        },
-                      })
-                      .set('Cookie', [
-                        `connect.sid=${connectSidValueBodo4First}`,
-                      ]);
-                    // extract itemId
-                    const itemId = createItemResponse.body[0]._id;
-
-                    // logout
-                    await logout(connectSidValueBodo4First);
+                    // bodo4 creates item
+                    const itemId = await bodo4CreatesItem(
+                      'testForRequestingDeclinedOnOpenedStatus',
+                    );
 
                     // login bibi
                     const connectSidValueBibi = await loginUser(
@@ -2517,7 +2508,7 @@ describe('itemInteraction Routes', () => {
               }, 20000);
             });
             describe('requested by interestedParty', () => {
-              // test: login bodo4, create item, logout bodo4, login bibi, have bibi open an interaction, have bibi do the request of interest, logout bibi,
+              // test: bodo4 creates an item, login bibi, have bibi open an interaction, have bibi do the request of interest, logout bibi,
               // login bodo4, delete all of bodo4's items, logout bodo4
 
               it('with message text and future dueDate', async () => {
@@ -2688,7 +2679,7 @@ describe('itemInteraction Routes', () => {
                   // further dates are set in other requests, which are tested elsewhere
                 };
 
-                // test: login bodo4, create item, logout bodo4,
+                // test: bodo4 creates an item,
                 //  login bibi, open an interaction, decline an interaction, logout bibi,
                 // login bob, open an interaction, have bob do the request of interest, logout bob
                 // login bodo4, delete all of bodo4's items, logout bodo4
@@ -2702,28 +2693,10 @@ describe('itemInteraction Routes', () => {
                     // define Body to be used in this test
                     const itemInteractionBody = validItemInteractionBody;
 
-                    // login Bodo4, let him create Item with passed in Body
-                    const connectSidValueBodo4First = await loginBodo4();
-
-                    // create item
-                    const createItemResponse = await request(app)
-                      .post(itemRoute)
-                      .send({
-                        item: {
-                          name: 'Item for testForRequestingDeclinedOnOpenedStatus',
-                          categories: {
-                            Other: { subcategories: ['Sonstiges'] },
-                          },
-                        },
-                      })
-                      .set('Cookie', [
-                        `connect.sid=${connectSidValueBodo4First}`,
-                      ]);
-                    // extract itemId
-                    const itemId = createItemResponse.body[0]._id;
-
-                    // logout
-                    await logout(connectSidValueBodo4First);
+                    // bodo4 creates item
+                    const itemId = await bodo4CreatesItem(
+                      'testForRequestingDeclinedOnOpenedStatus',
+                    );
 
                     // login bibi
                     const connectSidValueBibi = await loginUser(
@@ -2860,33 +2833,15 @@ describe('itemInteraction Routes', () => {
                 expect(authResponse.body.getHistory).toContain(itemId);
               };
 
-              // test: login bodo4, create item, logout bodo4,
+              // test: bodo4 creates an item,
               //  login bibi, open an interaction, decline an interaction, get auth, logout bibi,
               // login bodo4, delete all of bodo4's items, logout bodo4
               const testForDeclinedOnOpenedConcerningArraysOnUser =
                 async () => {
-                  // login Bodo4, let him create Item with passed in Body
-                  const connectSidValueBodo4First = await loginBodo4();
-
-                  // create item
-                  const createItemResponse = await request(app)
-                    .post(itemRoute)
-                    .send({
-                      item: {
-                        name: 'Item for testForRequestingDeclinedOnOpenedStatus',
-                        categories: {
-                          Other: { subcategories: ['Sonstiges'] },
-                        },
-                      },
-                    })
-                    .set('Cookie', [
-                      `connect.sid=${connectSidValueBodo4First}`,
-                    ]);
-                  // extract itemId
-                  const itemId = createItemResponse.body[0]._id;
-
-                  // logout
-                  await logout(connectSidValueBodo4First);
+                  // bodo4 creates item
+                  const itemId = await bodo4CreatesItem(
+                    'testForRequestingDeclinedOnOpenedStatus',
+                  );
 
                   // login bibi
                   const connectSidValueBibi = await loginUser(
@@ -3103,8 +3058,8 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4,
-            // login bibi, have bibi open an interaction, logout bibi,
+            // test: bodo4 creates an item,
+            // bibi opens interaction,
             // login bodo4, have bodo4 do the request of interest, logout bodo4
             // login bibi, have bibi view the item, logout bibi,
             // login bodo4, delete all of bodo4's items, logout bodo4
@@ -3115,52 +3070,16 @@ describe('itemInteraction Routes', () => {
                 // define Body to be used in this test
                 const itemInteractionBody = validItemInteractionBody;
 
-                // login Bodo4, let him create Item with passed in Body
-                const connectSidValueBodo4First = await loginBodo4();
-
-                // create item
-                const createItemResponse = await request(app)
-                  .post(itemRoute)
-                  .send({
-                    item: {
-                      name: 'Item for testForRequestingAcceptedOnOpenedStatus',
-                      categories: { Other: { subcategories: ['Sonstiges'] } },
-                    },
-                  })
-                  .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-                // extract itemId
-                const itemId = createItemResponse.body[0]._id;
-
-                // logout
-                await logout(connectSidValueBodo4First);
-
-                // login bibi
-                const connectSidValueBibi = await loginUser(
-                  'bibi@gmail.com',
-                  'bibi',
+                // bodo4 creates item
+                const itemId = await bodo4CreatesItem(
+                  'testForRequestingAcceptedOnOpenedStatus',
                 );
 
-                // bibi opens an interaction
-                const openItemInteractionResponse = await request(app)
-                  .post(
-                    `${itemRoute}/${itemId}/${
-                      itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                    }`,
-                  )
-                  .send({
-                    itemInteraction: {
-                      status: 'opened',
-                      message:
-                        'opening interaction for testForRequestingAcceptedOnOpenedStatus',
-                    },
-                  })
-                  .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-                // extract interactionId
-                const interactionIdOnItem =
-                  openItemInteractionResponse.body[0].interactions[0]._id;
-
-                // logout bibi
-                await logout(connectSidValueBibi);
+                // bibi opens interaction
+                const interactionIdOnItem = await bibiOpensInteraction(
+                  itemId,
+                  'testForRequestingAcceptedOnOpenedStatus',
+                );
 
                 // login Bodo4
                 const connectSidValueBodo4Second = await loginBodo4();
@@ -3211,8 +3130,8 @@ describe('itemInteraction Routes', () => {
               };
 
             describe('requested by owner', () => {
-              // test: login bodo4, create item, logout bodo4,
-              // login bibi, have bibi open an interaction, logout bibi,
+              // test: bodo4 creates an item,
+              // bibi opens interaction,
               // login bodo4, have bodo4 do the request of interest, logout bodo4
               // login bibi, have bibi view the item, logout bibi,
               // login bodo4, delete all of bodo4's items, logout bodo4
@@ -3252,8 +3171,8 @@ describe('itemInteraction Routes', () => {
         describe('should respond error with a statusCode400', () => {
           // check for the interaction to be exactly the same as before the request
 
-          // test: login bodo4, create item, logout bodo4,
-          // login bibi, have bibi open an interaction, logout bibi,
+          // test: bodo4 creates an item,
+          // bibi opens interaction,
           // login bodo4, accept interaction, [if giver: get showItem, have bodo4 do the request of interest, get showItem,] logout bodo4,
           // [if getter: login bibi, get showItem, have bibi do the request of interest, get showItem, logout bibi,]
           // login bodo4, delete all of bodo4's items, logout bodo4
@@ -3268,52 +3187,16 @@ describe('itemInteraction Routes', () => {
             // define Body to be used in this test
             const itemInteractionBody = validItemInteractionBody;
 
-            // login Bodo4, let him create Item with passed in Body
-            const connectSidValueBodo4First = await loginBodo4();
-
-            // create item
-            const createItemResponse = await request(app)
-              .post(itemRoute)
-              .send({
-                item: {
-                  name: 'Item for testForRequestingWrongStatusOnAccepted',
-                  categories: { Other: { subcategories: ['Sonstiges'] } },
-                },
-              })
-              .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-            // extract itemId
-            const itemId = createItemResponse.body[0]._id;
-
-            // logout
-            await logout(connectSidValueBodo4First);
-
-            // login bibi
-            const connectSidValueBibi = await loginUser(
-              'bibi@gmail.com',
-              'bibi',
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForRequestingWrongStatusOnAccepted',
             );
 
-            // bibi opens an interaction
-            const openItemInteractionResponse = await request(app)
-              .post(
-                `${itemRoute}/${itemId}/${
-                  itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                }`,
-              )
-              .send({
-                itemInteraction: {
-                  status: 'opened',
-                  message:
-                    'opening interaction for testForRequestingWrongStatusOnAccepted',
-                },
-              })
-              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-            // extract interactionId
-            const interactionIdOnItem =
-              openItemInteractionResponse.body[0].interactions[0]._id;
-
-            // logout bibi
-            await logout(connectSidValueBibi);
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              'testForRequestingWrongStatusOnAccepted',
+            );
 
             // login Bodo4
             const connectSidValueBodo4Second = await loginBodo4();
@@ -3630,8 +3513,8 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4,
-            // login bibi, have bibi open an interaction, logout bibi,
+            // test: bodo4 creates an item,
+            // bibi opens interaction,
             // login bodo4, accept interaction, [if giver: have bodo4 do the request of interest,] logout bodo4,
             // [if getter: login bibi, have bibi do the request of interest, logout bibi,]
             // login bodo4, delete all of bodo4's items, logout bodo4
@@ -3644,52 +3527,16 @@ describe('itemInteraction Routes', () => {
               // define Body to be used in this test
               const itemInteractionBody = validItemInteractionBody;
 
-              // login Bodo4, let him create Item with passed in Body
-              const connectSidValueBodo4First = await loginBodo4();
-
-              // create item
-              const createItemResponse = await request(app)
-                .post(itemRoute)
-                .send({
-                  item: {
-                    name: 'Item for testForRequestingAcceptedOnAcceptedStatus',
-                    categories: { Other: { subcategories: ['Sonstiges'] } },
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-              // extract itemId
-              const itemId = createItemResponse.body[0]._id;
-
-              // logout
-              await logout(connectSidValueBodo4First);
-
-              // login bibi
-              const connectSidValueBibi = await loginUser(
-                'bibi@gmail.com',
-                'bibi',
+              // bodo4 creates item
+              const itemId = await bodo4CreatesItem(
+                'testForRequestingAcceptedOnAcceptedStatus',
               );
 
-              // bibi opens an interaction
-              const openItemInteractionResponse = await request(app)
-                .post(
-                  `${itemRoute}/${itemId}/${
-                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                  }`,
-                )
-                .send({
-                  itemInteraction: {
-                    status: 'opened',
-                    message:
-                      'opening interaction for testForRequestingAcceptedOnAcceptedStatus',
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-              // extract interactionId
-              const interactionIdOnItem =
-                openItemInteractionResponse.body[0].interactions[0]._id;
-
-              // logout bibi
-              await logout(connectSidValueBibi);
+              // bibi opens interaction
+              const interactionIdOnItem = await bibiOpensInteraction(
+                itemId,
+                'testForRequestingAcceptedOnAcceptedStatus',
+              );
 
               // login Bodo4
               const connectSidValueBodo4Second = await loginBodo4();
@@ -3964,8 +3811,8 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4,
-            // login bibi, have bibi open an interaction, logout bibi,
+            // test: bodo4 creates an item,
+            // bibi opens interaction,
             // login bodo4, accept interaction, have bodo4 do the request of interest, delete all of bodo4's items, logout bodo4,
             const testForRequestingClosedOnAcceptedStatus = async (
               interactingParty: 'giver' | 'getter',
@@ -3976,52 +3823,16 @@ describe('itemInteraction Routes', () => {
               // define Body to be used in this test
               const itemInteractionBody = validItemInteractionBody;
 
-              // login Bodo4, let him create Item with passed in Body
-              const connectSidValueBodo4First = await loginBodo4();
-
-              // create item
-              const createItemResponse = await request(app)
-                .post(itemRoute)
-                .send({
-                  item: {
-                    name: 'Item for testForRequestingClosedOnAcceptedStatus',
-                    categories: { Other: { subcategories: ['Sonstiges'] } },
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-              // extract itemId
-              const itemId = createItemResponse.body[0]._id;
-
-              // logout
-              await logout(connectSidValueBodo4First);
-
-              // login bibi
-              const connectSidValueBibi = await loginUser(
-                'bibi@gmail.com',
-                'bibi',
+              // bodo4 creates item
+              const itemId = await bodo4CreatesItem(
+                'testForRequestingClosedOnAcceptedStatus',
               );
 
-              // bibi opens an interaction
-              const openItemInteractionResponse = await request(app)
-                .post(
-                  `${itemRoute}/${itemId}/${
-                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                  }`,
-                )
-                .send({
-                  itemInteraction: {
-                    status: 'opened',
-                    message:
-                      'opening interaction for testForRequestingClosedOnAcceptedStatus',
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-              // extract interactionId
-              const interactionIdOnItem =
-                openItemInteractionResponse.body[0].interactions[0]._id;
-
-              // logout bibi
-              await logout(connectSidValueBibi);
+              // bibi opens interaction
+              const interactionIdOnItem = await bibiOpensInteraction(
+                itemId,
+                'testForRequestingClosedOnAcceptedStatus',
+              );
 
               // login Bodo4
               const connectSidValueBodo4Second = await loginBodo4();
@@ -4154,35 +3965,17 @@ describe('itemInteraction Routes', () => {
                   );
                 };
 
-                // test: login bodo4, create item, logout bodo4,
+                // test: bodo4 creates an item,
                 // login bibi, open an interaction, get auth, logout bibi,
                 // login bodo4, accept interaction, close interaction, logout bodo4,
                 // login bibi, get auth, logout bibi,
                 // login bodo4, delete all of bodo4's items, logout bodo4,
                 const testForClosedOnAcceptedConcerningArraysOnUser =
                   async () => {
-                    // login Bodo4, let him create Item with passed in Body
-                    const connectSidValueBodo4First = await loginBodo4();
-
-                    // create item
-                    const createItemResponse = await request(app)
-                      .post(itemRoute)
-                      .send({
-                        item: {
-                          name: 'Item for testForClosedOnAcceptedConcerningArraysOnUser',
-                          categories: {
-                            Other: { subcategories: ['Sonstiges'] },
-                          },
-                        },
-                      })
-                      .set('Cookie', [
-                        `connect.sid=${connectSidValueBodo4First}`,
-                      ]);
-                    // extract itemId
-                    const itemId = createItemResponse.body[0]._id;
-
-                    // logout
-                    await logout(connectSidValueBodo4First);
+                    // bodo4 creates item
+                    const itemId = await bodo4CreatesItem(
+                      'testForClosedOnAcceptedConcerningArraysOnUser',
+                    );
 
                     // login bibi
                     const connectSidValueBibi = await loginUser(
@@ -4355,35 +4148,17 @@ describe('itemInteraction Routes', () => {
                     ).toHaveLength(1);
                   };
 
-                // test: login bodo4, create item, logout bodo4,
+                // test: bodo4 creates an item,
                 // login bibi, open an interaction, decline the interaction, open another interaction, get auth, logout bibi,
                 // login bodo4, accept interaction, close interaction, logout bodo4,
                 // login bibi, get auth, logout bibi,
                 // login bodo4, delete all of bodo4's items, logout bodo4,
                 const testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction =
                   async () => {
-                    // login Bodo4, let him create Item with passed in Body
-                    const connectSidValueBodo4First = await loginBodo4();
-
-                    // create item
-                    const createItemResponse = await request(app)
-                      .post(itemRoute)
-                      .send({
-                        item: {
-                          name: 'Item for testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
-                          categories: {
-                            Other: { subcategories: ['Sonstiges'] },
-                          },
-                        },
-                      })
-                      .set('Cookie', [
-                        `connect.sid=${connectSidValueBodo4First}`,
-                      ]);
-                    // extract itemId
-                    const itemId = createItemResponse.body[0]._id;
-
-                    // logout
-                    await logout(connectSidValueBodo4First);
+                    // bodo4 creates item
+                    const itemId = await bodo4CreatesItem(
+                      'testForClosedOnAcceptedConcerningArraysOnUserSecondInteraction',
+                    );
 
                     // login bibi
                     const connectSidValueBibi = await loginUser(
@@ -4564,7 +4339,7 @@ describe('itemInteraction Routes', () => {
         describe('should respond error with a statusCode400', () => {
           // check for the interaction to be exactly the same as before the request
 
-          // test: login bodo4, create item, logout bodo4,
+          // test: bodo4 creates an item,
           // login bibi, have bibi open an interaction, have bibi decline the interaction, [if getter: get showItem,  have bibi do the request of interest, get showItem,], logout bibi,
           // login bodo4, [if giver: get showItem,  have bodo4 do the request of interest, get showItem,] delete all of bodo4's items, logout bodo4,
           const testForRequestingWrongStatusOnDeclined = async (
@@ -4578,24 +4353,10 @@ describe('itemInteraction Routes', () => {
             // define Body to be used in this test
             const itemInteractionBody = validItemInteractionBody;
 
-            // login Bodo4, let him create Item with passed in Body
-            const connectSidValueBodo4First = await loginBodo4();
-
-            // create item
-            const createItemResponse = await request(app)
-              .post(itemRoute)
-              .send({
-                item: {
-                  name: 'Item for testForRequestingWrongStatusOnDeclined',
-                  categories: { Other: { subcategories: ['Sonstiges'] } },
-                },
-              })
-              .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-            // extract itemId
-            const itemId = createItemResponse.body[0]._id;
-
-            // logout
-            await logout(connectSidValueBodo4First);
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForRequestingWrongStatusOnDeclined',
+            );
 
             // login bibi
             const connectSidValueBibi = await loginUser(
@@ -4915,7 +4676,7 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4,
+            // test: bodo4 creates an item,
             // login bibi, have bibi open an interaction, decline interaction, [if getter: have bibi do the request of interest] logout bibi,
             // login bodo4,  [if giver: have bodo4 do the request of interest,]  delete all of bodo4's items, logout bodo4,
             const testForRequestingDeclinedOnDeclinedStatus = async (
@@ -4927,24 +4688,10 @@ describe('itemInteraction Routes', () => {
               // define Body to be used in this test
               const itemInteractionBody = validItemInteractionBody;
 
-              // login Bodo4, let him create Item with passed in Body
-              const connectSidValueBodo4First = await loginBodo4();
-
-              // create item
-              const createItemResponse = await request(app)
-                .post(itemRoute)
-                .send({
-                  item: {
-                    name: 'Item for testForRequestingDeclinedOnDeclinedStatus',
-                    categories: { Other: { subcategories: ['Sonstiges'] } },
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-              // extract itemId
-              const itemId = createItemResponse.body[0]._id;
-
-              // logout
-              await logout(connectSidValueBodo4First);
+              // bodo4 creates item
+              const itemId = await bodo4CreatesItem(
+                'testForRequestingDeclinedOnDeclinedStatus',
+              );
 
               // login bibi
               const connectSidValueBibi = await loginUser(
@@ -5143,8 +4890,8 @@ describe('itemInteraction Routes', () => {
         describe('should respond error with a statusCode400', () => {
           // check for the interaction to be exactly the same as before the request
 
-          // test: login bodo4, create item, logout bodo4,
-          // login bibi, have bibi open an interaction, logout bibi,
+          // test: bodo4 creates an item,
+          // bibi opens interaction,
           // login bodo4, accept interaction, close interaction, [if giver: get showItem, have bodo4 do the request of interest, get showItem,] logout bodo4,
           // [if getter: login bibi, get showItem, have bibi do the request of interest, get showItem, logout bibi,]
           // login bodo4, delete all of bodo4's items, logout bodo4
@@ -5159,52 +4906,16 @@ describe('itemInteraction Routes', () => {
             // define Body to be used in this test
             const itemInteractionBody = validItemInteractionBody;
 
-            // login Bodo4, let him create Item with passed in Body
-            const connectSidValueBodo4First = await loginBodo4();
-
-            // create item
-            const createItemResponse = await request(app)
-              .post(itemRoute)
-              .send({
-                item: {
-                  name: 'Item for testForRequestingWrongStatusOnClosed',
-                  categories: { Other: { subcategories: ['Sonstiges'] } },
-                },
-              })
-              .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-            // extract itemId
-            const itemId = createItemResponse.body[0]._id;
-
-            // logout
-            await logout(connectSidValueBodo4First);
-
-            // login bibi
-            const connectSidValueBibi = await loginUser(
-              'bibi@gmail.com',
-              'bibi',
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForRequestingWrongStatusOnClosed',
             );
 
-            // bibi opens an interaction
-            const openItemInteractionResponse = await request(app)
-              .post(
-                `${itemRoute}/${itemId}/${
-                  itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                }`,
-              )
-              .send({
-                itemInteraction: {
-                  status: 'opened',
-                  message:
-                    'opening interaction for testForRequestingWrongStatusOnClosed',
-                },
-              })
-              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-            // extract interactionId
-            const interactionIdOnItem =
-              openItemInteractionResponse.body[0].interactions[0]._id;
-
-            // logout bibi
-            await logout(connectSidValueBibi);
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              'testForRequestingWrongStatusOnClosed',
+            );
 
             // login Bodo4
             const connectSidValueBodo4Second = await loginBodo4();
@@ -5529,8 +5240,8 @@ describe('itemInteraction Routes', () => {
               },
             };
 
-            // test: login bodo4, create item, logout bodo4,
-            // login bibi, have bibi open an interaction, logout bibi,
+            // test: bodo4 creates an item,
+            // bibi opens interaction,
             // login bodo4, accept interaction, close interaction, [if giver: have bodo4 do the request of interest,] logout bodo4,
             // [if getter: login bibi, have bibi do the request of interest, logout bibi,]
             // login bodo4, delete all of bodo4's items, logout bodo4
@@ -5543,52 +5254,16 @@ describe('itemInteraction Routes', () => {
               // define Body to be used in this test
               const itemInteractionBody = validItemInteractionBody;
 
-              // login Bodo4, let him create Item with passed in Body
-              const connectSidValueBodo4First = await loginBodo4();
-
-              // create item
-              const createItemResponse = await request(app)
-                .post(itemRoute)
-                .send({
-                  item: {
-                    name: 'Item for testForRequestingClosedOnClosedStatus',
-                    categories: { Other: { subcategories: ['Sonstiges'] } },
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBodo4First}`]);
-              // extract itemId
-              const itemId = createItemResponse.body[0]._id;
-
-              // logout
-              await logout(connectSidValueBodo4First);
-
-              // login bibi
-              const connectSidValueBibi = await loginUser(
-                'bibi@gmail.com',
-                'bibi',
+              // bodo4 creates item
+              const itemId = await bodo4CreatesItem(
+                'testForRequestingClosedOnClosedStatus',
               );
 
-              // bibi opens an interaction
-              const openItemInteractionResponse = await request(app)
-                .post(
-                  `${itemRoute}/${itemId}/${
-                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
-                  }`,
-                )
-                .send({
-                  itemInteraction: {
-                    status: 'opened',
-                    message:
-                      'opening interaction for testForRequestingClosedOnClosedStatus',
-                  },
-                })
-                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
-              // extract interactionId
-              const interactionIdOnItem =
-                openItemInteractionResponse.body[0].interactions[0]._id;
-
-              // logout bibi
-              await logout(connectSidValueBibi);
+              // bibi opens interaction
+              const interactionIdOnItem = await bibiOpensInteraction(
+                itemId,
+                'testForRequestingClosedOnClosedStatus',
+              );
 
               // login Bodo4
               const connectSidValueBodo4Second = await loginBodo4();
