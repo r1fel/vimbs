@@ -81,9 +81,10 @@ const processItemForClient = async (
         for (const interaction of item.interactions) {
           if (interaction instanceof mongoose.Types.ObjectId) continue;
 
-          if (interaction.interestedParty.equals(currentUser))
+          if (interaction.interestedParty.equals(currentUser)) {
             interactionsArrayOfCurrentUser.push(interaction);
-          if (interaction.revealOwnerIdentity === true) ownerDataBool = true;
+            if (interaction.revealOwnerIdentity === true) ownerDataBool = true;
+          }
         }
 
         // console.log(
