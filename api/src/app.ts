@@ -29,11 +29,20 @@ import User from './models/user';
 
 // types
 import { GoogleEmailObject, UserInDB } from './typeDefinitions';
+import { suggestItems } from './controllers/itemControllers';
 
 // setup .env
 if (process.env.NODE_ENV !== 'production') {
   // Load environment variables from .env file if not in production
   require('dotenv').config();
+}
+
+// store suggestItemsIds in session, to prevent suggesting the same item twice
+declare module 'express-session' {
+  interface SessionData {
+    suggestItemsIds?: number[]; // Define the new property and its type
+    // You can define other properties if needed
+  }
 }
 
 // wrapping app in a function to do dependency injection of the database, to be able to test with a mock DB
@@ -79,6 +88,7 @@ export default function (database: any) {
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // Session expires in 7 days
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
+    suggestItemsIds: [],
   };
 
   app.use(session(sessionConfig));
@@ -238,3 +248,4 @@ export default function (database: any) {
 
   return app;
 }
+

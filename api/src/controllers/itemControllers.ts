@@ -131,6 +131,10 @@ export const updateItem = catchAsync(
   },
 );
 
+// TODO: After the user selects one of those suggestions, the selected searchToken should be added to the user's search history
+// Therefore, we need a updateSearchHistory function in the userController. Thereby you must consider the following:
+// suggestItems uses the searchHistory to suggest items. One Part of this is, that items, which were searched for in the past by the user, but didn't exist back then, 
+// are suggested to the user. This function only makes sens if searchTokens are added to the searchHistory, even if no item with the name exists currently.
 // return items, whose name includes the query (autocompletion)
 export const itemSearch = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -233,9 +237,12 @@ export const toggleItemAvailability = catchAsync(
 
 // suggest items for user
 export const suggestItems = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction, numberOfRequestedItems: number = 10) => {
+    
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
+
+    // get all available items
     const currentUser = req.user._id;
     const items: PopulatedItemsFromDB = await Item.find({
       owner: { $ne: currentUser },
@@ -246,42 +253,82 @@ export const suggestItems = catchAsync(
 
     if (items === null)
       return next(new ExpressError('this item doesnt exist', 500));
+      
+    const randomItemsCount = Math.floor(numberOfRequestedItems * 0.5);
+    const borrowedItemsCount = Math.floor(numberOfRequestedItems * 0.25);
+    const remainingCount = numberOfRequestedItems - randomItemsCount - borrowedItemsCount;
+    const historyItemsCount = Math.floor(remainingCount * 0.5);
+    const categoryItemsCount = remainingCount - historyItemsCount;
+    
+    const all_most_borrowed_items = await getMostBorrowedItems(items);
+    const all_search_history_items = await getSearchHistoryItems(items, req.user as UserInDB);
+    const all_catagory_items = await getItemsBasedOnCatagories(items, req.user as UserInDB);
+    
+    // filter items, which were already suggested
+    const filtered_most_borrowed_items = all_most_borrowed_items.filter(
+      (item) => !item.id.includes(req.session!.suggestItemsIds),
+    ).slice(0, borrowedItemsCount);
 
-    const most_borrowed_items = await getMostBorrowedItems(items);
-    const search_history_items = await getSearchHistoryItems(
-      items,
-      req.user as UserInDB,
+    const filtered_search_history_items = all_search_history_items.filter(
+      (item) => !item.id.includes(req.session!.suggestItemsIds),
+    ).slice(0, historyItemsCount);
+
+    const filtered_catagory_items = all_catagory_items?.filter(
+      (item) => !item.id.includes(req.session!.suggestItemsIds),
+    ).slice(0, categoryItemsCount);
+    
+    const totalItemsCount = filtered_most_borrowed_items.length + filtered_search_history_items.length + filtered_catagory_items.length;
+    const remainingItemsCount = numberOfRequestedItems - totalItemsCount;
+
+    if (req.session!.suggestItemsIds === undefined) req.session!.suggestItemsIds = [];
+
+    for (const item of filtered_most_borrowed_items) {
+      req.session!.suggestItemsIds.push(item._id);
+    }
+
+    for (const item of filtered_search_history_items) {
+      req.session!.suggestItemsIds.push(item._id);
+    }
+
+    for (const item of filtered_catagory_items) {
+      req.session!.suggestItemsIds.push(item._id);
+    }
+
+    let filtered_remaining_items = items?.filter(
+      (item) => !item.id.includes(req.session!.suggestItemsIds),
     );
-    const catagory_items = await getItemsBasedOnCatagories(
-      items,
-      req.user as UserInDB,
-    );
-    const random_items = await getRandomItems(items);
+    
+    let filtered_random_items = await getRandomItems(filtered_remaining_items, remainingItemsCount);
+
+    // TODO: If you want to show the user that no more items are available, do the following:
+    // you can remove this if statement, but you have to check in the front end the length of the response array
+    // if it is less than the requested number of items, then you can show the user that there are no more items available
+    // fill up with random items if not enough items were found
+    if (remainingItemsCount - filtered_random_items.length > 0 || filtered_random_items.length === 0) {
+      filtered_random_items = items.slice(0, remainingItemsCount - filtered_random_items.length);
+    } 
+
+    for (const item of filtered_random_items) {
+      req.session!.suggestItemsIds.push(item._id);
+    }
 
     const response_borrowed_items: Array<ResponseItemForClient> = [];
     const response_history_items: Array<ResponseItemForClient> = [];
     const response_catagory_items: Array<ResponseItemForClient> = [];
     const response_random_items: Array<ResponseItemForClient> = [];
 
-    processItemForClient(
-      most_borrowed_items,
-      currentUser,
-      response_borrowed_items,
-    );
-    processItemForClient(
-      search_history_items,
-      currentUser,
-      response_history_items,
-    );
-    processItemForClient(catagory_items, currentUser, response_catagory_items);
-    processItemForClient(random_items, currentUser, response_random_items);
+    processItemForClient(filtered_most_borrowed_items, currentUser, response_borrowed_items);
+    processItemForClient(filtered_search_history_items, currentUser, response_history_items);
+    processItemForClient(filtered_catagory_items, currentUser, response_catagory_items);
+    processItemForClient(filtered_random_items, currentUser, response_random_items);
 
-    const response: Array<Array<ResponseItemForClient>> = [
-      response_borrowed_items,
-      response_history_items,
-      response_catagory_items,
-      response_random_items,
-    ];
+    
+    // connect all responses
+    const response: Array<ResponseItemForClient> = [];
+    response.push(...response_borrowed_items);
+    response.push(...response_history_items);
+    response.push(...response_catagory_items);
+    response.push(...response_random_items);
 
     return res.send(response);
   },
@@ -291,20 +338,18 @@ export const suggestItems = catchAsync(
 
 // get random items
 export const getRandomItems = (
-  items: PopulatedItemsFromDB[],
+  items: ItemInDBPopulated[],
   numberOfItems: number = 2,
-): Promise<PopulatedItemsFromDB> => {
+): Promise<ItemInDBPopulated[]> => {
   if (!items || items.length === 0) return Promise.resolve([]);
-  const randomItems = Item.aggregate([
-    { $sample: { size: numberOfItems } },
-  ]).exec();
-  return randomItems;
+  // return random items
+  const randomItems = items.sort(() => Math.random() - Math.random()).slice(0, numberOfItems);
+  return Promise.resolve(randomItems);
 };
 
 // get most borrowed items
 export const getMostBorrowedItems = async (
   items: ItemInDBPopulated[],
-  numberOfItems: number = 2,
 ): Promise<ItemInDBPopulated[]> => {
   if (!items || items.length === 0) return Promise.resolve([]);
 
@@ -314,9 +359,11 @@ export const getMostBorrowedItems = async (
     const bInteractions = b.interactions ?? [];
     return bInteractions.length - aInteractions.length;
   });
-  // Get the top N items with the most interactions
-  const mostUsedItems = sortedItems.slice(0, numberOfItems);
-  return mostUsedItems;
+
+  // filter items out that have no interactions
+  const filteredItems = sortedItems.filter((item) => item.interactions && item.interactions.length > 0);
+
+  return Promise.resolve(filteredItems);
 };
 
 // returns items, which were searched for in the past,
@@ -324,12 +371,11 @@ export const getMostBorrowedItems = async (
 export const getSearchHistoryItems = (
   accessibleItems: ItemInDBPopulated[],
   user: UserInDB,
-  thresh: number = 5,
-): Promise<PopulatedItemsFromDB> => {
+): Promise<ItemInDBPopulated[]> => {
   if (!accessibleItems) return Promise.resolve([]);
 
   const searchHistory = user.searchHistory;
-  if (!searchHistory || searchHistory.length < thresh)
+  if (!searchHistory)
     return Promise.resolve([]);
 
   const interestingItems: PopulatedItemsFromDB = [];
@@ -352,11 +398,12 @@ export const getItemsBasedOnCatagories = (
   items: any[],
   user: any,
   min_length_user_history: number = 5,
-): Promise<PopulatedItemsFromDB> => {
+): Promise<ItemInDBPopulated[]> => {
   if (
     !items ||
     user.searchHistory.length < min_length_user_history ||
-    user.getHistory.length < min_length_user_history
+    user.getHistory.length < min_length_user_history ||
+    min_length_user_history < 1
   )
     return Promise.resolve([]);
 
@@ -371,7 +418,9 @@ export const getItemsBasedOnCatagories = (
   for (const searchToken of searchTokens) {
     const filteredItems = items.filter((item) => item.name === searchToken);
     for (const item of filteredItems) {
-      const categories = item.categories; // Get all category names
+      const categories = item.categories; // Get all category 
+      
+      //filter subcategory terms from DB object 
       const keys = Object.keys(categories);
       for (const key of keys) {
         if (typeof categories[key].name === 'string') {
@@ -408,6 +457,8 @@ export const getItemsBasedOnCatagories = (
       (item) => item._id.toString() === objectId.toString(),
     );
     const categories = item.categories; // Get all category names
+
+    //filter subcategory terms from DB object 
     const keys = Object.keys(categories);
     for (const key of keys) {
       const subcategories = categories[key].subcategories;
@@ -441,6 +492,8 @@ export const getItemsBasedOnCatagories = (
   const borrowSuggestedItems: any[] = Object.values(topBorrowCategories)
     .filter(([_, count]) => count > 1)
     .flatMap(([subcategory]) =>
+
+      //match subcategory terms from DB object 
       Object.keys(items[0].categories).flatMap((key) =>
         items.filter(
           (item) =>
@@ -457,6 +510,8 @@ export const getItemsBasedOnCatagories = (
   )
     .filter(([_, count]) => count > 1)
     .flatMap(([subcategory]) =>
+
+      //match subcategory terms from DB object 
       Object.keys(items[0].categories).flatMap((key) =>
         items.filter(
           (item) =>
@@ -473,6 +528,7 @@ export const getItemsBasedOnCatagories = (
   );
 };
 
+//TODO: Update catagory names
 export const WinterSubcategories = ['Winter Sports', 'Wintersport'];
 export const SummerSubcategories = [
   'Baustellengeräte',
@@ -481,8 +537,9 @@ export const SummerSubcategories = [
   'Construction equipment',
   'Gardening tools',
   'Camping gear',
-];
+]; 
 
+// TODO: Use this function if needed
 export const filterItemsBySeason = (
   accessibleItems: any[],
 ): Promise<PopulatedItemsFromDB> => {
@@ -518,11 +575,8 @@ export const filterItemsBySeason = (
 };
 
 // Don't remove
-// this function is only used for testing the helper functions above in itemControllers.test.ts
-export const getPopulatItems = async (
-  _id: any,
-): Promise<PopulatedItemsFromDB> => {
-  const currentUser = _id;
+// this function is only used for testing the helper functions above
+export const getPopulatItems = async (): Promise<PopulatedItemsFromDB> => {
   const items: PopulatedItemsFromDB = await Item.find();
   return items;
 };
