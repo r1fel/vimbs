@@ -173,15 +173,6 @@ export const deleteItemInteraction = catchAsync(
   },
 );
 
-// test function only needed for the scope of coding the itemInteractions
-export const dummyController = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const status: InteractionStatuses = req.body.itemInteraction.status;
-    console.log(status);
-    res.send('you passed dummy controller');
-  },
-);
-
 // controller, that handles the core logic arround itemInteractions
 //! in progress
 export const handlePostInteraction = catchAsync(
@@ -344,5 +335,23 @@ export const handlePostInteraction = catchAsync(
     processItemForClient(updatedItem, currentUser, response);
     res.send(response);
     // res.send(`Item: ${item} Interaction: ${interaction}`);
+  },
+);
+
+// test function only needed for the scope of coding the itemInteractions
+export const reviewInteraction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.send(
+      `you sent ${req.body.itemInteractionReview.body} to review Interaction`,
+    );
+  },
+);
+
+// test function only needed for the scope of coding the itemInteractions
+export const dummyController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const status: InteractionStatuses = req.body.itemInteraction.status;
+    console.log(status);
+    res.send('you passed dummy controller');
   },
 );
