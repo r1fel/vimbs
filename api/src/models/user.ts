@@ -74,6 +74,34 @@ const UserSchema: Schema = new Schema({
       date: Date,
     },
   ],
+  giveReviews: [
+    {
+      interactionId: {
+        type: Schema.Types.ObjectId,
+        ref: 'ItemInteraction',
+      },
+      rating: Number,
+      body: String,
+    },
+  ],
+  giveReviewStats: {
+    count: { type: Number, default: 0 },
+    meanRating: { type: Number, default: 0 },
+  },
+  getReviews: [
+    {
+      interactionId: {
+        type: Schema.Types.ObjectId,
+        ref: 'ItemInteraction',
+      },
+      rating: Number,
+      body: String,
+    },
+  ],
+  getReviewStats: {
+    count: { type: Number, default: 0 },
+    meanRating: { type: Number, default: 0 },
+  },
 });
 
 UserSchema.plugin(passportLocalMongoose, {

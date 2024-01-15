@@ -89,6 +89,15 @@ export type SportAndCamping = (typeof SportAndCamping)[number];
 export type Technology = (typeof Technology)[number];
 export type Other = (typeof Other)[number];
 
+// review Type
+export type Review = {
+  interactionId: mongoose.Types.ObjectId;
+  rating: number;
+  body?: string;
+};
+
+export type ReviewStats = { count: number; meanRating: number };
+
 // DB related Types
 export interface UserInDB extends Document {
   _id: mongoose.Types.ObjectId;
@@ -111,6 +120,10 @@ export interface UserInDB extends Document {
   getItems: mongoose.Types.ObjectId[];
   getHistory: mongoose.Types.ObjectId[];
   searchHistory: [{ searchToken: string; date: Date }];
+  giveReviews: Review[];
+  giveReviewStats: ReviewStats;
+  getReviews: Review[];
+  getReviewStats: ReviewStats;
 }
 
 export interface ItemInDB extends Document {
