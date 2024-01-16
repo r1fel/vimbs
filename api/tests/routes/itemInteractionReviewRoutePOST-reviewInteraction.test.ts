@@ -8,6 +8,7 @@ const app = makeApp(database);
 import {
   loginRoute,
   logoutRoute,
+  authRoute,
   itemRoute,
   itemIdInteractionRoute,
   itemIdInteractionIdRoute,
@@ -73,7 +74,7 @@ const bodo4CreatesItem = async (testName: string) => {
     // Check if the response is successful (status code 200) and has a valid itemId
     if (createItemResponse.status === 200 && createItemResponse.body[0]?._id) {
       itemId = createItemResponse.body[0]._id;
-      // console.log('itemId attempt', attempt);
+      console.log('itemId attempt', attempt);
       break; // Break the loop if successful
     }
 
@@ -116,7 +117,7 @@ const bibiOpensInteraction = async (itemId: string, testName: string) => {
     ) {
       interactionIdOnItem =
         openItemInteractionResponse.body[0].interactions[0]._id;
-      // console.log('interactionIdOnItem attempt', attempt);
+      console.log('interactionIdOnItem attempt', attempt);
       break;
     }
 
@@ -152,6 +153,9 @@ const bodo4AcceptsAndClosesInteraction = async (
       },
     })
     .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+  if (acceptItemInteractionResponse.status === 200) {
+    console.log('interaction accepted');
+  }
 
   // bodo4 closes the interaction
   const closeItemInteractionResponse = await request(app)
@@ -167,6 +171,9 @@ const bodo4AcceptsAndClosesInteraction = async (
       },
     })
     .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+  if (closeItemInteractionResponse.status === 200) {
+    console.log('interaction closed');
+  }
 
   // logout bodo4
   await logout(connectSidValueBodo4);
@@ -888,6 +895,283 @@ describe('itemInteractionReview Route', () => {
     //   itemIdInteractionRoute.split(':itemId/').slice(-1)[0],
     //   itemIdInteractionIdReviewRoute.split(':interactionId/').slice(-1)[0],
     // );
+
+    describe('when itemInteractionReview body is dealt with at controller', () => {
+      describe('should respond error with a statusCode400 when review was already given', () => {
+        afterEach(async () => {});
+
+        // test:
+        // general: create item, open interaction, accept and close interaction
+
+        // if giver:
+        // login bodo4, review for bibi, logout bodo4
+        // login bibi, get auth before error causing second review try of bodo4, logout bibi
+        // login bodo4, review try 2 for bibi (error causing), logout bodo4
+        // login bibi, get auth after error causing second review try of bodo4 to check against auth before (no changes expected), logout bibi
+
+        // if getter:
+        // login bibi, review for bodo4, logout bibi
+        // login bodo4, get auth before error causing second review try of bibi, logout bodo4
+        // login bibi, review try 2 for bodo4 (error causing), logout bibi
+        // login bodo4, get auth after error causing second review try of bibi to check against auth before (no changes expected), logout bodo4
+
+        // genereal: login bodo4, delete item, logout bodo4
+
+        const testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction =
+          async (
+            interactingParty: 'giver' | 'getter',
+            statusCode: number,
+            invalidity: string,
+            // validItemInteractionReviewBody: {
+            //   itemInteraction: ItemInteractionRequest;
+            // },
+          ) => {
+            // define Body to be used in this test
+            // const itemInteractionBody = validItemInteractionReviewBody;
+
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+            );
+
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              'testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+            );
+
+            // bodo4 accepts and closes the interaction
+            await bodo4AcceptsAndClosesInteraction(
+              itemId,
+              interactionIdOnItem,
+              'testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+            );
+
+            // define variables to be tested
+            let getAuthBefore: any = undefined;
+            let itemInteractionReviewResponseReview2: any = undefined;
+            let getAuthAfter: any = undefined;
+
+            if (interactingParty === 'giver') {
+              // login Bodo4
+              const connectSidValueBodo4 = await loginBodo4();
+
+              // set a first review on bibi
+              const itemInteractionReviewResponseReview1ByBodo = await request(
+                app,
+              )
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }/${interactionIdOnItem}/${
+                    itemIdInteractionIdReviewRoute
+                      .split(':interactionId/')
+                      .slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteractionReview: {
+                    rating: 5,
+                    body: 'review 1 for bibi from testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+              // console.log(
+              //   'response review 1',
+              //   itemInteractionReviewResponseReview1ByBodo.text,
+              // );
+
+              // logout bibi
+              await logout(connectSidValueBodo4);
+            }
+
+            // login bibi
+            const connectSidValueBibi = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            if (interactingParty === 'giver') {
+              // auth for bibi before the false review is given
+              getAuthBefore = await request(app)
+                .get(authRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              // console.log('auth before', getAuthBefore.body);
+            }
+
+            if (interactingParty === 'getter') {
+              // set a first review on bibi
+              const itemInteractionReviewResponseReview1ByBibi = await request(
+                app,
+              )
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }/${interactionIdOnItem}/${
+                    itemIdInteractionIdReviewRoute
+                      .split(':interactionId/')
+                      .slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteractionReview: {
+                    rating: 5,
+                    body: 'review 1 for bodo from testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+              console.log(
+                'response review 1',
+                itemInteractionReviewResponseReview1ByBibi.text,
+              );
+            }
+
+            // logout bibi
+            await logout(connectSidValueBibi);
+
+            // login Bodo4
+            const connectSidValueBodo4Second = await loginBodo4();
+
+            if (interactingParty === 'getter') {
+              // auth for bodo before the false review is given
+              getAuthBefore = await request(app)
+                .get(authRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+              // console.log('auth before', getAuthBefore.body);
+            }
+
+            if (interactingParty === 'giver') {
+              // try to set second review on bibi
+              itemInteractionReviewResponseReview2 = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }/${interactionIdOnItem}/${
+                    itemIdInteractionIdReviewRoute
+                      .split(':interactionId/')
+                      .slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteractionReview: {
+                    rating: 1,
+                    body: 'review 2 for bibi from testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Second}`]);
+
+              // console.log(
+              //   'response review 2',
+              //   itemInteractionReviewResponseReview2.text,
+              // );
+            }
+
+            // logout
+            await logout(connectSidValueBodo4Second);
+
+            // login bibi
+            const connectSidValueBibiSecond = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            if (interactingParty === 'giver') {
+              // auth for bibi after the false review was given
+              getAuthAfter = await request(app)
+                .get(authRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBibiSecond}`]);
+              // console.log('auth after', getAuthAfter.body);
+            }
+
+            if (interactingParty === 'getter') {
+              // try to set second review on bodo
+              itemInteractionReviewResponseReview2 = await request(app)
+                .post(
+                  `${itemRoute}/${itemId}/${
+                    itemIdInteractionRoute.split(':itemId/').slice(-1)[0]
+                  }/${interactionIdOnItem}/${
+                    itemIdInteractionIdReviewRoute
+                      .split(':interactionId/')
+                      .slice(-1)[0]
+                  }`,
+                )
+                .send({
+                  itemInteractionReview: {
+                    rating: 1,
+                    body: 'review 2 for bodo from testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+                  },
+                })
+                .set('Cookie', [`connect.sid=${connectSidValueBibiSecond}`]);
+              // console.log(
+              //   'response review 2',
+              //   itemInteractionReviewResponseReview2.text,
+              // );
+            }
+
+            // logout bibi
+            await logout(connectSidValueBibiSecond);
+
+            // login Bodo4
+            const connectSidValueBodo4Third = await loginBodo4();
+
+            if (interactingParty === 'getter') {
+              // auth for bodo after the false review was given
+              getAuthAfter = await request(app)
+                .get(authRoute)
+                .set('Cookie', [`connect.sid=${connectSidValueBodo4Third}`]);
+              // console.log('auth after', getAuthAfter.body);
+            }
+
+            // delete all items (and clear bibi and bodo4s reviews)
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4Third}`]);
+
+            // logout
+            await logout(connectSidValueBodo4Third);
+
+            //test that no changes are made on the user by the falsy request
+            // comment: the version number of the the entry changes, thus just comparing Auth.body throws an error
+            expect(getAuthBefore.body).not.toBe(undefined);
+            expect(getAuthAfter.body).not.toBe(undefined);
+            expect(getAuthBefore.body.giveReviews).toEqual(
+              getAuthAfter.body.giveReviews,
+            );
+            expect(getAuthBefore.body.giveReviewStats).toEqual(
+              getAuthAfter.body.giveReviewStats,
+            );
+            expect(getAuthBefore.body.getReviews).toEqual(
+              getAuthAfter.body.getReviews,
+            );
+            expect(getAuthBefore.body.getReviewStats).toEqual(
+              getAuthAfter.body.getReviewStats,
+            );
+
+            expectsForError(
+              statusCode,
+              invalidity,
+              itemInteractionReviewResponseReview2,
+            );
+          };
+
+        it('by owner', async () => {
+          await testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction(
+            'giver',
+            400,
+            'Error: Bad Request: You already gave the review &gt;review 1 for bibi from testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction&lt; <br> &nbsp; &nbsp; with a rating of 5 <br> &nbsp; &nbsp; on your interaction with bibi on &gt;Item for testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+          );
+        }, 20000);
+
+        it('by interrestedParty', async () => {
+          await testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction(
+            'getter',
+            400,
+            'Error: Bad Request: You already gave the review &gt;review 1 for bodo from testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction&lt; <br> &nbsp; &nbsp; with a rating of 5 <br> &nbsp; &nbsp; on your interaction with bodo4 on &gt;Item for testForRequestingItemInteractionReviewOnAlreadyReviewedInteraction',
+          );
+        }, 20000);
+      });
+      describe.skip('should respond successful with a statusCode200 and success message', () => {});
+    });
   });
 
   describe('DELETE all items', () => {

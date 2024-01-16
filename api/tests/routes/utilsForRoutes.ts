@@ -1,6 +1,6 @@
 // userIds
 
-export const bodosUserId = '6553b5bfa70b16a991b89001';
+export const bodo4sUserId = '6553b5bfa70b16a991b89001';
 export const bibisUserId = '6544bd1bdf354e46068d74bf';
 export const bobsUserId = '6544bbe8df354e46068d74bb';
 

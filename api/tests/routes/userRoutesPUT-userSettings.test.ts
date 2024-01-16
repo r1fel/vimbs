@@ -13,7 +13,7 @@ import {
   logoutRoute,
   userIdSettingsRoute,
   userRoute,
-  bodosUserId,
+  bodo4sUserId,
   bibisUserId,
 } from './utilsForRoutes';
 
@@ -204,7 +204,7 @@ describe('user Routes', () => {
           // change settings
           const changeSettingsResponse = await request(app)
             .put(
-              `${userRoute}/${bodosUserId}/${
+              `${userRoute}/${bodo4sUserId}/${
                 userIdSettingsRoute.split(':userId/').slice(-1)[0]
               }`,
             )
@@ -460,7 +460,7 @@ describe('user Routes', () => {
         // change settings
         const changeSettingsResponse = await request(app)
           .put(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdSettingsRoute.split(':userId/').slice(-1)[0]
             }`,
           )

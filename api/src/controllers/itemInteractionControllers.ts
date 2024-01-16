@@ -431,7 +431,7 @@ export const reviewInteraction = catchAsync(
             new ExpressError(
               `Bad Request: You already gave the review >${previouslyGivenReview.body}< 
      with a rating of ${previouslyGivenReview.rating} 
-     on your interaction with ${owner.firstName} on >${item.name}<`,
+     on your interaction with ${interactingParty.firstName} on >${item.name}<`,
               400,
             ),
           );

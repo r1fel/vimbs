@@ -13,7 +13,7 @@ import {
   itemRoute,
   userIdMyItemsRoute,
   userRoute,
-  bodosUserId,
+  bodo4sUserId,
   bibisUserId,
 } from './utilsForRoutes';
 
@@ -219,7 +219,7 @@ describe('user Routes', () => {
         // get bodos empty inventory
         const myInventoryResponse = await request(app)
           .get(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdMyItemsRoute.split(':userId/').slice(-1)[0]
             }`,
           )
@@ -262,7 +262,7 @@ describe('user Routes', () => {
         // get bodos empty inventory
         const myInventoryResponse = await request(app)
           .get(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdMyItemsRoute.split(':userId/').slice(-1)[0]
             }`,
           )
@@ -325,7 +325,7 @@ describe('user Routes', () => {
         // get bodos empty inventory
         const myInventoryResponse = await request(app)
           .get(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdMyItemsRoute.split(':userId/').slice(-1)[0]
             }`,
           )

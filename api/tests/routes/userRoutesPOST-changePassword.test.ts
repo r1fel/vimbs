@@ -13,7 +13,7 @@ import {
   logoutRoute,
   userIdChangePasswordRoute,
   userRoute,
-  bodosUserId,
+  bodo4sUserId,
   bibisUserId,
 } from './utilsForRoutes';
 
@@ -159,7 +159,7 @@ describe('user Routes', () => {
         // change password
         const changePasswordResponse = await request(app)
           .post(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
             }`,
           )
@@ -172,7 +172,7 @@ describe('user Routes', () => {
         // change password back
         const changePasswordBackResponse = await request(app)
           .post(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
             }`,
           )
@@ -230,7 +230,7 @@ describe('user Routes', () => {
         // change password
         const changePasswordResponse = await request(app)
           .post(
-            `${userRoute}/${bodosUserId}/${
+            `${userRoute}/${bodo4sUserId}/${
               userIdChangePasswordRoute.split(':userId/').slice(-1)[0]
             }`,
           )

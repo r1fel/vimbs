@@ -133,7 +133,7 @@ export const updateItem = catchAsync(
 
 // TODO: After the user selects one of those suggestions, the selected searchToken should be added to the user's search history
 // Therefore, we need a updateSearchHistory function in the userController. Thereby you must consider the following:
-// suggestItems uses the searchHistory to suggest items. One Part of this is, that items, which were searched for in the past by the user, but didn't exist back then, 
+// suggestItems uses the searchHistory to suggest items. One Part of this is, that items, which were searched for in the past by the user, but didn't exist back then,
 // are suggested to the user. This function only makes sens if searchTokens are added to the searchHistory, even if no item with the name exists currently.
 // return items, whose name includes the query (autocompletion)
 export const itemSearch = catchAsync(
@@ -194,11 +194,13 @@ export const deleteAllOfUsersItems = catchAsync(
     if (user === null)
       return next(new ExpressError('this user doesnt exist', 500));
 
-    if (user.myItems.length > 0) {
+    const items: ItemInDB[] = await Item.find({ owner: currentUser });
+
+    if (items.length > 0) {
       // use findByIdAndDelete to trigger findOneAndDelete middleware on ItemSchema
       // deletes the interactions that are on the item
-      for (const itemId of user.myItems) {
-        await Item.findByIdAndDelete(itemId);
+      for (const item of items) {
+        await Item.findByIdAndDelete(item._id);
       }
 
       // Empty out myItems array
@@ -206,6 +208,35 @@ export const deleteAllOfUsersItems = catchAsync(
       await user.save();
       return res.send('Successfully deleted all of your items!');
     }
+
+    // delete all reviews of bibi and bodo4
+    const bodo4: UserInDB | null = await User.findById(
+      '6553b5bfa70b16a991b89001',
+    );
+    if (bodo4 === null)
+      return next(
+        new ExpressError('Bad Request: This user does not exist', 400),
+      );
+
+    const bibi: UserInDB | null = await User.findById(
+      '6544bd1bdf354e46068d74bf',
+    );
+    if (bibi === null)
+      return next(
+        new ExpressError('Bad Request: This user does not exist', 400),
+      );
+
+    bodo4.giveReviews = [];
+    bodo4.giveReviewStats = { count: 0, meanRating: 0 };
+    bodo4.getReviews = [];
+    bodo4.getReviewStats = { count: 0, meanRating: 0 };
+    await bodo4.save();
+
+    bibi.giveReviews = [];
+    bibi.giveReviewStats = { count: 0, meanRating: 0 };
+    bibi.getReviews = [];
+    bibi.getReviewStats = { count: 0, meanRating: 0 };
+    await bibi.save();
 
     return res.send('You had no items to delete.');
   },
@@ -237,8 +268,12 @@ export const toggleItemAvailability = catchAsync(
 
 // suggest items for user
 export const suggestItems = catchAsync(
-  async (req: Request, res: Response, next: NextFunction, numberOfRequestedItems: number = 10) => {
-    
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    numberOfRequestedItems: number = 10,
+  ) => {
     if (req.user === undefined)
       return new ExpressError('user is undefined', 500);
 
@@ -253,34 +288,45 @@ export const suggestItems = catchAsync(
 
     if (items === null)
       return next(new ExpressError('this item doesnt exist', 500));
-      
+
     const randomItemsCount = Math.floor(numberOfRequestedItems * 0.5);
     const borrowedItemsCount = Math.floor(numberOfRequestedItems * 0.25);
-    const remainingCount = numberOfRequestedItems - randomItemsCount - borrowedItemsCount;
+    const remainingCount =
+      numberOfRequestedItems - randomItemsCount - borrowedItemsCount;
     const historyItemsCount = Math.floor(remainingCount * 0.5);
     const categoryItemsCount = remainingCount - historyItemsCount;
-    
+
     const all_most_borrowed_items = await getMostBorrowedItems(items);
-    const all_search_history_items = await getSearchHistoryItems(items, req.user as UserInDB);
-    const all_catagory_items = await getItemsBasedOnCatagories(items, req.user as UserInDB);
-    
+    const all_search_history_items = await getSearchHistoryItems(
+      items,
+      req.user as UserInDB,
+    );
+    const all_catagory_items = await getItemsBasedOnCatagories(
+      items,
+      req.user as UserInDB,
+    );
+
     // filter items, which were already suggested
-    const filtered_most_borrowed_items = all_most_borrowed_items.filter(
-      (item) => !item.id.includes(req.session!.suggestItemsIds),
-    ).slice(0, borrowedItemsCount);
+    const filtered_most_borrowed_items = all_most_borrowed_items
+      .filter((item) => !item.id.includes(req.session!.suggestItemsIds))
+      .slice(0, borrowedItemsCount);
 
-    const filtered_search_history_items = all_search_history_items.filter(
-      (item) => !item.id.includes(req.session!.suggestItemsIds),
-    ).slice(0, historyItemsCount);
+    const filtered_search_history_items = all_search_history_items
+      .filter((item) => !item.id.includes(req.session!.suggestItemsIds))
+      .slice(0, historyItemsCount);
 
-    const filtered_catagory_items = all_catagory_items?.filter(
-      (item) => !item.id.includes(req.session!.suggestItemsIds),
-    ).slice(0, categoryItemsCount);
-    
-    const totalItemsCount = filtered_most_borrowed_items.length + filtered_search_history_items.length + filtered_catagory_items.length;
+    const filtered_catagory_items = all_catagory_items
+      ?.filter((item) => !item.id.includes(req.session!.suggestItemsIds))
+      .slice(0, categoryItemsCount);
+
+    const totalItemsCount =
+      filtered_most_borrowed_items.length +
+      filtered_search_history_items.length +
+      filtered_catagory_items.length;
     const remainingItemsCount = numberOfRequestedItems - totalItemsCount;
 
-    if (req.session!.suggestItemsIds === undefined) req.session!.suggestItemsIds = [];
+    if (req.session!.suggestItemsIds === undefined)
+      req.session!.suggestItemsIds = [];
 
     for (const item of filtered_most_borrowed_items) {
       req.session!.suggestItemsIds.push(item._id);
@@ -297,16 +343,25 @@ export const suggestItems = catchAsync(
     let filtered_remaining_items = items?.filter(
       (item) => !item.id.includes(req.session!.suggestItemsIds),
     );
-    
-    let filtered_random_items = await getRandomItems(filtered_remaining_items, remainingItemsCount);
+
+    let filtered_random_items = await getRandomItems(
+      filtered_remaining_items,
+      remainingItemsCount,
+    );
 
     // TODO: If you want to show the user that no more items are available, do the following:
     // you can remove this if statement, but you have to check in the front end the length of the response array
     // if it is less than the requested number of items, then you can show the user that there are no more items available
     // fill up with random items if not enough items were found
-    if (remainingItemsCount - filtered_random_items.length > 0 || filtered_random_items.length === 0) {
-      filtered_random_items = items.slice(0, remainingItemsCount - filtered_random_items.length);
-    } 
+    if (
+      remainingItemsCount - filtered_random_items.length > 0 ||
+      filtered_random_items.length === 0
+    ) {
+      filtered_random_items = items.slice(
+        0,
+        remainingItemsCount - filtered_random_items.length,
+      );
+    }
 
     for (const item of filtered_random_items) {
       req.session!.suggestItemsIds.push(item._id);
@@ -317,12 +372,27 @@ export const suggestItems = catchAsync(
     const response_catagory_items: Array<ResponseItemForClient> = [];
     const response_random_items: Array<ResponseItemForClient> = [];
 
-    processItemForClient(filtered_most_borrowed_items, currentUser, response_borrowed_items);
-    processItemForClient(filtered_search_history_items, currentUser, response_history_items);
-    processItemForClient(filtered_catagory_items, currentUser, response_catagory_items);
-    processItemForClient(filtered_random_items, currentUser, response_random_items);
+    processItemForClient(
+      filtered_most_borrowed_items,
+      currentUser,
+      response_borrowed_items,
+    );
+    processItemForClient(
+      filtered_search_history_items,
+      currentUser,
+      response_history_items,
+    );
+    processItemForClient(
+      filtered_catagory_items,
+      currentUser,
+      response_catagory_items,
+    );
+    processItemForClient(
+      filtered_random_items,
+      currentUser,
+      response_random_items,
+    );
 
-    
     // connect all responses
     const response: Array<ResponseItemForClient> = [];
     response.push(...response_borrowed_items);
@@ -343,7 +413,9 @@ export const getRandomItems = (
 ): Promise<ItemInDBPopulated[]> => {
   if (!items || items.length === 0) return Promise.resolve([]);
   // return random items
-  const randomItems = items.sort(() => Math.random() - Math.random()).slice(0, numberOfItems);
+  const randomItems = items
+    .sort(() => Math.random() - Math.random())
+    .slice(0, numberOfItems);
   return Promise.resolve(randomItems);
 };
 
@@ -361,7 +433,9 @@ export const getMostBorrowedItems = async (
   });
 
   // filter items out that have no interactions
-  const filteredItems = sortedItems.filter((item) => item.interactions && item.interactions.length > 0);
+  const filteredItems = sortedItems.filter(
+    (item) => item.interactions && item.interactions.length > 0,
+  );
 
   return Promise.resolve(filteredItems);
 };
@@ -375,8 +449,7 @@ export const getSearchHistoryItems = (
   if (!accessibleItems) return Promise.resolve([]);
 
   const searchHistory = user.searchHistory;
-  if (!searchHistory)
-    return Promise.resolve([]);
+  if (!searchHistory) return Promise.resolve([]);
 
   const interestingItems: PopulatedItemsFromDB = [];
   for (const searchData of user.searchHistory) {
@@ -418,9 +491,9 @@ export const getItemsBasedOnCatagories = (
   for (const searchToken of searchTokens) {
     const filteredItems = items.filter((item) => item.name === searchToken);
     for (const item of filteredItems) {
-      const categories = item.categories; // Get all category 
-      
-      //filter subcategory terms from DB object 
+      const categories = item.categories; // Get all category
+
+      //filter subcategory terms from DB object
       const keys = Object.keys(categories);
       for (const key of keys) {
         if (typeof categories[key].name === 'string') {
@@ -458,7 +531,7 @@ export const getItemsBasedOnCatagories = (
     );
     const categories = item.categories; // Get all category names
 
-    //filter subcategory terms from DB object 
+    //filter subcategory terms from DB object
     const keys = Object.keys(categories);
     for (const key of keys) {
       const subcategories = categories[key].subcategories;
@@ -492,8 +565,7 @@ export const getItemsBasedOnCatagories = (
   const borrowSuggestedItems: any[] = Object.values(topBorrowCategories)
     .filter(([_, count]) => count > 1)
     .flatMap(([subcategory]) =>
-
-      //match subcategory terms from DB object 
+      //match subcategory terms from DB object
       Object.keys(items[0].categories).flatMap((key) =>
         items.filter(
           (item) =>
@@ -510,8 +582,7 @@ export const getItemsBasedOnCatagories = (
   )
     .filter(([_, count]) => count > 1)
     .flatMap(([subcategory]) =>
-
-      //match subcategory terms from DB object 
+      //match subcategory terms from DB object
       Object.keys(items[0].categories).flatMap((key) =>
         items.filter(
           (item) =>
@@ -537,7 +608,7 @@ export const SummerSubcategories = [
   'Construction equipment',
   'Gardening tools',
   'Camping gear',
-]; 
+];
 
 // TODO: Use this function if needed
 export const filterItemsBySeason = (
