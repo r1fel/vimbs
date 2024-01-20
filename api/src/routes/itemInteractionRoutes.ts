@@ -22,7 +22,6 @@ import {
   handlePostInteraction,
   reviewInteraction,
   dummyController, //! ER: remove when itemInteractions are set up
-  removeReviewTraces, //! for tests - check if this may be removed after setup
 } from '../controllers/itemInteractionControllers';
 
 const itemInteractionRoutes = Router({ mergeParams: true });
@@ -60,16 +59,13 @@ itemInteractionRoutes
     deleteItemInteraction,
   );
 
-itemInteractionRoutes
-  .route('/:interactionId/review')
-  .post(
-    LogSomething, //! just to make sure, that the review route was actually hit
-    isLoggedIn,
-    itemInteractionBelongsToItem,
-    isInteractionPartaker,
-    isItemInteractionClosed,
-    validateItemInteractionReview,
-    //
-    reviewInteraction,
-  )
-  .get(removeReviewTraces); //! for tests - check if this may be removed after setup
+itemInteractionRoutes.route('/:interactionId/review').post(
+  LogSomething, //! just to make sure, that the review route was actually hit
+  isLoggedIn,
+  itemInteractionBelongsToItem,
+  isInteractionPartaker,
+  isItemInteractionClosed,
+  validateItemInteractionReview,
+  //
+  reviewInteraction,
+);

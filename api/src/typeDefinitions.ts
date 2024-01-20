@@ -232,3 +232,8 @@ export type ItemInteractionRequest = {
   message?: string;
   dueDate?: string;
 };
+
+export type ItemInteractionReviewRequest = {
+  rating: number;
+  body?: string;
+};

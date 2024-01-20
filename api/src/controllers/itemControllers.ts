@@ -185,6 +185,32 @@ export const deleteItem = catchAsync(
 // deleting all item a user has from DB and empty owners myItems array
 export const deleteAllOfUsersItems = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    // delete all reviews of bibi and bodo4
+    const bodo4: UserInDB | null = await User.findById(
+      '6553b5bfa70b16a991b89001',
+    );
+    if (bodo4 === null)
+      return next(new ExpressError('Bad Request: Bodo4 does not exist', 400));
+
+    const bibi: UserInDB | null = await User.findById(
+      '6544bd1bdf354e46068d74bf',
+    );
+    if (bibi === null)
+      return next(new ExpressError('Bad Request: Bibi does not exist', 400));
+
+    bodo4.giveReviews = [];
+    bodo4.giveReviewStats = { count: 0, meanRating: 0 };
+    bodo4.getReviews = [];
+    bodo4.getReviewStats = { count: 0, meanRating: 0 };
+    await bodo4.save();
+
+    bibi.giveReviews = [];
+    bibi.giveReviewStats = { count: 0, meanRating: 0 };
+    bibi.getReviews = [];
+    bibi.getReviewStats = { count: 0, meanRating: 0 };
+    await bibi.save();
+
+    //anything connected to the requesting user
     if (req.user === undefined)
       return next(new ExpressError('user is undefined', 500));
 
@@ -208,35 +234,6 @@ export const deleteAllOfUsersItems = catchAsync(
       await user.save();
       return res.send('Successfully deleted all of your items!');
     }
-
-    // delete all reviews of bibi and bodo4
-    const bodo4: UserInDB | null = await User.findById(
-      '6553b5bfa70b16a991b89001',
-    );
-    if (bodo4 === null)
-      return next(
-        new ExpressError('Bad Request: This user does not exist', 400),
-      );
-
-    const bibi: UserInDB | null = await User.findById(
-      '6544bd1bdf354e46068d74bf',
-    );
-    if (bibi === null)
-      return next(
-        new ExpressError('Bad Request: This user does not exist', 400),
-      );
-
-    bodo4.giveReviews = [];
-    bodo4.giveReviewStats = { count: 0, meanRating: 0 };
-    bodo4.getReviews = [];
-    bodo4.getReviewStats = { count: 0, meanRating: 0 };
-    await bodo4.save();
-
-    bibi.giveReviews = [];
-    bibi.giveReviewStats = { count: 0, meanRating: 0 };
-    bibi.getReviews = [];
-    bibi.getReviewStats = { count: 0, meanRating: 0 };
-    await bibi.save();
 
     return res.send('You had no items to delete.');
   },

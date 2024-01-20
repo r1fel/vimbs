@@ -459,9 +459,7 @@ export const reviewInteraction = catchAsync(
       await interactingParty.save();
 
       return res.send(
-        `You sucessfully gave the review >${requestedReview.body}< 
- with a rating of ${requestedReview.rating} 
- on your interaction with ${interactingParty.firstName} on >${item.name}<`,
+        `You sucessfully gave the review >${requestedReview.body}< with a rating of ${requestedReview.rating} on your interaction with ${interactingParty.firstName} on >${item.name}<`,
       );
     };
 
@@ -470,55 +468,6 @@ export const reviewInteraction = catchAsync(
 
     // when the owner is the currentUser
     if (owner._id.equals(currentUser)) await setReview(interestedParty); // set review on interestedParty
-  },
-);
-
-//! function for the removing the traces of testing the review feature
-export const removeReviewTraces = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    // get the item.owner of the item requested in the params
-    const item: ItemInDB | null = await Item.findById(req.params.itemId);
-    if (item === null)
-      return next(
-        new ExpressError('Bad Request: This item does not exist', 400),
-      );
-    const owner: UserInDB | null = await User.findById(item.owner);
-    if (owner === null)
-      return next(
-        new ExpressError('Bad Request: This user does not exist', 400),
-      );
-
-    // get the interested Party of the interaction requested in the params
-
-    const interaction: ItemInteractionInDB | null =
-      await ItemInteraction.findById(req.params.interactionId);
-    if (interaction === null)
-      return next(
-        new ExpressError('Bad Request: This interaction does not exist', 400),
-      );
-    const interestedParty: UserInDB | null = await User.findById(
-      interaction.interestedParty,
-    );
-    if (interestedParty === null)
-      return next(
-        new ExpressError('Bad Request: This user does not exist', 400),
-      );
-
-    owner.giveReviews = [];
-    owner.giveReviewStats = { count: 0, meanRating: 0 };
-    owner.getReviews = [];
-    owner.getReviewStats = { count: 0, meanRating: 0 };
-    await owner.save();
-
-    interestedParty.giveReviews = [];
-    interestedParty.giveReviewStats = { count: 0, meanRating: 0 };
-    interestedParty.getReviews = [];
-    interestedParty.getReviewStats = { count: 0, meanRating: 0 };
-    await interestedParty.save();
-
-    res.send(
-      `you passed removeReviewTraces controller with owner: ${owner} and interestedParty: ${interestedParty}`,
-    );
   },
 );
 
