@@ -854,6 +854,21 @@ const notPassedValidateItemInteractionReview = (
             invalidItemInteractionReviewBody7,
           );
         }, 10000);
+
+        // for rating is a decimal number
+        const invalidItemInteractionReviewBody8 = {
+          itemInteractionReview: {
+            rating: 3.4,
+          },
+        };
+
+        it('for rating is a decimal number', async () => {
+          await testForInvalidItemInteractionReviewBody(
+            400,
+            'Error: &quot;itemInteractionReview.rating&quot; must be an integer<br> &nbsp; &nbsp;at validateItemInteractionReview',
+            invalidItemInteractionReviewBody8,
+          );
+        }, 10000);
       });
     });
   });
