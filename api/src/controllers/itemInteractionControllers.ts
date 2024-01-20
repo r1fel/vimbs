@@ -444,10 +444,13 @@ export const reviewInteraction = catchAsync(
       //update ReviewStats
       const newReviewStats: ReviewStats = {
         count: ReviewStats.count + 1,
-        meanRating:
-          (ReviewStats.meanRating * ReviewStats.count +
-            requestedReview.rating) /
-          (ReviewStats.count + 1),
+        meanRating: parseFloat(
+          (
+            (ReviewStats.meanRating * ReviewStats.count +
+              requestedReview.rating) /
+            (ReviewStats.count + 1)
+          ).toFixed(1),
+        ),
       };
 
       if (interactingParty.equals(owner)) {
