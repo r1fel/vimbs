@@ -10,7 +10,6 @@ import isItemAvailable from '../utils/middleware/isItemAvaliable';
 import validateItemInteraction from '../utils/middleware/validateItemInteraction';
 import itemInteractionBelongsToItem from '../utils/middleware/itemInteractionBelongsToItem';
 import isInteractionPartaker from '../utils/middleware/isInteractionPartaker';
-import LogSomething from '../utils/middleware/LogSomething'; //! just for developent
 import isItemInteractionClosed from '../utils/middleware/isItemInteractionClosed';
 import validateItemInteractionReview from '../utils/middleware/validateItemInteractionReview';
 
@@ -21,7 +20,6 @@ import {
   deleteItemInteraction,
   handlePostInteraction,
   reviewInteraction,
-  dummyController, //! ER: remove when itemInteractions are set up
 } from '../controllers/itemInteractionControllers';
 
 const itemInteractionRoutes = Router({ mergeParams: true });
@@ -60,7 +58,6 @@ itemInteractionRoutes
   );
 
 itemInteractionRoutes.route('/:interactionId/review').post(
-  LogSomething, //! just to make sure, that the review route was actually hit
   isLoggedIn,
   itemInteractionBelongsToItem,
   isInteractionPartaker,

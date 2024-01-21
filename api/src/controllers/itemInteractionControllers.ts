@@ -176,7 +176,6 @@ export const deleteItemInteraction = catchAsync(
 );
 
 // controller, that handles the core logic arround itemInteractions
-//! in progress
 export const handlePostInteraction = catchAsync(
   //constant definitions
   async (req: Request, res: Response, next: NextFunction) => {
@@ -471,14 +470,5 @@ export const reviewInteraction = catchAsync(
 
     // when the owner is the currentUser
     if (owner._id.equals(currentUser)) await setReview(interestedParty); // set review on interestedParty
-  },
-);
-
-// test function only needed for the scope of coding the itemInteractions
-export const dummyController = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const status: InteractionStatuses = req.body.itemInteraction.status;
-    console.log(status);
-    res.send('you passed dummy controller');
   },
 );
