@@ -827,7 +827,7 @@ describe('itemInteraction Routes', () => {
               }, 10000);
             });
 
-            describe.only('requested by interestedParty', () => {
+            describe('requested by interestedParty', () => {
               it('with message text and future dueDate', async () => {
                 await testForRequestingClosedOnClosedStatus(
                   'getter',
@@ -883,7 +883,7 @@ describe('itemInteraction Routes', () => {
     });
   });
 
-  describe.only('DELETE all items', () => {
+  describe('DELETE all items', () => {
     it('should delete all of bodo4s items', async () => {
       // login bodo4
       const connectSidValue = await loginBodo4();

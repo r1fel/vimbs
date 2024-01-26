@@ -184,6 +184,16 @@ describe('user Routes', () => {
               profilePicture: settingsBody.newUserData.profilePicture,
               getHistory: expect.any(Array),
               getItems: expect.any(Array),
+              getReviewStats: {
+                count: expect.any(Number),
+                meanRating: expect.any(Number),
+              },
+              getReviews: expect.any(Array),
+              giveReviewStats: {
+                count: expect.any(Number),
+                meanRating: expect.any(Number),
+              },
+              giveReviews: expect.any(Array),
               searchHistory: expect.any(Array),
               myItems: expect.any(Array),
             },
