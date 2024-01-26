@@ -10,6 +10,7 @@ import catchAsync from '../utils/catchAsync';
 
 // models
 import Item from '../models/item';
+import ItemInteraction from '../models/itemInteraction';
 import User from '../models/user';
 
 // Type-Definitions
@@ -209,6 +210,21 @@ export const deleteAllOfUsersItems = catchAsync(
     bibi.getReviews = [];
     bibi.getReviewStats = { count: 0, meanRating: 0 };
     await bibi.save();
+
+    // delete all orphaned interactions, that are still in the DB, but not on an item
+    // Step 1: Get all interaction IDs from the database
+    const allInteractionIds = await ItemInteraction.find({}, '_id');
+
+    // Step 2: Loop through the array and check if associated items exist
+    for (const interaction of allInteractionIds) {
+      const item = await Item.findOne({ interactions: interaction._id });
+
+      // If no item is found with the interaction ID in its interactions array, delete the interaction
+      if (!item) {
+        await ItemInteraction.findByIdAndDelete(interaction._id);
+        // console.log(`Deleted orphaned interaction with ID: ${interaction._id}`);
+      }
+    }
 
     //anything connected to the requesting user
     if (req.user === undefined)
