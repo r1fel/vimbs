@@ -116,6 +116,10 @@ export interface UserInDB extends Document {
     countryCode?: string;
     number?: string;
   };
+  notifications: {
+    read: mongoose.Types.ObjectId[];
+    unread: mongoose.Types.ObjectId[];
+  };
   myItems: mongoose.Types.ObjectId[];
   getItems: mongoose.Types.ObjectId[];
   getHistory: mongoose.Types.ObjectId[];
@@ -172,6 +176,18 @@ export interface ItemInteractionInDB extends Document {
     messageWriter: InteractingParties;
     messageTimestamp: Date;
   }[];
+}
+
+export interface NotificationInDB extends Document {
+  timeStamp: Date;
+  emailRequired: boolean;
+  body: {
+    headline: string;
+    text?: string;
+  };
+  item: mongoose.Types.ObjectId;
+  itemPicture?: string;
+  read: boolean;
 }
 
 // Response to Client related Types

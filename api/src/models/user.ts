@@ -50,6 +50,20 @@ const UserSchema: Schema = new Schema({
     plz: String,
     city: String,
   },
+  notifications: {
+    read: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Notification',
+      },
+    ],
+    unread: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Notification',
+      },
+    ],
+  },
   myItems: [
     {
       type: Schema.Types.ObjectId,
