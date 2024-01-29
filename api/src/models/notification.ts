@@ -1,6 +1,7 @@
 // Notification Model for working with MongoDB
 
 import mongoose, { Schema } from 'mongoose';
+import User from './user';
 import { NotificationInDB } from '../typeDefinitions';
 
 const notificationSchema: Schema = new Schema({
@@ -26,6 +27,42 @@ const notificationSchema: Schema = new Schema({
     default: false,
     required: true,
   },
+});
+
+// clean up after notification was deleted
+notificationSchema.post('findOneAndDelete', async function (doc) {
+  if (doc) {
+    // console.log(doc);
+    const notificationId = doc._id;
+
+    try {
+      //find the user
+      const user = await User.findOne({
+        $or: [
+          { 'notifications.read': notificationId },
+          { 'notifications.unread': notificationId },
+        ],
+      });
+
+      if (user) {
+        // If user is found, proceed to update
+        await User.updateOne(
+          { _id: user._id },
+          {
+            $pull: {
+              'notifications.read': notificationId,
+              'notifications.unread': notificationId,
+            },
+          },
+        );
+        // console.log(
+        //   `Notification ${notificationId} removed from user ${user._id}`,
+        // );
+      }
+    } catch (error) {
+      console.error(`Error removing notification ${notificationId}:`, error);
+    }
+  }
 });
 
 const Notification = mongoose.model<NotificationInDB>(

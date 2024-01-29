@@ -55,12 +55,14 @@ const UserSchema: Schema = new Schema({
       {
         type: Schema.Types.ObjectId,
         ref: 'Notification',
+        default: [],
       },
     ],
     unread: [
       {
         type: Schema.Types.ObjectId,
         ref: 'Notification',
+        default: [],
       },
     ],
   },

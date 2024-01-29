@@ -13,6 +13,9 @@ import {
   setUserData,
   changePassword,
   myItems,
+  notificationSetup,
+  notificationReadToggle,
+  deleteAllOfUsersNotifications,
   deleteUser,
 } from '../controllers/userControllers';
 
@@ -41,6 +44,29 @@ userRoutes.route('/inventory/myItems').get(
   isUser,
   //
   myItems,
+);
+
+userRoutes
+  .route('/notification')
+  .get(
+    isLoggedIn,
+    isUser,
+    //
+    notificationSetup,
+  )
+  .delete(
+    isLoggedIn,
+    isUser,
+    //
+    deleteAllOfUsersNotifications,
+  );
+
+userRoutes.route('/notification/:notificationId').get(
+  isLoggedIn,
+  isUser,
+  // isNotification,
+  //
+  notificationReadToggle,
 );
 
 userRoutes.route('/deleteUser').delete(deleteUser);
