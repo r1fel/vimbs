@@ -7,6 +7,7 @@ import ExpressError from '../utils/ExpressError';
 import catchAsync from '../utils/catchAsync';
 import processItemForClient from '../utils/processItemForClient';
 import getFutureDate from '../utils/getFutureDate';
+import setNotification from '../utils/setNotification';
 
 // models
 import Item from '../models/item';
@@ -106,7 +107,13 @@ export const createItemInteraction = catchAsync(
       user.getItems.push(item._id);
       await user.save();
     }
-    // TODO ER: implement notification on item Owner
+    //! implement notification on item Owner
+    await setNotification(
+      'interestedPartyOpensInteraction',
+      item,
+      interaction,
+      req.body,
+    );
 
     // process item for client with the current interaction
     const itemForClientProcessing = [item];

@@ -7,14 +7,22 @@ import catchAsync from '../utils/catchAsync';
 
 // models
 import User from '../models/user';
-import { UserInDB } from '../typeDefinitions';
+import { UserInDB, UserInDBPopulated } from '../typeDefinitions';
 import ExpressError from '../utils/ExpressError';
 
 // simple auth for client route changes: isLoggedIn middleware ran previously
-export const sendIsAuthenticated = (req: Request, res: Response) => {
-  // console.log(`req.user in sendIsAuthenticated is ${req.user}`);
-  res.send(req.user);
-};
+export const sendIsAuthenticated = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) return next(new ExpressError('Unauthorized', 401));
+    const user = (await User.findOne({
+      _id: req.user._id,
+    })
+      .populate('notifications.read')
+      .populate('notifications.unread')) as UserInDBPopulated | null;
+    if (!user) return next(new ExpressError('user not found', 500));
+    res.send(user);
+  },
+);
 
 // register new user
 export const register = catchAsync(
@@ -32,7 +40,11 @@ export const register = catchAsync(
 export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email } = req.body;
-    const user: UserInDB | null = await User.findOne({ email: email });
+    const user = (await User.findOne({
+      email: email,
+    })
+      .populate('notifications.read')
+      .populate('notifications.unread')) as UserInDBPopulated | null;
     if (!user) return next(new ExpressError('user not found', 500));
 
     //! logic to clean up the arrays as backup is the deletion didn't

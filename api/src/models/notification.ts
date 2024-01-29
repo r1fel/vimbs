@@ -21,6 +21,10 @@ const notificationSchema: Schema = new Schema({
     ref: 'Item',
     required: true,
   },
+  interaction: {
+    type: Schema.Types.ObjectId,
+    ref: 'ItemInteraction',
+  },
   itemPicture: String,
   read: {
     type: Boolean,

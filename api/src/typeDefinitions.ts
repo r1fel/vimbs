@@ -130,6 +130,37 @@ export interface UserInDB extends Document {
   getReviewStats: ReviewStats;
 }
 
+export interface UserInDBPopulated extends Document {
+  _id: mongoose.Types.ObjectId;
+  email: string;
+  googleId?: string;
+  profilePicture?: string;
+  creationDate: Date;
+  firstName?: string;
+  lastName?: string;
+  address?: {
+    street?: string;
+    plz?: string;
+    city?: string;
+  };
+  phone?: {
+    countryCode?: string;
+    number?: string;
+  };
+  notifications: {
+    read: NotificationInDB[];
+    unread: NotificationInDB[];
+  };
+  myItems: mongoose.Types.ObjectId[];
+  getItems: mongoose.Types.ObjectId[];
+  getHistory: mongoose.Types.ObjectId[];
+  searchHistory: [{ searchToken: string; date: Date }];
+  giveReviews: Review[];
+  giveReviewStats: ReviewStats;
+  getReviews: Review[];
+  getReviewStats: ReviewStats;
+}
+
 export interface ItemInDB extends Document {
   creationDate: Date;
   picture: string | undefined;
@@ -186,6 +217,7 @@ export interface NotificationInDB extends Document {
     text?: string;
   };
   item: mongoose.Types.ObjectId;
+  interaction?: mongoose.Types.ObjectId;
   itemPicture?: string;
   read: boolean;
 }
