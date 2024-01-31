@@ -107,9 +107,10 @@ export const createItemInteraction = catchAsync(
       user.getItems.push(item._id);
       await user.save();
     }
-    //! implement notification on item Owner
+
     await setNotification(
       'interestedPartyOpensInteraction',
+      currentUser,
       item,
       interaction,
       req.body,
@@ -262,6 +263,16 @@ export const handlePostInteraction = catchAsync(
     // users are messaging
     if (interaction.interactionStatus === itemInteractionBody.status) {
       pushMessage();
+
+      if (itemInteractionBody.message)
+        await setNotification(
+          'newMessage',
+          currentUser,
+          item,
+          interaction,
+          req.body,
+        );
+
       // owner can also adjust the due Date in accepted state
       if (
         interaction.interactionStatus === accepted &&
