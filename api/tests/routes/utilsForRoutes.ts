@@ -23,3 +23,4 @@ export const userRoute = '/user';
 export const userIdMyItemsRoute = '/user/:userId/inventory/myItems';
 export const userIdChangePasswordRoute = '/user/:userId/changePassword';
 export const userIdSettingsRoute = '/user/:userId/settings';
+export const userIdNotificationRoute = '/user/:userId/notification';
