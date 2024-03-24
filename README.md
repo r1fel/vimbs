@@ -9,7 +9,7 @@ VIMBS is a plattform to lend and borrow household items inside communities.
 1. open terminal
 2. navigate to folder "api"
 3. enter command "npm i"
-4. enter command "nodemon"
+4. enter command "npm run start:dev"
 5. open a second terminal
 6. navigate to folder "client"
 7. enter command "npm i"
