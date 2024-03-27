@@ -66,6 +66,25 @@ const setNotification = async (
     }< ist an >${item.name}< interessiert`;
   }
 
+  // declined interaction
+  if (notificationSituation === 'declinigOpenedInteraction') {
+    //the interactingParty causes the notification
+    if (currentUser.equals(interaction.interestedParty._id)) {
+      notification.body.headline = `>${
+        interestedParty.firstName ? interestedParty.firstName : noFirstName
+      }< hat die Anfrage zu >${item.name}< zurückgezogen`;
+    }
+    //the owner causes the notification
+    else if (currentUser.equals(item!.owner!._id)) {
+      notification.body.headline = `>Eigentümer< hat deine Anfrage zu >${item.name}< abgelehnt`;
+      // substitiute Eigentümer accordingly
+      //! ${
+      //!   interaction.revealOwnerIdentity === true ? item.owner.firstName : 'Eigentümer'
+      //!   interestedParty.firstName ? interestedParty.firstName : noFirstName
+      //! }
+    }
+  }
+
   //new Message
   else if (notificationSituation === 'newMessage') {
     //the interactingParty causes the notification

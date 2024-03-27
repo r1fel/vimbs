@@ -187,7 +187,7 @@ describe('notifications', () => {
     await database.closeDatabaseConnection();
   });
 
-  describe.skip(`POST ${itemIdInteractionRoute} (open interaction)`, () => {
+  describe(`POST ${itemIdInteractionRoute} (open interaction)`, () => {
     describe('should set notification on owner', () => {
       const expectsForNotificationOnItemInteraction = (
         itemId: string,
@@ -323,7 +323,7 @@ describe('notifications', () => {
 
   describe(`POST ${itemIdInteractionRoute} (handle interaction)`, () => {
     describe('for current interactionStatus is opened', () => {
-      describe.skip('for status opened - requested by interestedParty - and set notification', () => {
+      describe('for status opened - requested by interestedParty - and set notification', () => {
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -602,6 +602,284 @@ describe('notifications', () => {
 
         it('NOT on interstedParty without given message', async () => {
           await testForNotificationOnOwnerForMessageingOnOpendItemInteraction(
+            validItemInteractionBodyWithNoMessage,
+          );
+        }, 10000);
+      });
+      describe('for status declined - requested by owner - and set notification', () => {
+        const expectsForNotificationOnItemInteraction = (
+          itemId: string,
+          interactionIdOnItem: string,
+          itemInteractionBody: { itemInteraction: ItemInteractionRequest },
+          authResponseNotifiedUser: request.Response,
+        ) => {
+          // console.log(
+          //   'authResponseNotifiedUser.body.notifications',
+          //   authResponseNotifiedUser.body.notifications,
+          // );
+
+          // expects
+          expect(authResponseNotifiedUser.statusCode).toBe(200);
+          // the notification is suposed to be the only one on the user in the unread array and its supposed to be populated
+          // if a "messaging/ dueDate change" request was done that doesn't include a message, no new/second notification is expected
+          expect(authResponseNotifiedUser.body.notifications).toEqual({
+            read: [],
+            unread: [
+              {
+                body: {
+                  headline:
+                    '>Eigentümer< hat deine Anfrage zu >Item for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction< abgelehnt',
+                  ...(itemInteractionBody.itemInteraction.message
+                    ? {
+                        text: itemInteractionBody.itemInteraction.message,
+                      }
+                    : {}),
+                },
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                emailRequired: false,
+                read: false,
+                timeStamp: expect.any(String),
+                item: itemId,
+                interaction: interactionIdOnItem,
+                __v: expect.any(Number),
+              },
+            ],
+          });
+        };
+
+        // test: create Item, open interaction, let bodo4 decline,
+        // get bibis auth to check for notification, delete item and notifications
+        const testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction =
+          async (validItemInteractionBody: {
+            itemInteraction: ItemInteractionRequest;
+          }) => {
+            // define Body to be used in this test
+            const itemInteractionBody = validItemInteractionBody;
+
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+            );
+
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              'testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+            );
+
+            // bodo4 declines ItemInteraction
+            const handleItemInteractionResponseDeclinedOnOpened =
+              await bodo4SendsItemInteractionRequest(
+                itemId,
+                interactionIdOnItem,
+                itemInteractionBody,
+              );
+
+            // login bibi
+            const connectSidValueBibi = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            // bibi calles auth
+            const authResponseNotifiedUser = await request(app)
+              .get(authRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+            // logout bibi
+            await logout(connectSidValueBibi);
+
+            // login Bodo4
+            const connectSidValueBodo4 = await loginBodo4();
+
+            // delete all items
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // delete all notifications
+            const deleteAllOfUsersNotificationsResponse = await request(app)
+              .delete(
+                `${userRoute}/${bodo4sUserId}/${
+                  userIdNotificationRoute.split(':userId/').slice(-1)[0]
+                }`,
+              )
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // logout
+            await logout(connectSidValueBodo4);
+
+            expectsForNotificationOnItemInteraction(
+              itemId,
+              interactionIdOnItem,
+              validItemInteractionBody,
+              authResponseNotifiedUser,
+            );
+          };
+
+        const validItemInteractionBodyWithMessage = {
+          itemInteraction: {
+            status: 'declined',
+            message:
+              'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+          },
+        };
+        it('on interstedParty with a given message', async () => {
+          await testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction(
+            validItemInteractionBodyWithMessage,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithNoMessage = {
+          itemInteraction: {
+            status: 'declined',
+            // message: 'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+          },
+        };
+
+        it('on interstedParty without given message', async () => {
+          await testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction(
+            validItemInteractionBodyWithNoMessage,
+          );
+        }, 10000);
+      });
+      describe('for status declined - requested by interestedParty - and set notification', () => {
+        const expectsForNotificationOnItemInteraction = (
+          itemId: string,
+          interactionIdOnItem: string,
+          itemInteractionBody: { itemInteraction: ItemInteractionRequest },
+          authResponseNotifiedUser: request.Response,
+        ) => {
+          // console.log(
+          //   'authResponseNotifiedUser.body.notifications',
+          //   authResponseNotifiedUser.body.notifications,
+          // );
+
+          // expects
+          expect(authResponseNotifiedUser.statusCode).toBe(200);
+          // the notification is suposed to be the only one on the user in the unread array and its supposed to be populated
+          // if a "messaging/ dueDate change" request was done that doesn't include a message, no new/second notification is expected
+          expect(authResponseNotifiedUser.body.notifications).toEqual({
+            read: [],
+            unread: [
+              {
+                body: {
+                  headline:
+                    '>bibi< ist an >Item for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction< interessiert',
+                  text: 'opening interaction for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+                },
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                emailRequired: false,
+                read: false,
+                timeStamp: expect.any(String),
+                item: itemId,
+                interaction: interactionIdOnItem,
+                __v: expect.any(Number),
+              },
+              {
+                body: {
+                  headline:
+                    '>bibi< hat die Anfrage zu >Item for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction< zurückgezogen',
+                  ...(itemInteractionBody.itemInteraction.message
+                    ? {
+                        text: itemInteractionBody.itemInteraction.message,
+                      }
+                    : {}),
+                },
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                emailRequired: false,
+                read: false,
+                timeStamp: expect.any(String),
+                item: itemId,
+                interaction: interactionIdOnItem,
+                __v: expect.any(Number),
+              },
+            ],
+          });
+        };
+        // test: create Item, open interaction, let bibi decline,
+        // get bodo4s auth to check for notification, delete item and notifications
+        const testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction =
+          async (validItemInteractionBody: {
+            itemInteraction: ItemInteractionRequest;
+          }) => {
+            // define Body to be used in this test
+            const itemInteractionBody = validItemInteractionBody;
+
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+            );
+
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              'testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+            );
+
+            // bibi declines ItemInteraction
+            const handleItemInteractionResponseDeclinedOnOpened =
+              await bibiSendsItemInteractionRequest(
+                itemId,
+                interactionIdOnItem,
+                itemInteractionBody,
+              );
+
+            // login Bodo4
+            const connectSidValueBodo4 = await loginBodo4();
+
+            // bodo4 calles auth
+            const authResponseNotifiedUser = await request(app)
+              .get(authRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // delete all items
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // delete all notifications
+            const deleteAllOfUsersNotificationsResponse = await request(app)
+              .delete(
+                `${userRoute}/${bodo4sUserId}/${
+                  userIdNotificationRoute.split(':userId/').slice(-1)[0]
+                }`,
+              )
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // logout
+            await logout(connectSidValueBodo4);
+
+            expectsForNotificationOnItemInteraction(
+              itemId,
+              interactionIdOnItem,
+              validItemInteractionBody,
+              authResponseNotifiedUser,
+            );
+          };
+
+        const validItemInteractionBodyWithMessage = {
+          itemInteraction: {
+            status: 'declined',
+            message:
+              'some message on opened interaction for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+          },
+        };
+        it('on owner with a given message', async () => {
+          await testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction(
+            validItemInteractionBodyWithMessage,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithNoMessage = {
+          itemInteraction: {
+            status: 'declined',
+            // message: 'some message on opened interaction for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+          },
+        };
+
+        it('on owner without given message', async () => {
+          await testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction(
             validItemInteractionBodyWithNoMessage,
           );
         }, 10000);

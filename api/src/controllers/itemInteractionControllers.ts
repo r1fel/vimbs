@@ -291,6 +291,13 @@ export const handlePostInteraction = catchAsync(
       setDueDate(0); //to now
       toggleAvailability();
       pushMessage();
+      await setNotification(
+        'declinigOpenedInteraction',
+        currentUser,
+        item,
+        interaction,
+        req.body,
+      );
       await User.updateOne(
         { _id: interaction.interestedParty },
         { $pull: { getItems: itemId }, $addToSet: { getHistory: itemId } },
