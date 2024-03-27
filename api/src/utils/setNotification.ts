@@ -54,6 +54,12 @@ const setNotification = async (
   new ExpressError('Bad Request: This user does not exist', 400);
   // }
 
+  //! check if needed in every case - have request only, when item.owner is not already UserInDB and then if needed
+  let owner: UserInDB | null = null;
+  owner = await User.findById(item.owner);
+  if (owner === null) return;
+  new ExpressError('Bad Request: This user does not exist', 400);
+
   //create notifictation contents
   const notification: NotificationInDB = new Notification();
 
@@ -83,6 +89,13 @@ const setNotification = async (
       //!   interestedParty.firstName ? interestedParty.firstName : noFirstName
       //! }
     }
+  }
+
+  // accepting interaction
+  if (notificationSituation === 'acceptingOpenedInteraction') {
+    notification.body.headline = `>${
+      owner.firstName ? owner.firstName : noFirstName
+    }< hat deine Anfrage zu >${item.name}< angenommen`;
   }
 
   //new Message

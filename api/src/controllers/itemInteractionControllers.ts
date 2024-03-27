@@ -315,6 +315,13 @@ export const handlePostInteraction = catchAsync(
       setDueDate();
       pushMessage();
       revealOwnerIdentity();
+      await setNotification(
+        'acceptingOpenedInteraction',
+        currentUser,
+        item,
+        interaction,
+        req.body,
+      );
     }
 
     // owner closes interaction
