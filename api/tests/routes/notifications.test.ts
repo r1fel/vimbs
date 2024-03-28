@@ -1410,6 +1410,160 @@ describe('notifications', () => {
           );
         }, 10000);
       });
+      describe('for status closed - requested by owner - and set notification', () => {
+        const testName =
+          'testForNotificationOnInterestedPartyForOwnerClosingAcceptedItemInteraction';
+        const expectsForNotificationOnItemInteraction = (
+          itemId: string,
+          interactionIdOnItem: string,
+          itemInteractionBody: { itemInteraction: ItemInteractionRequest },
+          authResponseNotifiedUser: request.Response,
+        ) => {
+          // console.log(
+          //   'authResponseNotifiedUser.body.notifications.unread',
+          //   authResponseNotifiedUser.body.notifications.unread,
+          // );
+
+          // expects
+          expect(authResponseNotifiedUser.statusCode).toBe(200);
+          // the notification is suposed to be the only one on the user in the unread array and its supposed to be populated
+          expect(authResponseNotifiedUser.body.notifications).toEqual({
+            read: [],
+            unread: [
+              {
+                body: {
+                  headline: `>bodo4< hat deine Anfrage zu >Item for ${testName}< angenommen`,
+                },
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                emailRequired: false,
+                read: false,
+                timeStamp: expect.any(String),
+                item: itemId,
+                interaction: interactionIdOnItem,
+                __v: expect.any(Number),
+              },
+              {
+                body: {
+                  headline: `>bodo4< hat bestätigt, dass du >Item for ${testName}< zurückgegeben hast`,
+                  ...(itemInteractionBody.itemInteraction.message
+                    ? {
+                        text: itemInteractionBody.itemInteraction.message,
+                      }
+                    : {}),
+                },
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                emailRequired: false,
+                read: false,
+                timeStamp: expect.any(String),
+                item: itemId,
+                interaction: interactionIdOnItem,
+                __v: expect.any(Number),
+              },
+            ],
+          });
+        };
+
+        // test: create Item, open interaction, let bodo4 accept, have bodo4 close,
+        // get bibis auth to check for notification, delete item and notifications
+        const testForNotificationOnInterestedPartyForOwnerClosingAcceptedItemInteraction =
+          async (validItemInteractionBody: {
+            itemInteraction: ItemInteractionRequest;
+          }) => {
+            // define Body to be used in this test
+            const itemInteractionBody = validItemInteractionBody;
+
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(testName);
+
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              testName,
+            );
+
+            // bodo4 accepts ItemInteraction
+            const handleItemInteractionResponseAcceptOnOpened =
+              await bodo4SendsItemInteractionRequest(
+                itemId,
+                interactionIdOnItem,
+                { itemInteraction: { status: 'accepted' } },
+              );
+
+            // bodo4 closes the interaction
+            const handleItemInteractionResponseAcceptOnAccepted =
+              await bodo4SendsItemInteractionRequest(
+                itemId,
+                interactionIdOnItem,
+                itemInteractionBody,
+              );
+
+            // login bibi
+            const connectSidValueBibi = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            // bibi calles auth
+            const authResponseNotifiedUser = await request(app)
+              .get(authRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+            // logout bibi
+            await logout(connectSidValueBibi);
+
+            // login Bodo4
+            const connectSidValueBodo4 = await loginBodo4();
+
+            // delete all items
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // delete all notifications
+            const deleteAllOfUsersNotificationsResponse = await request(app)
+              .delete(
+                `${userRoute}/${bodo4sUserId}/${
+                  userIdNotificationRoute.split(':userId/').slice(-1)[0]
+                }`,
+              )
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // logout
+            await logout(connectSidValueBodo4);
+
+            expectsForNotificationOnItemInteraction(
+              itemId,
+              interactionIdOnItem,
+              validItemInteractionBody,
+              authResponseNotifiedUser,
+            );
+          };
+
+        const validItemInteractionBodyWithMessage = {
+          itemInteraction: {
+            status: 'closed',
+            message: `some message for closing the interaction for ${testName}`,
+          },
+        };
+        it('on interstedParty with a given message', async () => {
+          await testForNotificationOnInterestedPartyForOwnerClosingAcceptedItemInteraction(
+            validItemInteractionBodyWithMessage,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithNoMessage = {
+          itemInteraction: {
+            status: 'closed',
+            // message: `some message for closing the interaction for ${testName}`,
+          },
+        };
+
+        it('on interstedParty without given message', async () => {
+          await testForNotificationOnInterestedPartyForOwnerClosingAcceptedItemInteraction(
+            validItemInteractionBodyWithNoMessage,
+          );
+        }, 10000);
+      });
     });
   });
 

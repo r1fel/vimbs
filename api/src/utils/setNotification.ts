@@ -113,6 +113,13 @@ const setNotification = async (
     notification.body.text = undefined;
   }
 
+  // closing interaction
+  else if (notificationSituation === 'closingAcceptedInteraction') {
+    notification.body.headline = `>${
+      owner.firstName ? owner.firstName : noFirstName
+    }< hat bestätigt, dass du >${item.name}< zurückgegeben hast`;
+  }
+
   //new Message
   else if (notificationSituation === 'newMessage') {
     //the interactingParty causes the notification

@@ -346,6 +346,13 @@ export const handlePostInteraction = catchAsync(
       changeInteractionStatus();
       toggleAvailability();
       pushMessage();
+      await setNotification(
+        'closingAcceptedInteraction',
+        currentUser,
+        item,
+        interaction,
+        req.body,
+      );
       await User.updateOne(
         { _id: interaction.interestedParty },
         { $pull: { getItems: itemId }, $addToSet: { getHistory: itemId } },
