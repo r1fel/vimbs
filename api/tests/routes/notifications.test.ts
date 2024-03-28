@@ -202,6 +202,7 @@ describe('notifications', () => {
 
   describe(`POST ${itemIdInteractionRoute} (open interaction)`, () => {
     describe('should set notification on owner', () => {
+      const testName = 'testForNotificationOnOwnerForOpendItemInteraction';
       const expectsForNotificationOnItemInteraction = (
         itemId: string,
         interactionIdOnItem: string,
@@ -221,8 +222,7 @@ describe('notifications', () => {
           unread: [
             {
               body: {
-                headline:
-                  '>bibi< ist an >Item for testForNotificationOnOwnerForOpendItemInteraction< interessiert',
+                headline: `>bibi< ist an >Item for ${testName}< interessiert`,
                 ...(itemInteractionBody.itemInteraction.message
                   ? {
                       text: itemInteractionBody.itemInteraction.message,
@@ -251,9 +251,7 @@ describe('notifications', () => {
           const itemInteractionBody = validItemInteractionBody;
 
           // bodo4 creates item
-          const itemId = await bodo4CreatesItem(
-            'testForNotificationOnOwnerForOpendItemInteraction',
-          );
+          const itemId = await bodo4CreatesItem(testName);
 
           // bibi opens interaction
           // login bibi
@@ -310,8 +308,7 @@ describe('notifications', () => {
       const validItemInteractionBodyWithMessage = {
         itemInteraction: {
           status: 'opened',
-          message:
-            'opening Interaction for testForNotificationOnOwnerForOpendItemInteraction',
+          message: `opening Interaction for ${testName}`,
         },
       };
       it('with itemInteraction message', async () => {
@@ -323,7 +320,7 @@ describe('notifications', () => {
       const validItemInteractionBodyWithNoMessage = {
         itemInteraction: {
           status: 'opened',
-          // message: 'opening Interaction for testForNotificationOnOwnerForOpendItemInteraction',
+          // message: `opening Interaction for ${testName}`,
         },
       };
       it('with no itemInteraction message', async () => {
@@ -337,6 +334,8 @@ describe('notifications', () => {
   describe(`POST ${itemIdInteractionRoute} (handle interaction)`, () => {
     describe('for current interactionStatus is opened', () => {
       describe('for status opened - requested by interestedParty - and set notification', () => {
+        const testName =
+          'testForNotificationOnOwnerForMessageingOnOpendItemInteraction';
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -357,9 +356,8 @@ describe('notifications', () => {
             unread: [
               {
                 body: {
-                  headline:
-                    '>bibi< ist an >Item for testForNotificationOnOwnerForMessageingOnOpendItemInteraction< interessiert',
-                  text: 'opening interaction for testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+                  headline: `>bibi< ist an >Item for ${testName}< interessiert`,
+                  text: `opening interaction for ${testName}`,
                 },
                 _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
                 emailRequired: false,
@@ -372,8 +370,7 @@ describe('notifications', () => {
               itemInteractionBody.itemInteraction.message
                 ? {
                     body: {
-                      headline:
-                        'Neue Nachricht: >bibi< zu >Item for testForNotificationOnOwnerForMessageingOnOpendItemInteraction<',
+                      headline: `Neue Nachricht: >bibi< zu >Item for ${testName}<`,
                       ...(itemInteractionBody.itemInteraction.message
                         ? {
                             text: itemInteractionBody.itemInteraction.message,
@@ -403,14 +400,12 @@ describe('notifications', () => {
             const itemInteractionBody = validItemInteractionBody;
 
             // bodo4 creates item
-            const itemId = await bodo4CreatesItem(
-              'testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
-            );
+            const itemId = await bodo4CreatesItem(testName);
 
             // bibi opens interaction
             const interactionIdOnItem = await bibiOpensInteraction(
               itemId,
-              'testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+              testName,
             );
 
             // bibi sends message
@@ -457,8 +452,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessage = {
           itemInteraction: {
             status: 'opened',
-            message:
-              'some message on opened interaction for testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+            message: `some message on opened interaction for ${testName}`,
           },
         };
         it('on owner with a given message', async () => {
@@ -470,7 +464,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessage = {
           itemInteraction: {
             status: 'opened',
-            // message: 'some message on opened interaction for testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+            // message: `some message on opened interaction for ${testName}`,
           },
         };
 
@@ -481,6 +475,8 @@ describe('notifications', () => {
         }, 10000);
       });
       describe('for status opened - requested by owner - and set notification', () => {
+        const testName =
+          'testForNotificationOnOwnerForMessageingOnOpendItemInteraction';
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -502,8 +498,7 @@ describe('notifications', () => {
               itemInteractionBody.itemInteraction.message
                 ? {
                     body: {
-                      headline:
-                        'Neue Nachricht zu >Item for testForNotificationOnOwnerForMessageingOnOpendItemInteraction<',
+                      headline: `Neue Nachricht zu >Item for ${testName}<`,
                       ...(itemInteractionBody.itemInteraction.message
                         ? {
                             text: itemInteractionBody.itemInteraction.message,
@@ -533,14 +528,12 @@ describe('notifications', () => {
             const itemInteractionBody = validItemInteractionBody;
 
             // bodo4 creates item
-            const itemId = await bodo4CreatesItem(
-              'testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
-            );
+            const itemId = await bodo4CreatesItem(testName);
 
             // bibi opens interaction
             const interactionIdOnItem = await bibiOpensInteraction(
               itemId,
-              'testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+              testName,
             );
 
             // bodo4 sends message
@@ -596,8 +589,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessage = {
           itemInteraction: {
             status: 'opened',
-            message:
-              'some message on opened interaction for testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+            message: `some message on opened interaction for ${testName}`,
           },
         };
         it('on interstedParty with a given message', async () => {
@@ -609,7 +601,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessage = {
           itemInteraction: {
             status: 'opened',
-            // message: 'some message on opened interaction for testForNotificationOnOwnerForMessageingOnOpendItemInteraction',
+            // message: `some message on opened interaction for ${testName}`,
           },
         };
 
@@ -620,6 +612,8 @@ describe('notifications', () => {
         }, 10000);
       });
       describe('for status declined - requested by owner - and set notification', () => {
+        const testName =
+          'testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction';
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -640,8 +634,7 @@ describe('notifications', () => {
             unread: [
               {
                 body: {
-                  headline:
-                    'Deine Anfrage zu >Item for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction< wurde abgelehnt',
+                  headline: `Deine Anfrage zu >Item for ${testName}< wurde abgelehnt`,
                   ...(itemInteractionBody.itemInteraction.message
                     ? {
                         text: itemInteractionBody.itemInteraction.message,
@@ -670,14 +663,12 @@ describe('notifications', () => {
             const itemInteractionBody = validItemInteractionBody;
 
             // bodo4 creates item
-            const itemId = await bodo4CreatesItem(
-              'testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
-            );
+            const itemId = await bodo4CreatesItem(testName);
 
             // bibi opens interaction
             const interactionIdOnItem = await bibiOpensInteraction(
               itemId,
-              'testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+              testName,
             );
 
             // bodo4 declines ItemInteraction
@@ -733,8 +724,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessage = {
           itemInteraction: {
             status: 'declined',
-            message:
-              'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+            message: `some message on opened interaction for ${testName}`,
           },
         };
         it('on interstedParty with a given message', async () => {
@@ -746,7 +736,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessage = {
           itemInteraction: {
             status: 'declined',
-            // message: 'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction',
+            // message: `some message on opened interaction for ${testName}`,
           },
         };
 
@@ -757,6 +747,8 @@ describe('notifications', () => {
         }, 10000);
       });
       describe('for status declined - requested by interestedParty - and set notification', () => {
+        const testName =
+          'testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction';
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -777,9 +769,8 @@ describe('notifications', () => {
             unread: [
               {
                 body: {
-                  headline:
-                    '>bibi< ist an >Item for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction< interessiert',
-                  text: 'opening interaction for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+                  headline: `>bibi< ist an >Item for ${testName}< interessiert`,
+                  text: `opening interaction for ${testName}`,
                 },
                 _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
                 emailRequired: false,
@@ -791,8 +782,7 @@ describe('notifications', () => {
               },
               {
                 body: {
-                  headline:
-                    '>bibi< hat die Anfrage zu >Item for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction< zurückgezogen',
+                  headline: `>bibi< hat die Anfrage zu >Item for ${testName}< zurückgezogen`,
                   ...(itemInteractionBody.itemInteraction.message
                     ? {
                         text: itemInteractionBody.itemInteraction.message,
@@ -820,14 +810,12 @@ describe('notifications', () => {
             const itemInteractionBody = validItemInteractionBody;
 
             // bodo4 creates item
-            const itemId = await bodo4CreatesItem(
-              'testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
-            );
+            const itemId = await bodo4CreatesItem(testName);
 
             // bibi opens interaction
             const interactionIdOnItem = await bibiOpensInteraction(
               itemId,
-              'testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+              testName,
             );
 
             // bibi declines ItemInteraction
@@ -874,8 +862,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessage = {
           itemInteraction: {
             status: 'declined',
-            message:
-              'some message on opened interaction for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+            message: `some message on opened interaction for ${testName}`,
           },
         };
         it('on owner with a given message', async () => {
@@ -887,7 +874,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessage = {
           itemInteraction: {
             status: 'declined',
-            // message: 'some message on opened interaction for testForNotificationOnOwnerForInterestedPartyDecliningOpenedItemInteraction',
+            // message: `some message on opened interaction for ${testName}`,
           },
         };
 
@@ -898,6 +885,8 @@ describe('notifications', () => {
         }, 10000);
       });
       describe('for status accepted - requested by owner - and set notification', () => {
+        const testName =
+          'testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction';
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -918,8 +907,7 @@ describe('notifications', () => {
             unread: [
               {
                 body: {
-                  headline:
-                    '>bodo4< hat deine Anfrage zu >Item for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction< angenommen',
+                  headline: `>bodo4< hat deine Anfrage zu >Item for ${testName}< angenommen`,
                   ...(itemInteractionBody.itemInteraction.message
                     ? {
                         text: itemInteractionBody.itemInteraction.message,
@@ -937,7 +925,7 @@ describe('notifications', () => {
               itemInteractionBody.itemInteraction.dueDate
                 ? {
                     body: {
-                      headline: `Das Abgabedatum von >Item for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction< wurde zu >${itemInteractionBody.itemInteraction.dueDate}< geändert`,
+                      headline: `Das Abgabedatum von >Item for ${testName}< wurde zu >${itemInteractionBody.itemInteraction.dueDate}< geändert`,
                     },
                     _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
                     emailRequired: false,
@@ -962,14 +950,12 @@ describe('notifications', () => {
             const itemInteractionBody = validItemInteractionBody;
 
             // bodo4 creates item
-            const itemId = await bodo4CreatesItem(
-              'testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
-            );
+            const itemId = await bodo4CreatesItem(testName);
 
             // bibi opens interaction
             const interactionIdOnItem = await bibiOpensInteraction(
               itemId,
-              'testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+              testName,
             );
 
             // bodo4 accepts ItemInteraction
@@ -1025,8 +1011,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessage = {
           itemInteraction: {
             status: 'accepted',
-            message:
-              'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+            message: `some message on opened interaction for ${testName}`,
           },
         };
         it('on interstedParty with a given message', async () => {
@@ -1038,7 +1023,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessage = {
           itemInteraction: {
             status: 'accepted',
-            // message: 'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+            // message: `some message on opened interaction for ${testName}`,
           },
         };
 
@@ -1051,8 +1036,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessageAndDueDate = {
           itemInteraction: {
             status: 'accepted',
-            message:
-              'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+            message: `some message on opened interaction for ${testName}`,
             dueDate: getFutureDateForBody(7),
           },
         };
@@ -1065,7 +1049,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessageAndDueDate = {
           itemInteraction: {
             status: 'accepted',
-            // message: 'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+            // message: `some message on opened interaction for ${testName}`,
             dueDate: getFutureDateForBody(7),
           },
         };
@@ -1229,6 +1213,8 @@ describe('notifications', () => {
         }, 10000);
       });
       describe('for status accepted - requested by owner - and set notification', () => {
+        const testName =
+          'testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction';
         const expectsForNotificationOnItemInteraction = (
           itemId: string,
           interactionIdOnItem: string,
@@ -1249,8 +1235,7 @@ describe('notifications', () => {
             unread: [
               {
                 body: {
-                  headline:
-                    '>bodo4< hat deine Anfrage zu >Item for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction< angenommen',
+                  headline: `>bodo4< hat deine Anfrage zu >Item for ${testName}< angenommen`,
                 },
                 _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
                 emailRequired: false,
@@ -1263,8 +1248,7 @@ describe('notifications', () => {
               itemInteractionBody.itemInteraction.message
                 ? {
                     body: {
-                      headline:
-                        'Neue Nachricht zu >Item for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction<',
+                      headline: `Neue Nachricht zu >Item for ${testName}<`,
                       ...(itemInteractionBody.itemInteraction.message
                         ? {
                             text: itemInteractionBody.itemInteraction.message,
@@ -1283,7 +1267,7 @@ describe('notifications', () => {
               itemInteractionBody.itemInteraction.dueDate
                 ? {
                     body: {
-                      headline: `Das Abgabedatum von >Item for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction< wurde zu >${itemInteractionBody.itemInteraction.dueDate}< geändert`,
+                      headline: `Das Abgabedatum von >Item for ${testName}< wurde zu >${itemInteractionBody.itemInteraction.dueDate}< geändert`,
                     },
                     _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
                     emailRequired: false,
@@ -1308,14 +1292,12 @@ describe('notifications', () => {
             const itemInteractionBody = validItemInteractionBody;
 
             // bodo4 creates item
-            const itemId = await bodo4CreatesItem(
-              'testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
-            );
+            const itemId = await bodo4CreatesItem(testName);
 
             // bibi opens interaction
             const interactionIdOnItem = await bibiOpensInteraction(
               itemId,
-              'testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+              testName,
             );
 
             // bodo4 accepts ItemInteraction
@@ -1379,8 +1361,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessage = {
           itemInteraction: {
             status: 'accepted',
-            message:
-              'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            message: `some message on accepted interaction for ${testName}`,
           },
         };
         it('on interstedParty with a given message', async () => {
@@ -1392,7 +1373,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessage = {
           itemInteraction: {
             status: 'accepted',
-            // message: 'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            // message: `some message on accepted interaction for ${testName}`,
           },
         };
 
@@ -1405,8 +1386,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithMessageAndDueDate = {
           itemInteraction: {
             status: 'accepted',
-            message:
-              'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            message: `some message on accepted interaction for ${testName}`,
             dueDate: getFutureDateForBody(7),
           },
         };
@@ -1419,7 +1399,7 @@ describe('notifications', () => {
         const validItemInteractionBodyWithNoMessageAndDueDate = {
           itemInteraction: {
             status: 'accepted',
-            // message: 'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            // message: `some message on accepted interaction for ${testName}`,
             dueDate: getFutureDateForBody(7),
           },
         };
