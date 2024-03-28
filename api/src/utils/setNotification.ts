@@ -88,12 +88,7 @@ const setNotification = async (
     }
     //the owner causes the notification
     else if (currentUser.equals(item!.owner!._id)) {
-      notification.body.headline = `>Eigentümer< hat deine Anfrage zu >${item.name}< abgelehnt`;
-      // substitiute Eigentümer accordingly
-      //! ${
-      //!   interaction.revealOwnerIdentity === true ? item.owner.firstName : 'Eigentümer'
-      //!   interestedParty.firstName ? interestedParty.firstName : noFirstName
-      //! }
+      notification.body.headline = `Deine Anfrage zu >${item.name}< wurde abgelehnt`;
     }
   }
 
@@ -128,12 +123,7 @@ const setNotification = async (
     }
     //the owner causes the notification
     else if (currentUser.equals(item!.owner!._id)) {
-      notification.body.headline = `Neue Nachricht: >Eigentümer< zu >${item.name}<`;
-      // substitiute Eigentümer accordingly
-      //! ${
-      //!   interaction.revealOwnerIdentity === true ? item.owner.firstName : 'Eigentümer'
-      //!   interestedParty.firstName ? interestedParty.firstName : noFirstName
-      //! }
+      notification.body.headline = `Neue Nachricht zu >${item.name}<`;
     }
   } else {
     new ExpressError('Internal Server Error', 500);

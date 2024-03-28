@@ -503,7 +503,7 @@ describe('notifications', () => {
                 ? {
                     body: {
                       headline:
-                        'Neue Nachricht: >Eigentümer< zu >Item for testForNotificationOnOwnerForMessageingOnOpendItemInteraction<',
+                        'Neue Nachricht zu >Item for testForNotificationOnOwnerForMessageingOnOpendItemInteraction<',
                       ...(itemInteractionBody.itemInteraction.message
                         ? {
                             text: itemInteractionBody.itemInteraction.message,
@@ -641,7 +641,7 @@ describe('notifications', () => {
               {
                 body: {
                   headline:
-                    '>Eigentümer< hat deine Anfrage zu >Item for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction< abgelehnt',
+                    'Deine Anfrage zu >Item for testForNotificationOnInterestedPartyForOwnerDecliningOpenedItemInteraction< wurde abgelehnt',
                   ...(itemInteractionBody.itemInteraction.message
                     ? {
                         text: itemInteractionBody.itemInteraction.message,
@@ -972,7 +972,7 @@ describe('notifications', () => {
               'testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
             );
 
-            // bodo4 declines ItemInteraction
+            // bodo4 accepts ItemInteraction
             const handleItemInteractionResponseAcceptOnOpened =
               await bodo4SendsItemInteractionRequest(
                 itemId,
@@ -1082,9 +1082,207 @@ describe('notifications', () => {
         // test: create Item, open interaction, let bodo4 accept, have bibi send a message,
         // get bodo4s auth to check for notification, delete item and notifications
       });
-      describe.skip('for status accepted - requested by owner - and set notification', () => {
+      describe('for status accepted - requested by owner - and set notification', () => {
+        const expectsForNotificationOnItemInteraction = (
+          itemId: string,
+          interactionIdOnItem: string,
+          itemInteractionBody: { itemInteraction: ItemInteractionRequest },
+          authResponseNotifiedUser: request.Response,
+        ) => {
+          // console.log(
+          //   'authResponseNotifiedUser.body.notifications.unread',
+          //   authResponseNotifiedUser.body.notifications.unread,
+          // );
+
+          // expects
+          expect(authResponseNotifiedUser.statusCode).toBe(200);
+          // the notification is suposed to be the only one on the user in the unread array and its supposed to be populated
+          // if a "messaging/ dueDate change" request was done that doesn't include a message, no new/second notification is expected
+          expect(authResponseNotifiedUser.body.notifications).toEqual({
+            read: [],
+            unread: [
+              {
+                body: {
+                  headline:
+                    '>bodo4< hat deine Anfrage zu >Item for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction< angenommen',
+                },
+                _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                emailRequired: false,
+                read: false,
+                timeStamp: expect.any(String),
+                item: itemId,
+                interaction: interactionIdOnItem,
+                __v: expect.any(Number),
+              },
+              itemInteractionBody.itemInteraction.message
+                ? {
+                    body: {
+                      headline:
+                        'Neue Nachricht zu >Item for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction<',
+                      ...(itemInteractionBody.itemInteraction.message
+                        ? {
+                            text: itemInteractionBody.itemInteraction.message,
+                          }
+                        : {}),
+                    },
+                    _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                    emailRequired: false,
+                    read: false,
+                    timeStamp: expect.any(String),
+                    item: itemId,
+                    interaction: interactionIdOnItem,
+                    __v: expect.any(Number),
+                  }
+                : undefined,
+              itemInteractionBody.itemInteraction.dueDate
+                ? {
+                    body: {
+                      headline: `Das Abgabedatum von >Item for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction< wurde zu >${itemInteractionBody.itemInteraction.dueDate}< geändert`,
+                    },
+                    _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                    emailRequired: false,
+                    read: false,
+                    timeStamp: expect.any(String),
+                    item: itemId,
+                    interaction: interactionIdOnItem,
+                    __v: expect.any(Number),
+                  }
+                : undefined,
+            ].filter(Boolean), //removes undefined elements from an array
+          });
+        };
+
         // test: create Item, open interaction, let bodo4 accept, have bodo4 send a message,
         // get bibis auth to check for notification, delete item and notifications
+        const testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction =
+          async (validItemInteractionBody: {
+            itemInteraction: ItemInteractionRequest;
+          }) => {
+            // define Body to be used in this test
+            const itemInteractionBody = validItemInteractionBody;
+
+            // bodo4 creates item
+            const itemId = await bodo4CreatesItem(
+              'testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            );
+
+            // bibi opens interaction
+            const interactionIdOnItem = await bibiOpensInteraction(
+              itemId,
+              'testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            );
+
+            // bodo4 accepts ItemInteraction
+            const handleItemInteractionResponseAcceptOnOpened =
+              await bodo4SendsItemInteractionRequest(
+                itemId,
+                interactionIdOnItem,
+                { itemInteraction: { status: 'accepted' } },
+              );
+
+            // bodo4 sends request to message on accepted / change dueDate
+            const handleItemInteractionResponseAcceptOnAccepted =
+              await bodo4SendsItemInteractionRequest(
+                itemId,
+                interactionIdOnItem,
+                itemInteractionBody,
+              );
+
+            // login bibi
+            const connectSidValueBibi = await loginUser(
+              'bibi@gmail.com',
+              'bibi',
+            );
+
+            // bibi calles auth
+            const authResponseNotifiedUser = await request(app)
+              .get(authRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBibi}`]);
+
+            // logout bibi
+            await logout(connectSidValueBibi);
+
+            // login Bodo4
+            const connectSidValueBodo4 = await loginBodo4();
+
+            // delete all items
+            const deleteAllOfUsersItemsResponse = await request(app)
+              .delete(itemRoute)
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // delete all notifications
+            const deleteAllOfUsersNotificationsResponse = await request(app)
+              .delete(
+                `${userRoute}/${bodo4sUserId}/${
+                  userIdNotificationRoute.split(':userId/').slice(-1)[0]
+                }`,
+              )
+              .set('Cookie', [`connect.sid=${connectSidValueBodo4}`]);
+
+            // logout
+            await logout(connectSidValueBodo4);
+
+            expectsForNotificationOnItemInteraction(
+              itemId,
+              interactionIdOnItem,
+              validItemInteractionBody,
+              authResponseNotifiedUser,
+            );
+          };
+
+        const validItemInteractionBodyWithMessage = {
+          itemInteraction: {
+            status: 'accepted',
+            message:
+              'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+          },
+        };
+        it('on interstedParty with a given message', async () => {
+          await testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction(
+            validItemInteractionBodyWithMessage,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithNoMessage = {
+          itemInteraction: {
+            status: 'accepted',
+            // message: 'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+          },
+        };
+
+        it('on interstedParty without given message', async () => {
+          await testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction(
+            validItemInteractionBodyWithNoMessage,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithMessageAndDueDate = {
+          itemInteraction: {
+            status: 'accepted',
+            message:
+              'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            dueDate: getFutureDateForBody(7),
+          },
+        };
+        it('on interestedParty with a given message and new dueDate notice', async () => {
+          await testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction(
+            validItemInteractionBodyWithMessageAndDueDate,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithNoMessageAndDueDate = {
+          itemInteraction: {
+            status: 'accepted',
+            // message: 'some message on accepted interaction for testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction',
+            dueDate: getFutureDateForBody(7),
+          },
+        };
+
+        it('on interstedParty without given message and new dueDate notice', async () => {
+          await testForNotificationOnInterestedPartyForMessagingOnAcceptedItemInteraction(
+            validItemInteractionBodyWithNoMessageAndDueDate,
+          );
+        }, 10000);
       });
     });
   });
