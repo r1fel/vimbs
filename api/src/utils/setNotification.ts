@@ -63,7 +63,13 @@ const setNotification = async (
   //create notifictation contents
   const notification: NotificationInDB = new Notification();
 
-  // set headline according to notificationSituation
+  // set general notification details
+  if (bodyText !== '') notification.body.text = bodyText;
+  notification.item = item._id;
+  notification.interaction = interaction._id;
+  notification.itemPicture = item.picture;
+
+  // set situation specific headline according to notificationSituation
 
   // new opened interaction
   if (notificationSituation === 'interestedPartyOpensInteraction') {
@@ -73,7 +79,7 @@ const setNotification = async (
   }
 
   // declined interaction
-  if (notificationSituation === 'declinigOpenedInteraction') {
+  else if (notificationSituation === 'declinigOpenedInteraction') {
     //the interactingParty causes the notification
     if (currentUser.equals(interaction.interestedParty._id)) {
       notification.body.headline = `>${
@@ -92,10 +98,24 @@ const setNotification = async (
   }
 
   // accepting interaction
-  if (notificationSituation === 'acceptingOpenedInteraction') {
+  else if (notificationSituation === 'acceptingOpenedInteraction') {
     notification.body.headline = `>${
       owner.firstName ? owner.firstName : noFirstName
     }< hat deine Anfrage zu >${item.name}< angenommen`;
+  }
+
+  // dueDate changed
+  else if (notificationSituation === 'dueDateChange') {
+    let dueDate: string | undefined | null = null;
+    if ('itemInteraction' in reqBody) {
+      dueDate = reqBody.itemInteraction.dueDate
+        ? reqBody.itemInteraction.dueDate
+        : undefined;
+      // console.log('hit dueDate change notification', dueDate);
+    }
+    notification.body.headline = `Das Abgabedatum von >${item.name}< wurde zu >${dueDate}< geändert`;
+    // text was already set above, but for dueDate notifications no text is to be sent
+    notification.body.text = undefined;
   }
 
   //new Message
@@ -118,11 +138,6 @@ const setNotification = async (
   } else {
     new ExpressError('Internal Server Error', 500);
   }
-
-  if (bodyText !== '') notification.body.text = bodyText;
-  notification.item = item._id;
-  notification.interaction = interaction._id;
-  notification.itemPicture = item.picture;
 
   await notification.save();
 

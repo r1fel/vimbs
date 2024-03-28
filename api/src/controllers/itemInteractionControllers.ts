@@ -233,7 +233,7 @@ export const handlePostInteraction = catchAsync(
       });
     };
 
-    const setDueDate = (time?: number) => {
+    const setDueDate = async (time?: number) => {
       let dueDate: Date;
       // if in setDueDate a time is supplied, the dueDate is set to the time supplied
       if (time !== undefined) {
@@ -248,6 +248,18 @@ export const handlePostInteraction = catchAsync(
         new Date(itemInteractionBody.dueDate) >= reqTimestamp
           ? new Date(itemInteractionBody.dueDate)
           : interaction.dueDate;
+
+      // only send a dueDateChanged Notification, when it was set by the input of the owner
+      // dueDate stays interaction.dueDate, if the owner didn't give any input
+      if (dueDate !== interaction.dueDate)
+        await setNotification(
+          'dueDateChange',
+          currentUser,
+          item,
+          interaction,
+          req.body,
+        );
+
       return (interaction.dueDate = dueDate);
     };
 
@@ -278,7 +290,7 @@ export const handlePostInteraction = catchAsync(
         interaction.interactionStatus === accepted &&
         currentUser.equals(item.owner)
       )
-        setDueDate();
+        await setDueDate();
     }
 
     // declining the opened interaction
@@ -288,7 +300,7 @@ export const handlePostInteraction = catchAsync(
     ) {
       // console.log('opened to declined');
       changeInteractionStatus();
-      setDueDate(0); //to now
+      await setDueDate(0); //to now
       toggleAvailability();
       pushMessage();
       await setNotification(
@@ -312,9 +324,6 @@ export const handlePostInteraction = catchAsync(
     ) {
       // console.log('owner accepted');
       changeInteractionStatus();
-      setDueDate();
-      pushMessage();
-      revealOwnerIdentity();
       await setNotification(
         'acceptingOpenedInteraction',
         currentUser,
@@ -322,6 +331,9 @@ export const handlePostInteraction = catchAsync(
         interaction,
         req.body,
       );
+      await setDueDate();
+      pushMessage();
+      revealOwnerIdentity();
     }
 
     // owner closes interaction

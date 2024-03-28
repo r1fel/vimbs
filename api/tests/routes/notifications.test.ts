@@ -3,6 +3,8 @@ import makeApp from '../../src/app';
 import * as database from '../../src/database';
 import { ItemInteractionRequest } from '../../src/typeDefinitions';
 
+import getFutureDate from '../../src/utils/getFutureDate';
+
 const app = makeApp(database);
 
 // routedefinitions
@@ -178,6 +180,17 @@ const bodo4SendsItemInteractionRequest = async (
   await logout(connectSidValueBodo4);
 
   return itemInteractionResponse;
+};
+
+const getFutureDateForBody = (weeks = 2): string => {
+  const futureDate = getFutureDate(weeks);
+
+  // Formatting the date to 'YYYY-MM-DD'
+  const year = futureDate.getFullYear();
+  const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+  const day = String(futureDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 };
 
 // TESTS
@@ -892,8 +905,8 @@ describe('notifications', () => {
           authResponseNotifiedUser: request.Response,
         ) => {
           // console.log(
-          //   'authResponseNotifiedUser.body.notifications',
-          //   authResponseNotifiedUser.body.notifications,
+          //   'authResponseNotifiedUser.body.notifications.unread',
+          //   authResponseNotifiedUser.body.notifications.unread,
           // );
 
           // expects
@@ -921,6 +934,20 @@ describe('notifications', () => {
                 interaction: interactionIdOnItem,
                 __v: expect.any(Number),
               },
+              itemInteractionBody.itemInteraction.dueDate
+                ? {
+                    body: {
+                      headline: `Das Abgabedatum von >Item for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction< wurde zu >${itemInteractionBody.itemInteraction.dueDate}< geändert`,
+                    },
+                    _id: expect.any(String), // _id should be a mongo.Types.ObjectId, represented as a String
+                    emailRequired: false,
+                    read: false,
+                    timeStamp: expect.any(String),
+                    item: itemId,
+                    interaction: interactionIdOnItem,
+                    __v: expect.any(Number),
+                  }
+                : undefined,
             ],
           });
         };
@@ -1020,6 +1047,44 @@ describe('notifications', () => {
             validItemInteractionBodyWithNoMessage,
           );
         }, 10000);
+
+        const validItemInteractionBodyWithMessageAndDueDate = {
+          itemInteraction: {
+            status: 'accepted',
+            message:
+              'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+            dueDate: getFutureDateForBody(7),
+          },
+        };
+        it('on interestedParty with a given message and new dueDate notice', async () => {
+          await testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction(
+            validItemInteractionBodyWithMessageAndDueDate,
+          );
+        }, 10000);
+
+        const validItemInteractionBodyWithNoMessageAndDueDate = {
+          itemInteraction: {
+            status: 'accepted',
+            // message: 'some message on opened interaction for testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction',
+            dueDate: getFutureDateForBody(7),
+          },
+        };
+
+        it('on interstedParty without given message and new dueDate notice', async () => {
+          await testForNotificationOnInterestedPartyForOwnerAcceptsOpenedItemInteraction(
+            validItemInteractionBodyWithNoMessageAndDueDate,
+          );
+        }, 10000);
+      });
+    });
+    describe('for current interactionStatus is accepted', () => {
+      describe.skip('for status accepted - requested by interestedParty - and set notification', () => {
+        // test: create Item, open interaction, let bodo4 accept, have bibi send a message,
+        // get bodo4s auth to check for notification, delete item and notifications
+      });
+      describe.skip('for status accepted - requested by owner - and set notification', () => {
+        // test: create Item, open interaction, let bodo4 accept, have bodo4 send a message,
+        // get bibis auth to check for notification, delete item and notifications
       });
     });
   });
